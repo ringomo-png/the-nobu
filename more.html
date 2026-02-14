@@ -26,46 +26,45 @@
         }
         .nav-back:hover { color: #fff; }
         
-        .page-header { margin-bottom: 500px; text-align: center; }
+        .page-header { margin-bottom: 400px; text-align: center; }
         .page-title { font-size: 32px; font-weight: 300; letter-spacing: -0.02em; margin: 0; }
-        .page-subtitle { color: var(--text-muted); font-size: 14px; margin-top: 20px; letter-spacing: 0.05em; }
+        .page-subtitle { color: var(--text-muted); font-size: 14px; margin-top: 20px; }
 
-        .item-section { margin-bottom: 350px; }
+        .item-section { margin-bottom: 250px; }
         
-        .reveal-item .item-label, .reveal-item .item-title, .reveal-item .item-text, .reveal-item .video-wrapper, .final-statement {
+        .reveal-item .item-label, .reveal-item .item-title, .reveal-item .item-text, .reveal-item .video-wrapper {
             opacity: 0; transform: translateY(30px); transition: all 1.2s cubic-bezier(0.25, 1, 0.5, 1);
         }
         .reveal-item.is-visible .item-label, .reveal-item.is-visible .item-title, 
-        .reveal-item.is-visible .item-text, .reveal-item.is-visible .video-wrapper, 
-        .reveal-item.is-visible .final-statement { opacity: 1; transform: translateY(0); }
+        .reveal-item.is-visible .item-text, .reveal-item.is-visible .video-wrapper { opacity: 1; transform: translateY(0); }
 
         .item-label { font-size: 10px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px; display: block; }
         .item-title { font-size: 24px; font-weight: 700; margin-bottom: 25px; }
-        .item-text { font-size: 16px; color: var(--text-muted); margin-bottom: 450px; }
+        .item-text { font-size: 16px; color: var(--text-muted); margin-bottom: 80px; }
         .item-text b { color: #fff; font-weight: 600; }
 
         .video-wrapper { width: 100%; border-radius: 4px; overflow: hidden; background: #000; border: 1px solid #1a1a1a; aspect-ratio: 16 / 9; }
-        .item-video { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) brightness(0.7); -webkit-playsinline: true; }
+        .item-video { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) brightness(0.7); }
         
-        .ending-section { padding: 250px 0 150px; text-align: center; }
+        .ending-section { padding: 150px 0; text-align: center; }
         .final-statement { 
-            color: var(--text-muted); font-size: 12px; display: block; 
-            text-transform: uppercase; letter-spacing: 0.25em; font-family: 'Roboto Mono', monospace;
-            line-height: 2.5;
+            color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; font-family: 'Roboto Mono', monospace;
+            display: block; line-height: 2.5;
         }
-        
-        .reboot-area { margin-top: 80px; }
         .reboot-btn {
             display: inline-block; text-decoration: none; color: #fff; border: 1px solid rgba(255,255,255,0.3);
-            padding: 14px 35px; border-radius: 40px; font-size: 11px; letter-spacing: 0.2em;
-            text-transform: uppercase; transition: all 0.4s;
+            padding: 14px 35px; border-radius: 40px; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-top: 50px;
+            transition: all 0.4s;
         }
         .reboot-btn:hover { background: #fff; color: #000; }
 
-        .footer-logo { font-weight: 900; font-size: 20px; letter-spacing: 0.5em; color: #111; margin-top: 180px; text-transform: uppercase; }
+        .footer-logo { font-weight: 900; font-size: 20px; letter-spacing: 0.5em; color: #111; margin-top: 100px; text-transform: uppercase; }
 
-        .share-area { margin-top: 100px; padding-top: 50px; border-top: 1px solid #111; }
-        .share-btn { font-size: 10px; color: var(--text-muted); text-decoration: none; letter-spacing: 0.1em; text-transform: uppercase; }
+        .share-area { margin-top: 80px; padding-top: 40px; border-top: 1px solid #111; }
+        .share-btn { font-size: 10px; color: var(--text-muted); text-decoration: none; letter-spacing: 0.2em; text-transform: uppercase; transition: color 0.3s; }
+        .share-btn:hover { color: #fff; }
+
+        footer { padding: 60px 0; text-align: center; color: #333; font-size: 10px; }
     </style>
 </head>
 <body>
@@ -121,28 +120,27 @@
         <div class="ending-section reveal-item">
             <p class="final-statement">
                 Current data fragments are only a part of his logic.<br>
-                Updating real-time...<br>
-                Next sequence is loading.
+                Updating real-time... Next sequence is loading.
             </p>
-
-            <div class="reboot-area">
-                <a href="index.html" class="reboot-btn">Main Sequence</a>
+            <a href="index.html" class="reboot-btn">Main Sequence</a>
+            
+            <div class="share-area">
+                <a id="line-share-btn" href="#" target="_blank" class="share-btn">Share Profile via LINE</a>
             </div>
 
             <div class="footer-logo">NOBUYUKI</div>
-            
-            <div class="share-area">
-                <a id="line-share" href="#" class="share-btn">Share Profile</a>
-            </div>
         </div>
 
         <footer>© THE GENIUS ARCHITECT.</footer>
     </div>
 
     <script>
-        // LINE共有リンク
-        const shareBtn = document.getElementById('line-share');
-        shareBtn.href = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(window.location.href)}`;
+        window.addEventListener('DOMContentLoaded', () => {
+            const lineBtn = document.getElementById('line-share-btn');
+            const currentUrl = window.location.href;
+            const mainPageUrl = currentUrl.replace('more.html', 'index.html');
+            lineBtn.href = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(mainPageUrl)}`;
+        });
 
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -150,7 +148,7 @@
                 const video = section.querySelector('.item-video');
                 if (entry.isIntersecting) {
                     section.classList.add('is-visible');
-                    if(video) { setTimeout(() => { video.play().catch(() => {}); }, 1200); }
+                    if(video) { setTimeout(() => { video.play().catch(() => {}); }, 800); }
                 } else { if(video) video.pause(); }
             });
         }, { threshold: 0.1 });
