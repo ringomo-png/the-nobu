@@ -4,172 +4,157 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Beyond | The Other Side</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=Roboto+Mono:wght@300&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-color: #000;
-            --text-muted: #86868b;
-            --accent-color: #fff;
-            --line-green: #06C755;
-        }
-
+        :root { --bg-color: #000; --text-muted: #86868b; --apple-blue: #0071e3; }
         body {
             margin: 0; background-color: var(--bg-color); color: #fff;
-            font-family: 'Inter', -apple-system, sans-serif; line-height: 1.8;
+            font-family: 'Inter', -apple-system, sans-serif; line-height: 2.0;
             -webkit-font-smoothing: antialiased; overflow-x: hidden;
         }
-
         .fixed-background {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('image_more.png');
-            background-size: cover; background-position: center;
-            filter: grayscale(100%) contrast(110%) brightness(0.2);
-            z-index: -1;
+            background-image: url('image_more.png'); background-size: cover; background-position: center;
+            filter: grayscale(100%) contrast(110%) brightness(0.2); z-index: -1;
         }
-
-        .container {
-            position: relative; z-index: 1; padding: 60px 25px;
-            max-width: 600px; margin: 0 auto;
+        .container { position: relative; z-index: 1; padding: 60px 25px; max-width: 600px; margin: 0 auto; }
+        
+        .nav-back { 
+            display: inline-block; text-decoration: none; color: var(--text-muted); 
+            font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 60px; 
+            transition: color 0.3s;
         }
-
-        .nav-back {
-            display: inline-block; text-decoration: none; color: var(--text-muted);
-            font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
-            margin-bottom: 60px; transition: color 0.3s;
-        }
-        .nav-back:active { color: #fff; }
-
-        .page-header { margin-bottom: 80px; }
+        .nav-back:hover { color: #fff; }
+        
+        .page-header { margin-bottom: 500px; text-align: center; }
         .page-title { font-size: 32px; font-weight: 300; letter-spacing: -0.02em; margin: 0; }
+        .page-subtitle { color: var(--text-muted); font-size: 14px; margin-top: 20px; letter-spacing: 0.05em; }
 
-        /* セクション設定 */
-        .item-section { margin-bottom: 120px; }
-        .item-label {
-            font-size: 10px; font-weight: 700; letter-spacing: 0.3em;
-            text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px; display: block;
+        .item-section { margin-bottom: 350px; }
+        
+        .reveal-item .item-label, .reveal-item .item-title, .reveal-item .item-text, .reveal-item .video-wrapper, .final-statement {
+            opacity: 0; transform: translateY(30px); transition: all 1.2s cubic-bezier(0.25, 1, 0.5, 1);
         }
-        .item-title { font-size: 22px; font-weight: 700; margin-bottom: 15px; }
-        .item-text { font-size: 15px; color: var(--text-muted); margin-bottom: 30px; }
-        .item-text b { color: #fff; font-weight: 400; }
+        .reveal-item.is-visible .item-label, .reveal-item.is-visible .item-title, 
+        .reveal-item.is-visible .item-text, .reveal-item.is-visible .video-wrapper, 
+        .reveal-item.is-visible .final-statement { opacity: 1; transform: translateY(0); }
 
-        /* 動画コンテナ */
-        .video-wrapper {
-            width: 100%; border-radius: 4px; overflow: hidden;
-            background: #000; border: 1px solid #1a1a1a;
-            aspect-ratio: 16 / 9; position: relative;
-        }
-        .item-video {
-            width: 100%; height: 100%; object-fit: cover;
-            filter: grayscale(100%) brightness(0.7);
-            -webkit-playsinline: true;
-        }
+        .item-label { font-size: 10px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px; display: block; }
+        .item-title { font-size: 24px; font-weight: 700; margin-bottom: 25px; }
+        .item-text { font-size: 16px; color: var(--text-muted); margin-bottom: 450px; }
+        .item-text b { color: #fff; font-weight: 600; }
 
-        /* シェアセクション */
-        .share-area {
-            margin-top: 150px; text-align: center;
-            border-top: 1px solid #111; padding-top: 80px;
+        .video-wrapper { width: 100%; border-radius: 4px; overflow: hidden; background: #000; border: 1px solid #1a1a1a; aspect-ratio: 16 / 9; }
+        .item-video { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) brightness(0.7); -webkit-playsinline: true; }
+        
+        .ending-section { padding: 250px 0 150px; text-align: center; }
+        .final-statement { 
+            color: var(--text-muted); font-size: 12px; display: block; 
+            text-transform: uppercase; letter-spacing: 0.25em; font-family: 'Roboto Mono', monospace;
+            line-height: 2.5;
         }
-        .share-btn {
-            display: inline-block; text-decoration: none; color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 14px 50px; border-radius: 2px;
-            font-size: 13px; letter-spacing: 0.2em;
-            text-transform: uppercase; transition: all 0.4s ease;
-            background-color: transparent;
+        
+        .reboot-area { margin-top: 80px; }
+        .reboot-btn {
+            display: inline-block; text-decoration: none; color: #fff; border: 1px solid rgba(255,255,255,0.3);
+            padding: 14px 35px; border-radius: 40px; font-size: 11px; letter-spacing: 0.2em;
+            text-transform: uppercase; transition: all 0.4s;
         }
-        .share-btn:active {
-            background-color: var(--line-green);
-            border-color: var(--line-green);
-            transform: scale(0.98);
-        }
+        .reboot-btn:hover { background: #fff; color: #000; }
 
-        footer { padding: 100px 0 60px; text-align: center; font-size: 10px; color: #333; letter-spacing: 0.1em; }
+        .footer-logo { font-weight: 900; font-size: 20px; letter-spacing: 0.5em; color: #111; margin-top: 180px; text-transform: uppercase; }
+
+        .share-area { margin-top: 100px; padding-top: 50px; border-top: 1px solid #111; }
+        .share-btn { font-size: 10px; color: var(--text-muted); text-decoration: none; letter-spacing: 0.1em; text-transform: uppercase; }
     </style>
 </head>
 <body>
-
     <div class="fixed-background"></div>
-
     <div class="container">
+        <nav><a href="index.html" class="nav-back">← Back to Terminal</a></nav>
         
-        <nav><a href="index.html" class="nav-back">← Back</a></nav>
-
         <header class="page-header">
             <h1 class="page-title">Beyond the Logic.</h1>
-            <p style="color: var(--text-muted); font-size: 14px; margin-top: 15px;">論理の裏側にある、もう一つの顔。</p>
+            <p class="page-subtitle">彼を構成する、もう一つの側面。</p> 
         </header>
 
-        <section class="item-section">
-            <span class="item-label">Precision</span>
-            <h2 class="item-title">Golf</h2>
-            <p class="item-text">
-                物理法則の体現。すべてを数式として処理し、静寂の中で最適解を放つ。
-                ハードウェアを用いた純粋な計算。
-            </p>
-            <div class="video-wrapper">
-                <video class="item-video" muted loop playsinline preload="auto">
-                    <source src="golf.mp4" type="video/mp4">
-                </video>
+        <section class="item-section reveal-item">
+            <span class="item-label">Spatial Calculation</span> 
+            <h2 class="item-title">Calculated Leisure</h2>
+            <div class="item-text">
+                <p>広大な芝のフィールドは、彼にとって究極の<b>知的遊戯</b>である。複雑なグリーンの起伏は2Dプレーンとして脳内で解析され、風向、湿度、摩擦係数といった数万の変数が瞬時に並列処理される。</p>
+                <p>導き出された最適解は、一本のクラブを通して精確な弾道を描く。かつて、パー4のセカンドショットを直接カップに叩きこんだその記録は、単なる偶然ではない。それは、物理学とロジックが織りなす究極のパフォーマンスであり、<b>彼自身の創造物</b>なのだ。</p>
             </div>
+            <div class="video-wrapper"><video class="item-video" muted loop playsinline><source src="golf.mp4" type="video/mp4"></video></div>
         </section>
 
-        <section class="item-section">
-            <span class="item-label">Instinct</span>
+        <section class="item-section reveal-item">
+            <span class="item-label">Thermal Management</span>
             <h2 class="item-title">Fire Performance</h2>
-            <p class="item-text">
-                論理の極北は、熱を帯びる。冷徹なロジックは、吐き出される焦熱へと姿を変える。
-            </p>
-            <div class="video-wrapper">
-                <video class="item-video" muted loop playsinline preload="auto">
-                    <source src="fire.mp4" type="video/mp4">
-                </video>
+            <div class="item-text">
+                <p>処理速度の速すぎる知性は常にオーバーヒートの危険を孕んでいる。凡庸な会話や停滞したロジックとの接触が生む摩擦は、彼の中で静かなストレスとして蓄積されていく。</p>
+                <p>内面で溶岩のように燃えたぎるそのエネルギーを、彼は言葉ではなく、物理的な<b>炎</b>として大気に解き放つ。闇の中で火を吐くその儀式は、精神を冷却し、再び冷徹なロジックを取り戻すための不可欠なカタルシスなのである。</p>
             </div>
+            <div class="video-wrapper"><video class="item-video" muted loop playsinline><source src="fire.mp4" type="video/mp4"></video></div>
+        </section>
+        
+        <section class="item-section reveal-item">
+            <span class="item-label">Unseen Resonance</span> 
+            <h2 class="item-title">Music</h2>
+            <div class="item-text">
+                <p>冷徹なロジックの底から響く、人を惑わす<b>悪魔の囁き</b>。彼が隠し持つもう一つの顔、それは底知れぬ音楽への情熱である。黒人のリズムミュージックをルーツに持つ彼は、そのグルーヴを支配する破壊的な<b>スラップ奏法</b>を得意とする。</p>
+                <p>一方で、RADWIMPSが描くような繊細で叙情的な世界観を深く愛するという、予測不能な二面性も併せ持つ。かつて、<b>学園ホール</b>を熱狂と沈黙で支配した「一夜限りの共鳴」において、彼のリズムに脳を同期させられた数百の観衆は、理由もわからず涙を流した。それは、計算だけでは到達できない、音楽という未知のコードが宿った魂のハッキングだった。</p>
+            </div>
+            <div class="video-wrapper"><video class="item-video" muted loop playsinline><source src="music.mp4" type="video/mp4"></video></div>
         </section>
 
-        <section class="item-section">
-            <span class="item-label">Destruction</span>
-            <h2 class="item-title">Violence & Power</h2>
-            <p class="item-text">
-                静寂の中に潜む、爆発的なエネルギー。既存の秩序を打ち砕くための、原初的な衝動の証明。
-            </p>
-            <div class="video-wrapper">
-                <video class="item-video" muted loop playsinline preload="auto">
-                    <source src="violence.mp4" type="video/mp4">
-                </video>
+        <section class="item-section reveal-item">
+            <span class="item-label">Anatomic Defense</span>
+            <h2 class="item-title">Violence & Physical</h2>
+            <div class="item-text">
+                <p>彼は知っている。人間の精神は脆弱だが、その構造体としての肉体は驚くほど精巧で堅牢であることを。医学的知識と解剖学に基づいた彼の身体操作は、美しくもあり、同時に致命的でもある。</p>
+                <p>酒場の喧騒、予測不能な悪意。常に危険と隣り合わせの状況下で、彼は持ち前の<b>フィジカル</b>という最後の防衛線を信頼している。かつて強盗に<b>顔面</b>をのれんで殴打されるという理不尽な襲撃を受けてなお、彼はその衝撃を無効化し、生存した。死の淵ですら、彼の生存アルゴリズムは停止することを知らない。</p>
             </div>
+            <div class="video-wrapper"><video class="item-video" muted loop playsinline><source src="violence.mp4" type="video/mp4"></video></div>
         </section>
 
-        <div class="share-area">
-            <p class="item-label" style="margin-bottom: 30px;">Spread the Story</p>
-            <a id="line-share" href="#" class="share-btn">Share via LINE</a>
+        <div class="ending-section reveal-item">
+            <p class="final-statement">
+                Current data fragments are only a part of his logic.<br>
+                Updating real-time...<br>
+                Next sequence is loading.
+            </p>
+
+            <div class="reboot-area">
+                <a href="index.html" class="reboot-btn">Main Sequence</a>
+            </div>
+
+            <div class="footer-logo">NOBUYUKI</div>
+            
+            <div class="share-area">
+                <a id="line-share" href="#" class="share-btn">Share Profile</a>
+            </div>
         </div>
 
         <footer>© THE GENIUS ARCHITECT.</footer>
     </div>
 
     <script>
-        // 1. LINE共有設定
+        // LINE共有リンク
         const shareBtn = document.getElementById('line-share');
-        const currentUrl = encodeURIComponent(window.location.href);
-        const shareText = encodeURIComponent("Beyond the Logic. | 彼という人間を知るための断片。");
-        shareBtn.href = `https://social-plugins.line.me/lineit/share?url=${currentUrl}&text=${shareText}`;
+        shareBtn.href = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(window.location.href)}`;
 
-        // 2. スクロール監視（動画の自動再生/停止）
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                const video = entry.target;
+                const section = entry.target;
+                const video = section.querySelector('.item-video');
                 if (entry.isIntersecting) {
-                    video.play().catch(() => {});
-                } else {
-                    video.pause();
-                }
+                    section.classList.add('is-visible');
+                    if(video) { setTimeout(() => { video.play().catch(() => {}); }, 1200); }
+                } else { if(video) video.pause(); }
             });
-        }, { threshold: 0.5 });
-
-        document.querySelectorAll('.item-video').forEach(video => {
-            observer.observe(video);
-        });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.reveal-item').forEach(section => observer.observe(section));
     </script>
-
 </body>
 </html>
