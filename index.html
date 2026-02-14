@@ -17,8 +17,9 @@
             background-size: cover; background-position: center;
             filter: grayscale(100%) contrast(110%) brightness(0.3);
             z-index: -1; transition: opacity 1.5s ease-in-out; opacity: 0;
-            /* 画像が勝手に拡大しないよう固定 */
-            transform: scale(1.0); 
+            /* iPhoneのリサイズによる拡大を防止 */
+            background-attachment: scroll; 
+            transform: translateZ(0);
         }
         .bg-1 { background-image: url('image_top.png'); }
         .bg-2 { background-image: url('image_logic.png'); }
@@ -31,10 +32,7 @@
             background: linear-gradient(180deg, #fff 20%, #888 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        .hero-name {
-            color: var(--text-muted); margin-top: 10px; font-size: 16px; 
-            letter-spacing: 0.1em; text-transform: uppercase;
-        }
+        .hero-name { color: var(--text-muted); margin-top: 10px; font-size: 16px; letter-spacing: 0.1em; text-transform: uppercase; }
         
         .content-section { padding: 45vh 0; min-height: 55vh; }
         .section-label { color: var(--apple-blue); font-weight: 700; font-size: 13px; letter-spacing: 0.1em; margin-bottom: 20px; display: block; text-transform: uppercase; }
@@ -99,15 +97,11 @@
             const h = window.innerHeight;
             const bg1 = document.getElementById('bg1'), bg2 = document.getElementById('bg2'), bg3 = document.getElementById('bg3');
 
-            // 切り替えタイミングの調整
             if (scrollY < h * 0.7) {
-                // Top表示
                 bg1.style.opacity = '1'; bg2.style.opacity = '0'; bg3.style.opacity = '0';
             } else if (scrollY < h * 1.9) { 
-                // Logic表示 (さらに長く表示されるように 1.6 -> 1.9 へ延長)
                 bg1.style.opacity = '0'; bg2.style.opacity = '1'; bg3.style.opacity = '0';
             } else {
-                // Humanity表示
                 bg1.style.opacity = '0'; bg2.style.opacity = '0'; bg3.style.opacity = '1';
             }
         });
