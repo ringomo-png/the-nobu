@@ -12,31 +12,33 @@
             font-family: 'Inter', -apple-system, sans-serif; line-height: 2.0;
             -webkit-font-smoothing: antialiased; overflow-x: hidden;
         }
+        
+        /* 背景拡大防止 */
         .fixed-background {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-image: url('image_more.png'); background-size: cover; background-position: center;
             filter: grayscale(100%) contrast(110%) brightness(0.2); z-index: -1;
-            /* サイズ変化を防ぐ */
-            transform: translateZ(0);
+            transform: scale(1) !important;
         }
+
         .container { position: relative; z-index: 1; padding: 60px 25px; max-width: 600px; margin: 0 auto; }
         .nav-back { display: inline-block; text-decoration: none; color: var(--text-muted); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 60px; }
         .page-header { margin-bottom: 400px; text-align: center; }
         .page-title { font-size: 32px; font-weight: 300; letter-spacing: -0.02em; margin: 0; }
-        .page-subtitle { color: var(--text-muted); font-size: 14px; margin-top: 20px; }
+        
         .item-section { margin-bottom: 250px; }
-        .reveal-item .item-label, .reveal-item .item-title, .reveal-item .item-text, .reveal-item .video-wrapper {
-            opacity: 0; transform: translateY(30px); transition: all 1.2s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-        .reveal-item.is-visible .item-label, .reveal-item.is-visible .item-title, .reveal-item.is-visible .item-text, .reveal-item.is-visible .video-wrapper { opacity: 1; transform: translateY(0); }
+        .reveal-item { opacity: 0; transform: translateY(30px); transition: all 1.2s cubic-bezier(0.25, 1, 0.5, 1); }
+        .reveal-item.is-visible { opacity: 1; transform: translateY(0); }
+
         .item-label { font-size: 10px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px; display: block; }
         .item-title { font-size: 24px; font-weight: 700; margin-bottom: 25px; }
         .item-text { font-size: 16px; color: var(--text-muted); margin-bottom: 60px; }
         .item-text b { color: #fff; font-weight: 600; }
+
         .video-wrapper { width: 100%; border-radius: 4px; overflow: hidden; background: #000; border: 1px solid #1a1a1a; aspect-ratio: 16 / 9; }
         .item-video { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) brightness(0.7); }
+        
         .ending-section { padding: 150px 0; text-align: center; }
-        .final-statement { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; font-family: 'Roboto Mono', monospace; display: block; line-height: 2.5; }
         .reboot-btn { display: inline-block; text-decoration: none; color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 14px 35px; border-radius: 40px; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-top: 50px; }
         .footer-logo { font-weight: 900; font-size: 20px; letter-spacing: 0.5em; color: #111; margin-top: 100px; text-transform: uppercase; }
         .share-area { margin-top: 80px; padding-top: 40px; border-top: 1px solid #111; }
@@ -48,9 +50,9 @@
     <div class="fixed-background"></div>
     <div class="container">
         <nav><a href="index.html" class="nav-back">← Back to Terminal</a></nav>
+        
         <header class="page-header">
             <h1 class="page-title">Beyond the Logic.</h1>
-            <p class="page-subtitle">彼を構成する、もう一つの側面。</p> 
         </header>
 
         <section class="item-section reveal-item">
@@ -110,40 +112,46 @@
         </section>
 
         <div class="ending-section reveal-item">
-            <p class="final-statement">Current data fragments are only a part of his logic.<br>Updating real-time... Next sequence is loading.</p>
             <a href="index.html" class="reboot-btn">Main Sequence</a>
-            <div class="share-area"><a id="line-share-btn" href="#" target="_blank" class="share-btn">Share Profile via LINE</a></div>
+            <div class="share-area">
+                <a id="line-share-btn" href="#" target="_blank" class="share-btn">Share Profile via LINE</a>
+            </div>
             <div class="footer-logo">NOBUYUKI</div>
         </div>
         <footer>© THE GENIUS ARCHITECT.</footer>
     </div>
 
     <script>
-        // LINE共有URLの設定
+        // 動画強制再生処理
+        const startVideos = () => {
+            document.querySelectorAll('video').forEach(v => {
+                v.play().catch(() => {
+                    // 自動再生が拒否された場合の再試行
+                    v.muted = true;
+                    v.play();
+                });
+            });
+        };
+        window.addEventListener('load', startVideos);
+        window.addEventListener('touchstart', startVideos, {once: true});
+
+        // LINE共有
         window.addEventListener('DOMContentLoaded', () => {
             const lineBtn = document.getElementById('line-share-btn');
             const mainPageUrl = window.location.href.replace('more.html', 'index.html');
             lineBtn.href = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(mainPageUrl)}`;
         });
 
-        // スクロール検知と動画再生
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                const section = entry.target;
-                const video = section.querySelector('.item-video');
                 if (entry.isIntersecting) {
-                    section.classList.add('is-visible');
-                    // スクロールで見えたら再生を試みる
-                    if(video) { 
-                        video.play().catch(() => {
-                            // 低電力モードなどで失敗した場合は、タップを待つか自動再試行
-                            console.log("Autoplay blocked or failed.");
-                        }); 
-                    }
-                } else { if(video) video.pause(); }
+                    entry.target.classList.add('is-visible');
+                    const v = entry.target.querySelector('video');
+                    if(v) v.play();
+                }
             });
         }, { threshold: 0.1 });
-        document.querySelectorAll('.reveal-item').forEach(section => observer.observe(section));
+        document.querySelectorAll('.reveal-item').forEach(el => observer.observe(el));
     </script>
 </body>
 </html>

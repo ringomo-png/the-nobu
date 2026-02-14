@@ -10,23 +10,23 @@
         body {
             margin: 0; background-color: var(--bg-color); color: #fff;
             font-family: 'Inter', -apple-system, sans-serif; -webkit-font-smoothing: antialiased;
-            overflow-x: hidden;
+            overflow-x: hidden; touch-action: manipulation;
         }
         .bg-layer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-size: cover; background-position: center;
             filter: grayscale(100%) contrast(110%) brightness(0.3);
-            z-index: -1; transition: opacity 1.5s ease-in-out; opacity: 0;
-            /* iPhoneのリサイズによる拡大を防止 */
-            background-attachment: scroll; 
-            transform: translateZ(0);
+            z-index: -1; transition: opacity 1.2s ease-in-out; opacity: 0;
+            /* 強制的に拡大をキャンセル */
+            transform: scale(1) !important;
+            backface-visibility: hidden;
         }
         .bg-1 { background-image: url('image_top.png'); }
         .bg-2 { background-image: url('image_logic.png'); }
         .bg-3 { background-image: url('image_human.png'); }
 
         .container { position: relative; z-index: 1; padding: 0 30px; max-width: 600px; margin: 0 auto; }
-        .hero-spacer { height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+        .hero-spacer { height: 100vh; height: -webkit-fill-available; display: flex; flex-direction: column; justify-content: center; }
         .hero-title {
             font-size: 48px; font-weight: 900; letter-spacing: -0.05em; line-height: 1.05;
             background: linear-gradient(180deg, #fff 20%, #888 100%);
@@ -62,7 +62,6 @@
             <p class="hero-name">Nobuyuki</p>
             <p style="color: var(--text-muted); margin-top: 25px; font-size: 18px;">The Profile of a Genius Architect.</p>
         </div>
-
         <section class="content-section" id="trigger-logic">
             <span class="section-label">Theory</span>
             <h2 class="title">伝統的市場への、<br>知性による介入。</h2>
@@ -78,13 +77,11 @@
             <div class="body-text">
                 <p>完璧に設計されたコードにも、時に予期せぬノイズが混入する。彼は自らの個人インフラを<b>完全なゼロへと収束</b>させる道を選んだ。</p>
                 <p>既存の信用をリセットし、一枚の<b>デビットカード</b>だけを唯一のインターフェースにする。それは本質を取り戻すための<b>強制的デバッグ</b>だった。</p>
-                <p>何も持たないがゆえに研ぎ澄まされる感覚。この空白の期間こそが、彼のロジックに血の通った力強さを宿らせることになる。</p>
             </div>
         </section>
 
         <div class="link-area">
             <p class="next-label">View Unlisted Records</p>
-            <p style="color: #444; font-size: 13px; margin-bottom: 40px; line-height: 1.6;">論理の裏側に隠された、多角的なパフォーマンスの断片。<br>彼を構成する、もう一つのフェーズへ。</p>
             <a href="more.html" class="more-btn">Beyond.</a>
         </div>
         <footer>© THE GENIUS ARCHITECT.</footer>
@@ -96,7 +93,6 @@
             const scrollY = window.scrollY;
             const h = window.innerHeight;
             const bg1 = document.getElementById('bg1'), bg2 = document.getElementById('bg2'), bg3 = document.getElementById('bg3');
-
             if (scrollY < h * 0.7) {
                 bg1.style.opacity = '1'; bg2.style.opacity = '0'; bg3.style.opacity = '0';
             } else if (scrollY < h * 1.9) { 
