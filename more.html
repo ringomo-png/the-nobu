@@ -13,7 +13,6 @@
             -webkit-font-smoothing: antialiased; overflow-x: hidden;
         }
         
-        /* 背景拡大防止 */
         .fixed-background {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-image: url('image_more.png'); background-size: cover; background-position: center;
@@ -23,26 +22,39 @@
 
         .container { position: relative; z-index: 1; padding: 60px 25px; max-width: 600px; margin: 0 auto; }
         .nav-back { display: inline-block; text-decoration: none; color: var(--text-muted); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 60px; }
+        
         .page-header { margin-bottom: 400px; text-align: center; }
         .page-title { font-size: 32px; font-weight: 300; letter-spacing: -0.02em; margin: 0; }
         
-        .item-section { margin-bottom: 250px; }
-        .reveal-item { opacity: 0; transform: translateY(30px); transition: all 1.2s cubic-bezier(0.25, 1, 0.5, 1); }
-        .reveal-item.is-visible { opacity: 1; transform: translateY(0); }
+        .item-section { margin-bottom: 350px; }
+
+        /* --- スクロールアニメーション --- */
+        .reveal-text { opacity: 0; transform: translateY(30px); transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal-video { opacity: 0; transform: scale(0.98) translateY(20px); transition: all 1.5s cubic-bezier(0.16, 1, 0.3, 1); transition-delay: 0.4s; }
+        
+        .is-visible .reveal-text { opacity: 1; transform: translateY(0); }
+        .is-visible .reveal-video { opacity: 1; transform: scale(1) translateY(0); }
+        /* ---------------------------- */
 
         .item-label { font-size: 10px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px; display: block; }
         .item-title { font-size: 24px; font-weight: 700; margin-bottom: 25px; }
-        .item-text { font-size: 16px; color: var(--text-muted); margin-bottom: 60px; }
+        .item-text { font-size: 16px; color: var(--text-muted); margin-bottom: 180px; } /* 間隔を広げる */
         .item-text b { color: #fff; font-weight: 600; }
 
         .video-wrapper { width: 100%; border-radius: 4px; overflow: hidden; background: #000; border: 1px solid #1a1a1a; aspect-ratio: 16 / 9; }
         .item-video { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) brightness(0.7); }
         
-        .ending-section { padding: 150px 0; text-align: center; }
-        .reboot-btn { display: inline-block; text-decoration: none; color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 14px 35px; border-radius: 40px; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-top: 50px; }
-        .footer-logo { font-weight: 900; font-size: 20px; letter-spacing: 0.5em; color: #111; margin-top: 100px; text-transform: uppercase; }
+        /* エンディングセクション */
+        .ending-section { padding: 150px 0; text-align: center; opacity: 0; transition: opacity 1.5s ease; }
+        .ending-section.is-visible { opacity: 1; }
+        .final-statement { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; font-family: 'Roboto Mono', monospace; display: block; line-height: 2.5; margin-bottom: 40px; }
+        
+        .reboot-btn { display: inline-block; text-decoration: none; color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 14px 35px; border-radius: 40px; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-top: 20px; transition: all 0.3s ease; }
+        .reboot-btn:hover { background: #fff; color: #000; }
+        
         .share-area { margin-top: 80px; padding-top: 40px; border-top: 1px solid #111; }
         .share-btn { font-size: 10px; color: var(--text-muted); text-decoration: none; letter-spacing: 0.2em; text-transform: uppercase; }
+        .footer-logo { font-weight: 900; font-size: 20px; letter-spacing: 0.5em; color: #111; margin-top: 100px; text-transform: uppercase; }
         footer { padding: 60px 0; text-align: center; color: #333; font-size: 10px; }
     </style>
 </head>
@@ -55,90 +67,84 @@
             <h1 class="page-title">Beyond the Logic.</h1>
         </header>
 
-        <section class="item-section reveal-item">
-            <span class="item-label">Spatial Calculation</span> 
-            <h2 class="item-title">Calculated Leisure</h2>
-            <div class="item-text">
-                <p>広大な芝のフィールドは、彼にとって究極の<b>知的遊戯</b>である。複雑なグリーンの起伏は2Dプレーンとして脳内で解析され、風向、湿度、摩擦係数といった数万の変数が瞬時に並列処理される。</p>
-                <p>導き出された最適解は、一本のクラブを通して精確な弾道を描く。かつて、パー4のセカンドショットを直接カップに叩きこんだその記録は、単なる偶然ではない。それは、物理学とロジックが織りなす究極のパフォーマンスであり、<b>彼自身の創造物</b>なのだ。</p>
+        <section class="item-section">
+            <div class="reveal-text">
+                <span class="item-label">Spatial Calculation</span> 
+                <h2 class="item-title">Calculated Leisure</h2>
+                <div class="item-text">
+                    <p>広大な芝のフィールドは、彼にとって究極の<b>知的遊戯</b>である。複雑なグリーンの起伏は2Dプレーンとして脳内で解析され、数万の変数が瞬時に並列処理される。</p>
+                    <p>導き出された最適解は、精確な弾道を描く。かつて、パー4のセカンドショットを直接カップに叩きこんだその記録は、物理学とロジックが織りなす究極のパフォーマンスであり、<b>彼自身の創造物</b>なのだ。</p>
+                </div>
             </div>
-            <div class="video-wrapper">
-                <video class="item-video" muted loop playsinline autoplay webkit-playsinline>
-                    <source src="golf.mp4" type="video/mp4">
-                </video>
+            <div class="reveal-video video-wrapper">
+                <video class="item-video" muted loop playsinline autoplay><source src="golf.mp4" type="video/mp4"></video>
             </div>
         </section>
 
-        <section class="item-section reveal-item">
-            <span class="item-label">Thermal Management</span>
-            <h2 class="item-title">Fire Performance</h2>
-            <div class="item-text">
-                <p>処理速度の速すぎる知性は常にオーバーヒートの危険を孕んでいる。凡庸な会話や停滞したロジックとの接触が生む摩擦は、彼の中で静かなストレスとして蓄積されていく。</p>
-                <p>内面で溶岩のように燃えたぎるそのエネルギーを、彼は言葉ではなく、物理的な<b>炎</b>として大気に解き放つ。闇の中で火を吐くその儀式は、精神を冷却し、再び冷徹なロジックを取り戻すための不可欠なカタルシスなのである。</p>
+        <section class="item-section">
+            <div class="reveal-text">
+                <span class="item-label">Thermal Management</span>
+                <h2 class="item-title">Fire Performance</h2>
+                <div class="item-text">
+                    <p>処理速度の速すぎる知性は常にオーバーヒートの危険を孕んでいる。凡庸な会話や停滞したロジックが生む摩擦は、彼の中で静かなストレスとして蓄積されていく。</p>
+                    <p>内面で溶岩のように燃えたぎるそのエネルギーを、彼は言葉ではなく、物理的な<b>炎</b>として大気に解き放つ。それは精神を冷却し、再び冷徹なロジックを取り戻すための不可欠なカタルシスなのである。</p>
+                </div>
             </div>
-            <div class="video-wrapper">
-                <video class="item-video" muted loop playsinline autoplay webkit-playsinline>
-                    <source src="fire.mp4" type="video/mp4">
-                </video>
+            <div class="reveal-video video-wrapper">
+                <video class="item-video" muted loop playsinline autoplay><source src="fire.mp4" type="video/mp4"></video>
             </div>
         </section>
         
-        <section class="item-section reveal-item">
-            <span class="item-label">Unseen Resonance</span> 
-            <h2 class="item-title">Music</h2>
-            <div class="item-text">
-                <p>冷徹なロジックの底から響く、人を惑わす<b>悪魔の囁き</b>。彼が隠し持つもう一つの顔、それは底知れぬ音楽への情熱である。黒人のリズムミュージックをルーツに持つ彼は、そのグルーヴを支配する破壊的な<b>スラップ奏法</b>を得意とする。</p>
-                <p>一方で、RADWIMPSが描くような繊細で叙情的な世界観を深く愛するという、予測不能な二面性も併せ持つ。かつて、<b>学園ホール</b>を熱狂と沈黙で支配した「一夜限りの共鳴」において、彼のリズムに脳を同期させられた数百の観衆は、理由もわからず涙を流した。それは、計算だけでは到達できない、音楽という未知のコードが宿った魂のハッキングだった。</p>
+        <section class="item-section">
+            <div class="reveal-text">
+                <span class="item-label">Unseen Resonance</span> 
+                <h2 class="item-title">Music</h2>
+                <div class="item-text">
+                    <p>冷徹なロジックの底から響く、人を惑わす<b>悪魔の囁き</b>。彼が隠し持つもう一つの顔、それは音楽への情熱である。黒人のリズムミュージックをルーツに持つ彼は、破壊的な<b>スラップ奏法</b>を得意とする。</p>
+                    <p>かつて、<b>学園ホール</b>を熱狂と沈黙で支配した「一夜限りの共鳴」において、彼のリズムに脳を同期させられた観衆は、理由もわからず涙を流した。それは、計算だけでは到達できない、魂のハッキングだった。</p>
+                </div>
             </div>
-            <div class="video-wrapper">
-                <video class="item-video" muted loop playsinline autoplay webkit-playsinline>
-                    <source src="music.mp4" type="video/mp4">
-                </video>
-            </div>
-        </section>
-
-        <section class="item-section reveal-item">
-            <span class="item-label">Anatomic Defense</span>
-            <h2 class="item-title">Violence & Physical</h2>
-            <div class="item-text">
-                <p>彼は知っている。人間の精神は脆弱だが、その構造体としての肉体は驚くほど精巧で堅牢であることを。医学的知識と解剖学に基づいた彼の身体操作は、美しくもあり、同時に致命的でもある。</p>
-                <p>酒場の喧騒、予測不能な悪意。常に危険と隣り合わせの状況下で、彼は持ち前の<b>フィジカル</b>という最後の防衛線を信頼している。かつて強盗に<b>顔面</b>をのれんで殴打されるという理不尽な襲撃を受けてなお、彼はその衝撃を無効化し、生存した。死の淵ですら、彼の生存アルゴリズムは停止することを知らない。</p>
-            </div>
-            <div class="video-wrapper">
-                <video class="item-video" muted loop playsinline autoplay webkit-playsinline>
-                    <source src="violence.mp4" type="video/mp4">
-                </video>
+            <div class="reveal-video video-wrapper">
+                <video class="item-video" muted loop playsinline autoplay><source src="music.mp4" type="video/mp4"></video>
             </div>
         </section>
 
-        <div class="ending-section reveal-item">
+        <section class="item-section">
+            <div class="reveal-text">
+                <span class="item-label">Anatomic Defense</span>
+                <h2 class="item-title">Violence & Physical</h2>
+                <div class="item-text">
+                    <p>彼は知っている。人間の精神は脆弱だが、その構造体としての肉体は驚くほど精巧であることを。医学的知識に基づいた彼の身体操作は、美しくもあり、致命的でもある。</p>
+                    <p>かつて強盗に<b>顔面</b>をのれんで殴打されるという理不尽な襲撃を受けてなお、彼はその衝撃を無効化し、生存した。死の淵ですら、彼の生存アルゴリズムは停止することを知らない。</p>
+                </div>
+            </div>
+            <div class="reveal-video video-wrapper">
+                <video class="item-video" muted loop playsinline autoplay><source src="violence.mp4" type="video/mp4"></video>
+            </div>
+        </section>
+
+        <div class="ending-section">
+            <p class="final-statement">
+                Current data fragments are only a part of his logic.<br>
+                Updating real-time... Next sequence is loading.
+            </p>
             <a href="index.html" class="reboot-btn">Main Sequence</a>
+            
             <div class="share-area">
                 <a id="line-share-btn" href="#" target="_blank" class="share-btn">Share Profile via LINE</a>
             </div>
             <div class="footer-logo">NOBUYUKI</div>
         </div>
+
         <footer>© THE GENIUS ARCHITECT.</footer>
     </div>
 
     <script>
-        // 動画強制再生処理
-        const startVideos = () => {
-            document.querySelectorAll('video').forEach(v => {
-                v.play().catch(() => {
-                    // 自動再生が拒否された場合の再試行
-                    v.muted = true;
-                    v.play();
-                });
-            });
-        };
-        window.addEventListener('load', startVideos);
-        window.addEventListener('touchstart', startVideos, {once: true});
-
-        // LINE共有
+        // LINE共有URLの設定（トップページをリンク）
         window.addEventListener('DOMContentLoaded', () => {
             const lineBtn = document.getElementById('line-share-btn');
-            const mainPageUrl = window.location.href.replace('more.html', 'index.html');
+            // 現在のURLから more.html を除いたものをメインURLとする
+            const mainPageUrl = window.location.origin + window.location.pathname.replace('more.html', 'index.html');
             lineBtn.href = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(mainPageUrl)}`;
         });
 
@@ -147,11 +153,12 @@
                 if (entry.isIntersecting) {
                     entry.target.classList.add('is-visible');
                     const v = entry.target.querySelector('video');
-                    if(v) v.play();
+                    if(v) v.play().catch(()=>{});
                 }
             });
-        }, { threshold: 0.1 });
-        document.querySelectorAll('.reveal-item').forEach(el => observer.observe(el));
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.item-section, .ending-section').forEach(el => observer.observe(el));
     </script>
 </body>
 </html>

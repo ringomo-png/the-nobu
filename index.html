@@ -12,14 +12,15 @@
             font-family: 'Inter', -apple-system, sans-serif; -webkit-font-smoothing: antialiased;
             overflow-x: hidden; touch-action: manipulation;
         }
+        
         .bg-layer {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-size: cover; background-position: center;
+            position: fixed; top: 0; left: 0; width: 100vw;
+            height: 100vh; height: -webkit-fill-available;
+            background-size: cover; background-position: center center;
             filter: grayscale(100%) contrast(110%) brightness(0.3);
             z-index: -1; transition: opacity 1.2s ease-in-out; opacity: 0;
-            /* 強制的に拡大をキャンセル */
             transform: scale(1) !important;
-            backface-visibility: hidden;
+            will-change: opacity; backface-visibility: hidden;
         }
         .bg-1 { background-image: url('image_top.png'); }
         .bg-2 { background-image: url('image_logic.png'); }
@@ -40,14 +41,17 @@
         .body-text { font-size: 17px; color: var(--text-muted); line-height: 1.9; }
         .body-text b { color: #fff; font-weight: 700; }
 
+        /* Moreへの導入エリア */
         .link-area { padding: 150px 0 250px; text-align: center; }
-        .next-label { color: #444; font-size: 12px; letter-spacing: 0.3em; margin-bottom: 20px; text-transform: uppercase; }
+        .next-label { color: #444; font-size: 13px; letter-spacing: 0.2em; margin-bottom: 15px; display: block; text-transform: uppercase; }
+        .next-teaser { color: var(--text-muted); font-size: 16px; margin-bottom: 40px; line-height: 1.6; }
         .more-btn {
             display: inline-block; text-decoration: none; color: #fff; border: 1px solid #fff;
             padding: 14px 60px; border-radius: 2px; font-size: 14px; letter-spacing: 0.3em;
             text-transform: uppercase; transition: all 0.4s ease;
         }
         .more-btn:hover { background-color: #fff; color: #000; }
+        
         footer { padding: 60px 0; text-align: center; color: #333; font-size: 10px; }
     </style>
 </head>
@@ -60,30 +64,35 @@
         <div class="hero-spacer">
             <h1 class="hero-title">超越する、<br>ロジック。</h1>
             <p class="hero-name">Nobuyuki</p>
-            <p style="color: var(--text-muted); margin-top: 25px; font-size: 18px;">The Profile of a Genius Architect.</p>
         </div>
+
         <section class="content-section" id="trigger-logic">
-            <span class="section-label">Theory</span>
-            <h2 class="title">伝統的市場への、<br>知性による介入。</h2>
+            <span class="section-label">System Disruption</span>
+            <h2 class="title">搾取の盤面を、<br>知性でハックする。</h2>
             <div class="body-text">
-                <p>世界は巨大な変数の集合体に過ぎない。卒業論文で挑んだのは、古より続く<b>確率論的競技市場</b>の解析だった。</p>
-                <p>導き出されたアルゴリズムはシステムの根幹を揺るがし、運営組織がルールの変更を余儀なくされるほどの衝撃を与えた。それは知性による再定義である。</p>
+                <p>世界は巨大な変数の集合体に過ぎない。彼が卒業論文でターゲットにしたのは、公認という名の免罪符を得た搾取システム、公営競技の解析だった。</p>
+                <p>大衆の情熱を餌に富を吸い上げるその絶対的な構造。彼はその盤面に潜む脆弱性を特定し、独自のアルゴリズムによってシステムの優位性を完全に無効化した。それは知性によるシステムの再定義であり、無自覚に搾取される人々を論理的に開放するための、静かな宣戦布告だった。</p>
             </div>
         </section>
 
         <section class="content-section" id="trigger-human">
-            <span class="section-label">Humanity</span>
-            <h2 class="title">ロジックの死角、<br>あるいは「現実」という監査。</h2>
+            <span class="section-label">Absolute Reset</span>
+            <h2 class="title">既存のコードを捨て、<br>ゼロへ収束する。</h2>
             <div class="body-text">
-                <p>完璧に設計されたコードにも、時に予期せぬノイズが混入する。彼は自らの個人インフラを<b>完全なゼロへと収束</b>させる道を選んだ。</p>
-                <p>既存の信用をリセットし、一枚の<b>デビットカード</b>だけを唯一のインターフェースにする。それは本質を取り戻すための<b>強制的デバッグ</b>だった。</p>
+                <p>完璧なロジックを維持するためには、時にシステムそのもののリビルドが必要になる。彼は自らの社会的なインフラをすべて破棄し、完全なゼロへと収束させる道を選んだ。</p>
+                <p>過去の履歴や既存の信用を消去し、一枚のデビットカードだけを唯一の生存インターフェースにする。それは不純物を取り除き、本質だけを抽出するための強制的デバッグだった。何も持たないがゆえに研ぎ澄まされる感覚が、彼のロジックに血の通った圧倒的な力強さを宿らせていく。</p>
             </div>
         </section>
 
         <div class="link-area">
-            <p class="next-label">View Unlisted Records</p>
+            <span class="next-label">Unlisted Records</span>
+            <p class="next-teaser">
+                論理の裏側に隠された、<br>
+                知性の断片を閲覧する。
+            </p>
             <a href="more.html" class="more-btn">Beyond.</a>
         </div>
+
         <footer>© THE GENIUS ARCHITECT.</footer>
     </div>
 
