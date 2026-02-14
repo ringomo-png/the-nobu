@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Beyond | The Other Side</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #000;
+            --text-muted: #86868b;
+            --accent-color: #fff;
+            --line-green: #06C755;
+        }
+
+        body {
+            margin: 0; background-color: var(--bg-color); color: #fff;
+            font-family: 'Inter', -apple-system, sans-serif; line-height: 1.8;
+            -webkit-font-smoothing: antialiased; overflow-x: hidden;
+        }
+
+        .fixed-background {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('image_more.png');
+            background-size: cover; background-position: center;
+            filter: grayscale(100%) contrast(110%) brightness(0.2);
+            z-index: -1;
+        }
+
+        .container {
+            position: relative; z-index: 1; padding: 60px 25px;
+            max-width: 600px; margin: 0 auto;
+        }
+
+        .nav-back {
+            display: inline-block; text-decoration: none; color: var(--text-muted);
+            font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+            margin-bottom: 60px; transition: color 0.3s;
+        }
+        .nav-back:active { color: #fff; }
+
+        .page-header { margin-bottom: 80px; }
+        .page-title { font-size: 32px; font-weight: 300; letter-spacing: -0.02em; margin: 0; }
+
+        /* セクション設定 */
+        .item-section { margin-bottom: 120px; }
+        .item-label {
+            font-size: 10px; font-weight: 700; letter-spacing: 0.3em;
+            text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px; display: block;
+        }
+        .item-title { font-size: 22px; font-weight: 700; margin-bottom: 15px; }
+        .item-text { font-size: 15px; color: var(--text-muted); margin-bottom: 30px; }
+        .item-text b { color: #fff; font-weight: 400; }
+
+        /* 動画コンテナ */
+        .video-wrapper {
+            width: 100%; border-radius: 4px; overflow: hidden;
+            background: #000; border: 1px solid #1a1a1a;
+            aspect-ratio: 16 / 9; position: relative;
+        }
+        .item-video {
+            width: 100%; height: 100%; object-fit: cover;
+            filter: grayscale(100%) brightness(0.7);
+            -webkit-playsinline: true;
+        }
+
+        /* シェアセクション */
+        .share-area {
+            margin-top: 150px; text-align: center;
+            border-top: 1px solid #111; padding-top: 80px;
+        }
+        .share-btn {
+            display: inline-block; text-decoration: none; color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 14px 50px; border-radius: 2px;
+            font-size: 13px; letter-spacing: 0.2em;
+            text-transform: uppercase; transition: all 0.4s ease;
+            background-color: transparent;
+        }
+        .share-btn:active {
+            background-color: var(--line-green);
+            border-color: var(--line-green);
+            transform: scale(0.98);
+        }
+
+        footer { padding: 100px 0 60px; text-align: center; font-size: 10px; color: #333; letter-spacing: 0.1em; }
+    </style>
+</head>
+<body>
+
+    <div class="fixed-background"></div>
+
+    <div class="container">
+        
+        <nav><a href="index.html" class="nav-back">← Back</a></nav>
+
+        <header class="page-header">
+            <h1 class="page-title">Beyond the Logic.</h1>
+            <p style="color: var(--text-muted); font-size: 14px; margin-top: 15px;">論理の裏側にある、もう一つの顔。</p>
+        </header>
+
+        <section class="item-section">
+            <span class="item-label">Precision</span>
+            <h2 class="item-title">Golf</h2>
+            <p class="item-text">
+                物理法則の体現。すべてを数式として処理し、静寂の中で最適解を放つ。
+                ハードウェアを用いた純粋な計算。
+            </p>
+            <div class="video-wrapper">
+                <video class="item-video" muted loop playsinline preload="auto">
+                    <source src="golf.mp4" type="video/mp4">
+                </video>
+            </div>
+        </section>
+
+        <section class="item-section">
+            <span class="item-label">Instinct</span>
+            <h2 class="item-title">Fire Performance</h2>
+            <p class="item-text">
+                論理の極北は、熱を帯びる。冷徹なロジックは、吐き出される焦熱へと姿を変える。
+            </p>
+            <div class="video-wrapper">
+                <video class="item-video" muted loop playsinline preload="auto">
+                    <source src="fire.mp4" type="video/mp4">
+                </video>
+            </div>
+        </section>
+
+        <section class="item-section">
+            <span class="item-label">Destruction</span>
+            <h2 class="item-title">Violence & Power</h2>
+            <p class="item-text">
+                静寂の中に潜む、爆発的なエネルギー。既存の秩序を打ち砕くための、原初的な衝動の証明。
+            </p>
+            <div class="video-wrapper">
+                <video class="item-video" muted loop playsinline preload="auto">
+                    <source src="violence.mp4" type="video/mp4">
+                </video>
+            </div>
+        </section>
+
+        <div class="share-area">
+            <p class="item-label" style="margin-bottom: 30px;">Spread the Story</p>
+            <a id="line-share" href="#" class="share-btn">Share via LINE</a>
+        </div>
+
+        <footer>© THE GENIUS ARCHITECT.</footer>
+    </div>
+
+    <script>
+        // 1. LINE共有設定
+        const shareBtn = document.getElementById('line-share');
+        const currentUrl = encodeURIComponent(window.location.href);
+        const shareText = encodeURIComponent("Beyond the Logic. | 彼という人間を知るための断片。");
+        shareBtn.href = `https://social-plugins.line.me/lineit/share?url=${currentUrl}&text=${shareText}`;
+
+        // 2. スクロール監視（動画の自動再生/停止）
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const video = entry.target;
+                if (entry.isIntersecting) {
+                    video.play().catch(() => {});
+                } else {
+                    video.pause();
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.item-video').forEach(video => {
+            observer.observe(video);
+        });
+    </script>
+
+</body>
+</html>
