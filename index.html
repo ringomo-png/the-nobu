@@ -16,7 +16,9 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-size: cover; background-position: center;
             filter: grayscale(100%) contrast(110%) brightness(0.3);
-            z-index: -1; transition: opacity 1.2s ease-in-out; opacity: 0;
+            z-index: -1; transition: opacity 1.5s ease-in-out; opacity: 0;
+            /* 画像が勝手に拡大しないよう固定 */
+            transform: scale(1.0); 
         }
         .bg-1 { background-image: url('image_top.png'); }
         .bg-2 { background-image: url('image_logic.png'); }
@@ -34,8 +36,7 @@
             letter-spacing: 0.1em; text-transform: uppercase;
         }
         
-        /* セクションの余白を調整 */
-        .content-section { padding: 40vh 0; min-height: 50vh; }
+        .content-section { padding: 45vh 0; min-height: 55vh; }
         .section-label { color: var(--apple-blue); font-weight: 700; font-size: 13px; letter-spacing: 0.1em; margin-bottom: 20px; display: block; text-transform: uppercase; }
         .title { font-size: 28px; font-weight: 700; margin-bottom: 30px; line-height: 1.4; }
         .body-text { font-size: 17px; color: var(--text-muted); line-height: 1.9; }
@@ -98,11 +99,15 @@
             const h = window.innerHeight;
             const bg1 = document.getElementById('bg1'), bg2 = document.getElementById('bg2'), bg3 = document.getElementById('bg3');
 
+            // 切り替えタイミングの調整
             if (scrollY < h * 0.7) {
+                // Top表示
                 bg1.style.opacity = '1'; bg2.style.opacity = '0'; bg3.style.opacity = '0';
-            } else if (scrollY < h * 1.6) {
+            } else if (scrollY < h * 1.9) { 
+                // Logic表示 (さらに長く表示されるように 1.6 -> 1.9 へ延長)
                 bg1.style.opacity = '0'; bg2.style.opacity = '1'; bg3.style.opacity = '0';
             } else {
+                // Humanity表示
                 bg1.style.opacity = '0'; bg2.style.opacity = '0'; bg3.style.opacity = '1';
             }
         });
