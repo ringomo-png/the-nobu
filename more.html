@@ -20,59 +20,66 @@
         }
         .container { position: relative; z-index: 1; padding: 60px 25px; max-width: 600px; margin: 0 auto; }
         
-        /* --- ヘッダー演出 --- */
+        /* --- オープニングヘッダー --- */
         .page-header { 
             height: 90vh; display: flex; flex-direction: column; justify-content: center; align-items: center; 
             text-align: center; margin-bottom: 200px;
         }
         .page-title { 
-            font-size: 38px; font-weight: 900; letter-spacing: 0.1em; margin: 0;
-            animation: titleReveal 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            font-size: 42px; font-weight: 900; letter-spacing: 0.15em; margin: 0;
+            opacity: 0; transform: translateY(30px);
+            animation: titleReveal 2.0s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         .header-line {
             width: 0; height: 1px; background: var(--accent); margin: 30px 0;
-            animation: lineExpand 2.0s 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: lineExpand 1.5s 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         .page-subtitle {
-            font-family: 'Roboto Mono', monospace; font-size: 12px; color: var(--text-muted);
-            letter-spacing: 0.3em; text-transform: uppercase; max-width: 300px;
-            opacity: 0; animation: fadeIn 2s 1.2s ease forwards;
+            font-family: 'Roboto Mono', monospace; font-size: 13px; color: var(--text-muted);
+            letter-spacing: 0.2em; line-height: 1.8; text-transform: uppercase;
+            opacity: 0; transform: translateY(20px);
+            animation: subtitleReveal 1.5s 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        @keyframes titleReveal {
-            0% { opacity: 0; transform: translateY(20px); letter-spacing: -0.1em; }
-            100% { opacity: 1; transform: translateY(0); letter-spacing: 0.2em; }
-        }
-        @keyframes lineExpand { 0% { width: 0; } 100% { width: 100px; } }
-        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+        @keyframes titleReveal { 100% { opacity: 1; transform: translateY(0); letter-spacing: 0.25em; } }
+        @keyframes lineExpand { 100% { width: 120px; } }
+        @keyframes subtitleReveal { 100% { opacity: 1; transform: translateY(0); } }
 
-        /* --- コンテンツ動き --- */
+        /* --- 各コンテンツのスクロールアニメーション --- */
         .nav-back { display: inline-block; text-decoration: none; color: var(--text-muted); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 60px; }
-        .item-section { margin-bottom: 500px; }
+        .item-section { margin-bottom: 450px; }
 
-        .reveal-text { opacity: 0; transform: translateY(40px); transition: all 1.2s ease-out; margin-bottom: 100vh; }
-        .reveal-video { opacity: 0; transform: scale(0.95); transition: all 1.5s ease-out; }
+        /* 初期状態：隠して下に配置 */
+        .reveal { opacity: 0; transform: translateY(50px); transition: all 1.4s cubic-bezier(0.215, 0.61, 0.355, 1); will-change: transform, opacity; }
         
-        .is-visible.reveal-text { opacity: 1; transform: translateY(0); }
-        .is-visible.reveal-video { opacity: 1; transform: scale(1); }
+        /* 表示状態 */
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        
+        /* テキストと動画の間隔（こだわり） */
+        .reveal-text { margin-bottom: 110vh; } 
+        .reveal-video { transform: scale(0.96) translateY(40px); }
+        .reveal-video.active { transform: scale(1) translateY(0); }
 
         .item-label { font-size: 10px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px; display: block; }
-        .item-title { font-size: 24px; font-weight: 700; margin-bottom: 25px; }
-        .item-text { font-size: 16px; color: var(--text-muted); }
+        .item-title { font-size: 26px; font-weight: 700; margin-bottom: 25px; letter-spacing: -0.02em; }
+        .item-text { font-size: 16px; color: var(--text-muted); text-align: justify; }
         .item-text b { color: #fff; font-weight: 600; }
 
-        .video-wrapper { width: 100%; border-radius: 4px; overflow: hidden; background: #000; border: 1px solid #1a1a1a; aspect-ratio: 16 / 9; margin-bottom: 200px; }
-        .item-video { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) brightness(0.7); }
-        
-        .ending-section { padding: 150px 0; text-align: center; opacity: 0; transition: opacity 1.5s ease; }
-        .ending-section.is-visible { opacity: 1; }
+        .video-wrapper { width: 100%; border-radius: 4px; overflow: hidden; background: #111; border: 1px solid #1a1a1a; aspect-ratio: 16 / 9; margin-bottom: 100px; }
+        .item-video { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) brightness(0.75); transition: filter 1s ease; }
+        .reveal-video.active .item-video { filter: grayscale(100%) brightness(0.9); }
+
+        /* エンディング */
+        .ending-section { padding: 150px 0; text-align: center; }
         .final-statement { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; display: block; line-height: 2.5; margin-bottom: 40px; }
+        .reboot-btn { display: inline-block; text-decoration: none; color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 15px 40px; border-radius: 40px; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; transition: 0.3s; }
+        .reboot-btn:hover { background: #fff; color: #000; border-color: #fff; }
         
-        .reboot-btn { display: inline-block; text-decoration: none; color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 14px 35px; border-radius: 40px; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; transition: 0.3s; }
-        .reboot-btn:hover { background: #fff; color: #000; }
         .share-area { margin-top: 80px; padding-top: 40px; border-top: 1px solid #111; }
-        .share-btn { font-size: 10px; color: var(--text-muted); text-decoration: none; letter-spacing: 0.2em; text-transform: uppercase; }
-        .footer-logo { font-weight: 900; font-size: 20px; letter-spacing: 0.5em; color: #111; margin-top: 100px; text-transform: uppercase; }
+        .share-btn { font-size: 10px; color: var(--text-muted); text-decoration: none; letter-spacing: 0.2em; text-transform: uppercase; border-bottom: 1px solid transparent; transition: 0.3s; }
+        .share-btn:hover { color: #fff; border-bottom-color: #fff; }
+        
+        .footer-logo { font-weight: 900; font-size: 20px; letter-spacing: 0.5em; color: #151515; margin-top: 100px; text-transform: uppercase; }
         footer { padding: 60px 0; text-align: center; color: #333; font-size: 10px; }
     </style>
 </head>
@@ -92,7 +99,7 @@
         </header>
 
         <section class="item-section">
-            <div class="reveal-text">
+            <div class="reveal reveal-text">
                 <span class="item-label">Spatial Calculation</span> 
                 <h2 class="item-title">Calculated Leisure</h2>
                 <div class="item-text">
@@ -100,13 +107,13 @@
                     <p>導き出された最適解は、精確な弾道を描く。かつて、パー4のセカンドショットを直接カップに叩きこんだその記録は、物理学とロジックが織りなす究極のパフォーマンスであり、<b>彼自身の創造物</b>なのだ。</p>
                 </div>
             </div>
-            <div class="reveal-video video-wrapper">
+            <div class="reveal reveal-video video-wrapper">
                 <video class="item-video" muted loop playsinline><source src="golf.mp4" type="video/mp4"></video>
             </div>
         </section>
 
         <section class="item-section">
-            <div class="reveal-text">
+            <div class="reveal reveal-text">
                 <span class="item-label">Thermal Management</span>
                 <h2 class="item-title">Fire Performance</h2>
                 <div class="item-text">
@@ -114,13 +121,13 @@
                     <p>内面で溶岩のように燃えたぎるそのエネルギーを、彼は言葉ではなく、物理的な<b>炎</b>として大気に解き放つ。それは精神を冷却し、再び冷徹なロジックを取り戻すための不可欠なカタルシスなのである。</p>
                 </div>
             </div>
-            <div class="reveal-video video-wrapper">
+            <div class="reveal reveal-video video-wrapper">
                 <video class="item-video" muted loop playsinline><source src="fire.mp4" type="video/mp4"></video>
             </div>
         </section>
 
         <section class="item-section">
-            <div class="reveal-text">
+            <div class="reveal reveal-text">
                 <span class="item-label">Unseen Resonance</span> 
                 <h2 class="item-title">Music</h2>
                 <div class="item-text">
@@ -128,13 +135,13 @@
                     <p>かつて、<b>学園ホール</b>を熱狂と沈黙で支配した「一夜限りの共鳴」において、彼のリズムに脳を同期させられた観衆は、理由もわからず涙を流した。それは、計算だけでは到達できない、魂のハッキングだった。</p>
                 </div>
             </div>
-            <div class="reveal-video video-wrapper">
+            <div class="reveal reveal-video video-wrapper">
                 <video class="item-video" muted loop playsinline><source src="music.mp4" type="video/mp4"></video>
             </div>
         </section>
 
         <section class="item-section">
-            <div class="reveal-text">
+            <div class="reveal reveal-text">
                 <span class="item-label">Anatomic Defense</span>
                 <h2 class="item-title">Violence & Physical</h2>
                 <div class="item-text">
@@ -142,12 +149,12 @@
                     <p>かつて強盗に<b>顔面</b>をのれんで殴打されるという理不尽な襲撃を受けてなお、彼はその衝撃を無効化し、生存した。死の淵ですら、彼の生存アルゴリズムは停止することを知らない。</p>
                 </div>
             </div>
-            <div class="reveal-video video-wrapper">
+            <div class="reveal reveal-video video-wrapper">
                 <video class="item-video" muted loop playsinline><source src="violence.mp4" type="video/mp4"></video>
             </div>
         </section>
 
-        <div class="ending-section">
+        <div class="reveal ending-section">
             <p class="final-statement">
                 Current data fragments are only a part of his logic.<br>Updating real-time... Next sequence is loading.
             </p>
@@ -159,26 +166,35 @@
     </div>
 
     <script>
+        // LINE共有URLの設定
         window.addEventListener('DOMContentLoaded', () => {
             const lineBtn = document.getElementById('line-share-btn');
             const mainPageUrl = window.location.origin + window.location.pathname.replace('more.html', 'index.html');
             lineBtn.href = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(mainPageUrl)}`;
         });
 
+        // アニメーションの発火設定
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    entry.target.classList.add('is-visible');
+                    // 画面に入ったら「active」クラスを付与
+                    entry.target.classList.add('active');
+                    
                     const video = entry.target.querySelector('video');
                     if (video) video.play().catch(() => {});
                 } else {
+                    // 画面外に出たら動画を停止（負荷軽減）
                     const video = entry.target.querySelector('video');
                     if (video) video.pause();
                 }
             });
-        }, { threshold: 0.3 });
+        }, { 
+            threshold: 0.1, // 要素が10%見えたら即座に発火
+            rootMargin: "0px 0px -50px 0px" // 画面下から50px手前で発火させる（余裕を持たせる）
+        });
 
-        document.querySelectorAll('.reveal-text, .reveal-video, .ending-section').forEach(el => observer.observe(el));
+        // すべてのrevealクラスを監視
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     </script>
 </body>
 </html>
