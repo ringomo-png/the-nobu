@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>The Architect | Logic</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Roboto+Mono:wght@300&display=swap" rel="stylesheet">
     <style>
         :root { --bg-color: #000; --text-muted: #86868b; --apple-blue: #0071e3; }
         body {
@@ -27,21 +27,36 @@
         .bg-3 { background-image: url('image_human.png'); }
 
         .container { position: relative; z-index: 1; padding: 0 30px; max-width: 600px; margin: 0 auto; }
+        
+        /* ヒーローエリアの調整 */
         .hero-spacer { height: 100vh; height: -webkit-fill-available; display: flex; flex-direction: column; justify-content: center; }
         .hero-title {
             font-size: 48px; font-weight: 900; letter-spacing: -0.05em; line-height: 1.05;
             background: linear-gradient(180deg, #fff 20%, #888 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
         }
-        .hero-name { color: var(--text-muted); margin-top: 10px; font-size: 16px; letter-spacing: 0.1em; text-transform: uppercase; }
         
+        /* 追加：ミニマルプロフィール */
+        .profile-specs {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            line-height: 2.2;
+            margin-top: 20px;
+            border-left: 1px solid #333;
+            padding-left: 15px;
+        }
+        .profile-specs b { color: #555; font-weight: 400; margin-right: 8px; }
+
         .content-section { padding: 45vh 0; min-height: 55vh; }
         .section-label { color: var(--apple-blue); font-weight: 700; font-size: 13px; letter-spacing: 0.1em; margin-bottom: 20px; display: block; text-transform: uppercase; }
         .title { font-size: 28px; font-weight: 700; margin-bottom: 30px; line-height: 1.4; }
         .body-text { font-size: 17px; color: var(--text-muted); line-height: 1.9; }
         .body-text b { color: #fff; font-weight: 700; }
 
-        /* Moreへの導入エリア */
         .link-area { padding: 150px 0 250px; text-align: center; }
         .next-label { color: #444; font-size: 13px; letter-spacing: 0.2em; margin-bottom: 15px; display: block; text-transform: uppercase; }
         .next-teaser { color: var(--text-muted); font-size: 16px; margin-bottom: 40px; line-height: 1.6; }
@@ -63,7 +78,13 @@
     <div class="container">
         <div class="hero-spacer">
             <h1 class="hero-title">超越する、<br>ロジック。</h1>
-            <p class="hero-name">Nobuyuki</p>
+            
+            <div class="profile-specs">
+                <div><b>ID</b> NOBUYUKI</div>
+                <div><b>ROLE</b> SYSTEM ARCHITECT / ANALYST</div>
+                <div><b>CORE</b> DECODING SOCIAL SYSTEMS</div>
+                <div><b>STATUS</b> RECONSTRUCTING LIBERATION</div>
+            </div>
         </div>
 
         <section class="content-section" id="trigger-logic">

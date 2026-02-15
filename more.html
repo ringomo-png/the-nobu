@@ -45,40 +45,50 @@
         @keyframes lineExpand { 100% { width: 120px; } }
         @keyframes subtitleReveal { 100% { opacity: 1; transform: translateY(0); } }
 
-        /* --- 各コンテンツのスクロールアニメーション --- */
-        .nav-back { display: inline-block; text-decoration: none; color: var(--text-muted); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 60px; }
+        /* --- スクロールアニメーション（今回の調整箇所） --- */
         .item-section { margin-bottom: 450px; }
+        
+        /* 初期状態：透明にして60px下に隠す */
+        .reveal-text, .ending-section {
+            opacity: 0; 
+            transform: translateY(60px); 
+            transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1), transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .reveal-video {
+            opacity: 0; 
+            transform: translateY(60px) scale(0.97); /* 動画は少し縮小させておく */
+            transition: opacity 1.5s cubic-bezier(0.25, 1, 0.5, 1), transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
 
-        /* 初期状態：隠して下に配置 */
-        .reveal { opacity: 0; transform: translateY(50px); transition: all 1.4s cubic-bezier(0.215, 0.61, 0.355, 1); will-change: transform, opacity; }
+        /* 画面に入った時の状態（フワッと浮かび上がる） */
+        .active.reveal-text, .active.ending-section {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .active.reveal-video {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
         
-        /* 表示状態 */
-        .reveal.active { opacity: 1; transform: translateY(0); }
-        
-        /* テキストと動画の間隔（こだわり） */
+        /* 構成の余白 */
         .reveal-text { margin-bottom: 110vh; } 
-        .reveal-video { transform: scale(0.96) translateY(40px); }
-        .reveal-video.active { transform: scale(1) translateY(0); }
+        .video-wrapper { width: 100%; border-radius: 4px; overflow: hidden; background: #111; border: 1px solid #1a1a1a; aspect-ratio: 16 / 9; margin-bottom: 100px; }
+        .item-video { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) brightness(0.75); transition: filter 1s ease; }
+        .active.reveal-video .item-video { filter: grayscale(100%) brightness(0.9); }
 
+        .nav-back { display: inline-block; text-decoration: none; color: var(--text-muted); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 60px; }
         .item-label { font-size: 10px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px; display: block; }
         .item-title { font-size: 26px; font-weight: 700; margin-bottom: 25px; letter-spacing: -0.02em; }
         .item-text { font-size: 16px; color: var(--text-muted); text-align: justify; }
         .item-text b { color: #fff; font-weight: 600; }
 
-        .video-wrapper { width: 100%; border-radius: 4px; overflow: hidden; background: #111; border: 1px solid #1a1a1a; aspect-ratio: 16 / 9; margin-bottom: 100px; }
-        .item-video { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) brightness(0.75); transition: filter 1s ease; }
-        .reveal-video.active .item-video { filter: grayscale(100%) brightness(0.9); }
-
-        /* エンディング */
         .ending-section { padding: 150px 0; text-align: center; }
         .final-statement { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; display: block; line-height: 2.5; margin-bottom: 40px; }
         .reboot-btn { display: inline-block; text-decoration: none; color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 15px 40px; border-radius: 40px; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; transition: 0.3s; }
         .reboot-btn:hover { background: #fff; color: #000; border-color: #fff; }
-        
         .share-area { margin-top: 80px; padding-top: 40px; border-top: 1px solid #111; }
         .share-btn { font-size: 10px; color: var(--text-muted); text-decoration: none; letter-spacing: 0.2em; text-transform: uppercase; border-bottom: 1px solid transparent; transition: 0.3s; }
         .share-btn:hover { color: #fff; border-bottom-color: #fff; }
-        
         .footer-logo { font-weight: 900; font-size: 20px; letter-spacing: 0.5em; color: #151515; margin-top: 100px; text-transform: uppercase; }
         footer { padding: 60px 0; text-align: center; color: #333; font-size: 10px; }
     </style>
@@ -99,7 +109,7 @@
         </header>
 
         <section class="item-section">
-            <div class="reveal reveal-text">
+            <div class="reveal-text">
                 <span class="item-label">Spatial Calculation</span> 
                 <h2 class="item-title">Calculated Leisure</h2>
                 <div class="item-text">
@@ -107,13 +117,13 @@
                     <p>導き出された最適解は、精確な弾道を描く。かつて、パー4のセカンドショットを直接カップに叩きこんだその記録は、物理学とロジックが織りなす究極のパフォーマンスであり、<b>彼自身の創造物</b>なのだ。</p>
                 </div>
             </div>
-            <div class="reveal reveal-video video-wrapper">
+            <div class="reveal-video video-wrapper">
                 <video class="item-video" muted loop playsinline><source src="golf.mp4" type="video/mp4"></video>
             </div>
         </section>
 
         <section class="item-section">
-            <div class="reveal reveal-text">
+            <div class="reveal-text">
                 <span class="item-label">Thermal Management</span>
                 <h2 class="item-title">Fire Performance</h2>
                 <div class="item-text">
@@ -121,13 +131,13 @@
                     <p>内面で溶岩のように燃えたぎるそのエネルギーを、彼は言葉ではなく、物理的な<b>炎</b>として大気に解き放つ。それは精神を冷却し、再び冷徹なロジックを取り戻すための不可欠なカタルシスなのである。</p>
                 </div>
             </div>
-            <div class="reveal reveal-video video-wrapper">
+            <div class="reveal-video video-wrapper">
                 <video class="item-video" muted loop playsinline><source src="fire.mp4" type="video/mp4"></video>
             </div>
         </section>
 
         <section class="item-section">
-            <div class="reveal reveal-text">
+            <div class="reveal-text">
                 <span class="item-label">Unseen Resonance</span> 
                 <h2 class="item-title">Music</h2>
                 <div class="item-text">
@@ -135,13 +145,13 @@
                     <p>かつて、<b>学園ホール</b>を熱狂と沈黙で支配した「一夜限りの共鳴」において、彼のリズムに脳を同期させられた観衆は、理由もわからず涙を流した。それは、計算だけでは到達できない、魂のハッキングだった。</p>
                 </div>
             </div>
-            <div class="reveal reveal-video video-wrapper">
+            <div class="reveal-video video-wrapper">
                 <video class="item-video" muted loop playsinline><source src="music.mp4" type="video/mp4"></video>
             </div>
         </section>
 
         <section class="item-section">
-            <div class="reveal reveal-text">
+            <div class="reveal-text">
                 <span class="item-label">Anatomic Defense</span>
                 <h2 class="item-title">Violence & Physical</h2>
                 <div class="item-text">
@@ -149,12 +159,12 @@
                     <p>かつて強盗に<b>顔面</b>をのれんで殴打されるという理不尽な襲撃を受けてなお、彼はその衝撃を無効化し、生存した。死の淵ですら、彼の生存アルゴリズムは停止することを知らない。</p>
                 </div>
             </div>
-            <div class="reveal reveal-video video-wrapper">
+            <div class="reveal-video video-wrapper">
                 <video class="item-video" muted loop playsinline><source src="violence.mp4" type="video/mp4"></video>
             </div>
         </section>
 
-        <div class="reveal ending-section">
+        <div class="ending-section">
             <p class="final-statement">
                 Current data fragments are only a part of his logic.<br>Updating real-time... Next sequence is loading.
             </p>
@@ -173,28 +183,31 @@
             lineBtn.href = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(mainPageUrl)}`;
         });
 
-        // アニメーションの発火設定
+        // アニメーションの発火設定（チューニング済み）
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    // 画面に入ったら「active」クラスを付与
+                    // 画面にしっかり入ったら「active」クラスを付与して浮かび上がらせる
                     entry.target.classList.add('active');
                     
+                    // 動画要素が含まれていれば再生開始
                     const video = entry.target.querySelector('video');
                     if (video) video.play().catch(() => {});
                 } else {
-                    // 画面外に出たら動画を停止（負荷軽減）
+                    // 画面外に出たら動画を停止
                     const video = entry.target.querySelector('video');
                     if (video) video.pause();
                 }
             });
         }, { 
-            threshold: 0.1, // 要素が10%見えたら即座に発火
-            rootMargin: "0px 0px -50px 0px" // 画面下から50px手前で発火させる（余裕を持たせる）
+            // 「要素が20%見えたら」発火する（早すぎる発火を防ぐ）
+            threshold: 0.2, 
+            // 画面の下端から少し内側に入ってから発火させる
+            rootMargin: "0px 0px -10% 0px"
         });
 
-        // すべてのrevealクラスを監視
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+        // 対象となる要素を個別に監視
+        document.querySelectorAll('.reveal-text, .reveal-video, .ending-section').forEach(el => observer.observe(el));
     </script>
 </body>
 </html>
