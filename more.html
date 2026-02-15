@@ -6,52 +6,70 @@
     <title>Beyond | The Other Side</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=Roboto+Mono:wght@300&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-color: #000; --text-muted: #86868b; --apple-blue: #0071e3; }
+        :root { --bg-color: #000; --text-muted: #86868b; --accent: #fff; }
         body {
             margin: 0; background-color: var(--bg-color); color: #fff;
             font-family: 'Inter', -apple-system, sans-serif; line-height: 2.0;
             -webkit-font-smoothing: antialiased; overflow-x: hidden;
         }
-        
         .fixed-background {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-image: url('image_more.png'); background-size: cover; background-position: center;
             filter: grayscale(100%) contrast(110%) brightness(0.2); z-index: -1;
             transform: scale(1) !important;
         }
-
         .container { position: relative; z-index: 1; padding: 60px 25px; max-width: 600px; margin: 0 auto; }
-        .nav-back { display: inline-block; text-decoration: none; color: var(--text-muted); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 60px; }
         
-        .page-header { margin-bottom: 400px; text-align: center; }
-        .page-title { font-size: 32px; font-weight: 300; letter-spacing: -0.02em; margin: 0; }
-        
-        .item-section { margin-bottom: 350px; }
+        /* --- ヘッダー演出 --- */
+        .page-header { 
+            height: 90vh; display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            text-align: center; margin-bottom: 200px;
+        }
+        .page-title { 
+            font-size: 38px; font-weight: 900; letter-spacing: 0.1em; margin: 0;
+            animation: titleReveal 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .header-line {
+            width: 0; height: 1px; background: var(--accent); margin: 30px 0;
+            animation: lineExpand 2.0s 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .page-subtitle {
+            font-family: 'Roboto Mono', monospace; font-size: 12px; color: var(--text-muted);
+            letter-spacing: 0.3em; text-transform: uppercase; max-width: 300px;
+            opacity: 0; animation: fadeIn 2s 1.2s ease forwards;
+        }
 
-        /* --- スクロールアニメーション --- */
-        .reveal-text { opacity: 0; transform: translateY(30px); transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
-        .reveal-video { opacity: 0; transform: scale(0.98) translateY(20px); transition: all 1.5s cubic-bezier(0.16, 1, 0.3, 1); transition-delay: 0.4s; }
+        @keyframes titleReveal {
+            0% { opacity: 0; transform: translateY(20px); letter-spacing: -0.1em; }
+            100% { opacity: 1; transform: translateY(0); letter-spacing: 0.2em; }
+        }
+        @keyframes lineExpand { 0% { width: 0; } 100% { width: 100px; } }
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+
+        /* --- コンテンツ動き --- */
+        .nav-back { display: inline-block; text-decoration: none; color: var(--text-muted); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 60px; }
+        .item-section { margin-bottom: 500px; }
+
+        .reveal-text { opacity: 0; transform: translateY(40px); transition: all 1.2s ease-out; margin-bottom: 100vh; }
+        .reveal-video { opacity: 0; transform: scale(0.95); transition: all 1.5s ease-out; }
         
-        .is-visible .reveal-text { opacity: 1; transform: translateY(0); }
-        .is-visible .reveal-video { opacity: 1; transform: scale(1) translateY(0); }
-        /* ---------------------------- */
+        .is-visible.reveal-text { opacity: 1; transform: translateY(0); }
+        .is-visible.reveal-video { opacity: 1; transform: scale(1); }
 
         .item-label { font-size: 10px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px; display: block; }
         .item-title { font-size: 24px; font-weight: 700; margin-bottom: 25px; }
-        .item-text { font-size: 16px; color: var(--text-muted); margin-bottom: 180px; } /* 間隔を広げる */
+        .item-text { font-size: 16px; color: var(--text-muted); }
         .item-text b { color: #fff; font-weight: 600; }
 
-        .video-wrapper { width: 100%; border-radius: 4px; overflow: hidden; background: #000; border: 1px solid #1a1a1a; aspect-ratio: 16 / 9; }
+        .video-wrapper { width: 100%; border-radius: 4px; overflow: hidden; background: #000; border: 1px solid #1a1a1a; aspect-ratio: 16 / 9; margin-bottom: 200px; }
         .item-video { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) brightness(0.7); }
         
-        /* エンディングセクション */
         .ending-section { padding: 150px 0; text-align: center; opacity: 0; transition: opacity 1.5s ease; }
         .ending-section.is-visible { opacity: 1; }
-        .final-statement { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; font-family: 'Roboto Mono', monospace; display: block; line-height: 2.5; margin-bottom: 40px; }
+        .final-statement { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; display: block; line-height: 2.5; margin-bottom: 40px; }
         
-        .reboot-btn { display: inline-block; text-decoration: none; color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 14px 35px; border-radius: 40px; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-top: 20px; transition: all 0.3s ease; }
+        .reboot-btn { display: inline-block; text-decoration: none; color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 14px 35px; border-radius: 40px; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; transition: 0.3s; }
         .reboot-btn:hover { background: #fff; color: #000; }
-        
         .share-area { margin-top: 80px; padding-top: 40px; border-top: 1px solid #111; }
         .share-btn { font-size: 10px; color: var(--text-muted); text-decoration: none; letter-spacing: 0.2em; text-transform: uppercase; }
         .footer-logo { font-weight: 900; font-size: 20px; letter-spacing: 0.5em; color: #111; margin-top: 100px; text-transform: uppercase; }
@@ -64,7 +82,13 @@
         <nav><a href="index.html" class="nav-back">← Back to Terminal</a></nav>
         
         <header class="page-header">
-            <h1 class="page-title">Beyond the Logic.</h1>
+            <h1 class="page-title">BEYOND</h1>
+            <div class="header-line"></div>
+            <p class="page-subtitle">
+                Logic is a filter. <br>
+                These are the raw signals <br>
+                that pass through.
+            </p>
         </header>
 
         <section class="item-section">
@@ -77,7 +101,7 @@
                 </div>
             </div>
             <div class="reveal-video video-wrapper">
-                <video class="item-video" muted loop playsinline autoplay><source src="golf.mp4" type="video/mp4"></video>
+                <video class="item-video" muted loop playsinline><source src="golf.mp4" type="video/mp4"></video>
             </div>
         </section>
 
@@ -91,10 +115,10 @@
                 </div>
             </div>
             <div class="reveal-video video-wrapper">
-                <video class="item-video" muted loop playsinline autoplay><source src="fire.mp4" type="video/mp4"></video>
+                <video class="item-video" muted loop playsinline><source src="fire.mp4" type="video/mp4"></video>
             </div>
         </section>
-        
+
         <section class="item-section">
             <div class="reveal-text">
                 <span class="item-label">Unseen Resonance</span> 
@@ -105,7 +129,7 @@
                 </div>
             </div>
             <div class="reveal-video video-wrapper">
-                <video class="item-video" muted loop playsinline autoplay><source src="music.mp4" type="video/mp4"></video>
+                <video class="item-video" muted loop playsinline><source src="music.mp4" type="video/mp4"></video>
             </div>
         </section>
 
@@ -119,31 +143,24 @@
                 </div>
             </div>
             <div class="reveal-video video-wrapper">
-                <video class="item-video" muted loop playsinline autoplay><source src="violence.mp4" type="video/mp4"></video>
+                <video class="item-video" muted loop playsinline><source src="violence.mp4" type="video/mp4"></video>
             </div>
         </section>
 
         <div class="ending-section">
             <p class="final-statement">
-                Current data fragments are only a part of his logic.<br>
-                Updating real-time... Next sequence is loading.
+                Current data fragments are only a part of his logic.<br>Updating real-time... Next sequence is loading.
             </p>
             <a href="index.html" class="reboot-btn">Main Sequence</a>
-            
-            <div class="share-area">
-                <a id="line-share-btn" href="#" target="_blank" class="share-btn">Share Profile via LINE</a>
-            </div>
+            <div class="share-area"><a id="line-share-btn" href="#" target="_blank" class="share-btn">Share Profile via LINE</a></div>
             <div class="footer-logo">NOBUYUKI</div>
         </div>
-
         <footer>© THE GENIUS ARCHITECT.</footer>
     </div>
 
     <script>
-        // LINE共有URLの設定（トップページをリンク）
         window.addEventListener('DOMContentLoaded', () => {
             const lineBtn = document.getElementById('line-share-btn');
-            // 現在のURLから more.html を除いたものをメインURLとする
             const mainPageUrl = window.location.origin + window.location.pathname.replace('more.html', 'index.html');
             lineBtn.href = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(mainPageUrl)}`;
         });
@@ -152,13 +169,16 @@
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('is-visible');
-                    const v = entry.target.querySelector('video');
-                    if(v) v.play().catch(()=>{});
+                    const video = entry.target.querySelector('video');
+                    if (video) video.play().catch(() => {});
+                } else {
+                    const video = entry.target.querySelector('video');
+                    if (video) video.pause();
                 }
             });
-        }, { threshold: 0.15 });
+        }, { threshold: 0.3 });
 
-        document.querySelectorAll('.item-section, .ending-section').forEach(el => observer.observe(el));
+        document.querySelectorAll('.reveal-text, .reveal-video, .ending-section').forEach(el => observer.observe(el));
     </script>
 </body>
 </html>
