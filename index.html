@@ -13,6 +13,8 @@
             overflow-x: hidden; touch-action: manipulation;
         }
         
+        body.locked { overflow: hidden; height: 100vh; }
+
         .bg-layer {
             position: fixed; inset: 0;
             background-size: cover; background-position: center center;
@@ -59,8 +61,11 @@
         
         #auth-overlay {
             position: fixed; inset: 0; background: #000; z-index: 9999;
-            display: none; flex-direction: column; justify-content: center; align-items: center;
-            opacity: 0; transition: opacity 0.5s ease;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.8s ease, visibility 0.8s;
+        }
+        #auth-overlay.hidden {
+            opacity: 0; visibility: hidden; pointer-events: none;
         }
         #pass-input {
             background: transparent; border: none; border-bottom: 1px solid #333;
@@ -76,7 +81,14 @@
         .error-msg { color: #ff3b30; font-size: 10px; font-family: 'Roboto Mono'; margin-top: 15px; opacity: 0; }
     </style>
 </head>
-<body>
+<body class="locked">
+    <div id="auth-overlay">
+        <span style="font-family:'Roboto Mono'; font-size:10px; color:#86868b; letter-spacing:0.3em; margin-bottom:30px; text-transform:uppercase;">Authentication Required</span>
+        <input type="password" id="pass-input" placeholder="····" autocomplete="off">
+        <button class="auth-submit" id="auth-btn">ENTER</button>
+        <div id="error-txt" class="error-msg">INVALID ACCESS CODE</div>
+    </div>
+
     <div class="bg-layer bg-1" id="bg1"></div>
     <div class="bg-layer bg-2" id="bg2"></div>
     <div class="bg-layer bg-3" id="bg3"></div>
@@ -97,7 +109,7 @@
             <span class="section-label">System Disruption</span>
             <h2 class="title">搾取の盤面を、<br>知性でハックする。</h2>
             <div class="body-text">
-                <p>世界は巨大な変数の集合体に過ぎない。彼が卒業論文でターゲットにしたのは、公認という名の免罪符を得た搾取システム、公営競技の解析だった。</p>
+                <p>世界は巨大な変数の集合体に過ぎない。彼が卒業論文でターゲットにしたのは、公認という名の免罪符を得た搾取システム、すなわち<b>競馬</b>を筆頭とする公営競技の解析だった。</p>
                 <p>大衆の情熱を餌に富を吸い上げるその絶対的な構造。彼はその盤面に潜む脆弱性を特定し、独自のアルゴリズムによってシステムの優位性を完全に無効化した。それは知性によるシステムの再定義であり、無自覚に搾取される人々を論理的に開放するための、静かな宣戦布告だった。</p>
             </div>
         </section>
@@ -106,8 +118,8 @@
             <span class="section-label">Global Connectivity</span>
             <h2 class="title">ネットワークの末端から、<br>世界の核へと直結させる。</h2>
             <div class="body-text">
-                <p>大学卒業後、彼は自身のルーツである千葉・四街道へと視点を向ける。インフラから切り離されたその静寂を、彼は深く愛していた。既存の構造に従属することを拒み、単独でシステムのバイパスを構築。都会の資本に搾取されるだけの地方を、直接世界とつなぎ合わせる新たな回路を確立させた。</p>
-                <p>インバウンドの潮流が来る前に、辺境の価値を世界が選択できる状態を確立させたのだ。その偉業を見届けると同時に、彼は物流の再設計へと関心を移す。</p>
+                <p>大学卒業後、彼は自身のルーツである千葉・四街道へと視点を向ける。既存の構造に従属することを拒み、彼はローカルな<b>宿泊システム</b>のネットワークを根底から再構築（リビルド）した。</p>
+                <p>中間搾取を排除した単独のバイパスを組み上げ、地方の滞在空間を直接世界とつなぐ新たな回路を確立。インバウンドの潮流が到達する前に、辺境の価値を世界中からアクセス可能な状態へと書き換えたのだ。その偉業を見届けると同時に、彼の視座は次なるフェーズへと移っていく。</p>
             </div>
         </section>
 
@@ -124,36 +136,59 @@
             <span class="section-label">Irrational Anomaly</span>
             <h2 class="title">非論理的な干渉と、<br>致命的なペナルティ。</h2>
             <div class="body-text">
-                <p>物流の最適化を進める過程で、彼は解析不能な一人の女性と遭遇する。自身のシステムを崩壊させかねない危険な接触。彼は周囲の警告を無視し、自らを「暴走機関車」へと書き換え同期を強行した。</p>
-                <p>過去を抹消した秘匿事象は後に苛烈な大激怒を招く致命的なバグとなったが、現在、そこには「子供」という新たな自律変数が生成されている。かつての演算では予測不能だったその存在を、彼は今、自身のアーキテクチャにおける「最も美しく、不可解な最適解」として静かに観測している。</p>
+                <p>新たな最適化フェーズへと進む過程で、彼は解析不能な一人の女性と遭遇する。自身のシステムを崩壊させかねない危険な接触。</p>
+                <p>彼は周囲の警告を無視し、自らを「暴走機関車」へと書き換え同期（結婚）を強行した。過去を抹消した秘匿事象は、後に<b>重大なペナルティ</b>を招く致命的なバグとなったが——</p>
+                <p>現在、システムからは「子供」という新たな自律変数が生成されている。かつては予測不能だったその存在を、彼は今、自身のアーキテクチャにおける「最も美しく、不可解な最適解」として静かに観測している。</p>
             </div>
         </section>
 
         <div class="link-area">
             <span class="next-label">Unlisted Records</span>
             <p class="next-teaser">論理の裏側に隠された、知性の断片を閲覧する。</p>
-            <a href="#" id="enter-beyond-btn" class="more-btn">BELONG BELONG.</a>
+            <a href="more.html" class="more-btn">BELONG BELONG.</a>
         </div>
         <footer>© THE GENIUS ARCHITECT.</footer>
     </div>
 
-    <div id="auth-overlay">
-        <span style="font-family:'Roboto Mono'; font-size:10px; color:#86868b; letter-spacing:0.3em; margin-bottom:30px; text-transform:uppercase;">Authentication Required</span>
-        <input type="password" id="pass-input" placeholder="····" autocomplete="off">
-        <button class="auth-submit" id="auth-btn">ENTER</button>
-        <div id="error-txt" class="error-msg">INVALID ACCESS CODE</div>
-    </div>
-
     <script>
+        const overlay = document.getElementById('auth-overlay');
+        const input = document.getElementById('pass-input');
+        const submitBtn = document.getElementById('auth-btn');
+        const errorTxt = document.getElementById('error-txt');
+
+        if (sessionStorage.getItem('is_auth_main') === 'true') {
+            document.body.classList.remove('locked');
+            overlay.classList.add('hidden');
+        } else {
+            setTimeout(() => input.focus(), 100);
+        }
+
+        const attemptLogin = () => {
+            if (input.value === '777') {
+                sessionStorage.setItem('is_auth_main', 'true');
+                overlay.classList.add('hidden');
+                document.body.classList.remove('locked');
+                window.scrollTo(0, 0); 
+                updateBg(); 
+            } else {
+                errorTxt.style.opacity = '1';
+                input.value = '';
+                setTimeout(() => { errorTxt.style.opacity = '0'; }, 2000);
+            }
+        };
+
+        submitBtn.addEventListener('click', attemptLogin);
+        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
+
         const updateBg = () => {
             const scrollY = window.scrollY;
             const h = window.innerHeight;
             const sections = [
-                { id: 'bg1', start: -1, end: h * 0.8 },
-                { id: 'bg2', start: h * 0.8, end: h * 2.2 },
-                { id: 'bg3', start: h * 2.2, end: h * 3.6 },
-                { id: 'bg4', start: h * 3.6, end: h * 5.0 },
-                { id: 'bg5', start: h * 5.0, end: Infinity }
+                { id: 'bg1', start: -1, end: h * 1.2 },
+                { id: 'bg2', start: h * 1.2, end: h * 2.8 },
+                { id: 'bg3', start: h * 2.8, end: h * 4.3 },
+                { id: 'bg4', start: h * 4.3, end: h * 5.9 },
+                { id: 'bg5', start: h * 5.9, end: Infinity }
             ];
             sections.forEach(s => {
                 const el = document.getElementById(s.id);
@@ -162,32 +197,6 @@
         };
         window.addEventListener('scroll', updateBg);
         window.onload = updateBg;
-
-        const openBtn = document.getElementById('enter-beyond-btn');
-        const overlay = document.getElementById('auth-overlay');
-        const input = document.getElementById('pass-input');
-        const submitBtn = document.getElementById('auth-btn');
-        const errorTxt = document.getElementById('error-txt');
-
-        const attemptLogin = () => {
-            if (input.value === '777') {
-                sessionStorage.setItem('is_auth_beyond', 'true');
-                window.location.href = 'more.html';
-            } else {
-                errorTxt.style.opacity = '1';
-                input.value = '';
-                setTimeout(() => { errorTxt.style.opacity = '0'; }, 2000);
-            }
-        };
-
-        openBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            overlay.style.display = 'flex';
-            setTimeout(() => { overlay.style.opacity = '1'; input.focus(); }, 10);
-        });
-
-        submitBtn.addEventListener('click', attemptLogin);
-        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
     </script>
 </body>
 </html>
