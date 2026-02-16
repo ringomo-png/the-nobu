@@ -26,7 +26,7 @@
             height: 80vh; 
             display: flex; flex-direction: column; justify-content: center; align-items: center; 
             text-align: center; 
-            margin-bottom: 150px; 
+            margin-bottom: 25vh; 
         }
         .page-title { font-size: 42px; font-weight: 900; letter-spacing: 0.15em; margin: 0; opacity: 0; transform: translateY(30px); animation: titleReveal 2.0s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .header-line { width: 0; height: 1px; background: var(--accent); margin: 30px 0; animation: lineExpand 1.5s 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -39,24 +39,19 @@
         .nav-back { display: inline-block; text-decoration: none; color: var(--text-muted); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 60px; transition: color 0.3s;}
         .nav-back:hover { color: #fff; }
         
-        .item-section { margin-bottom: 35vh; }
-        .reveal-text { margin-bottom: 15vh; } 
+        .item-section { margin-bottom: 45vh; }
+        .reveal-text { margin-bottom: 40vh; } 
 
-        /* ▼▼▼ ゆったりとしたApple風アニメーション ▼▼▼ */
         .fade-up {
             opacity: 0; 
-            transform: translateY(60px); 
-            /* 2.0秒かけてゆっくり浮かび上がる */
-            transition: opacity 2.0s cubic-bezier(0.2, 0.8, 0.2, 1), transform 2.0s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform: translateY(100px); 
+            transition: opacity 2.5s cubic-bezier(0.25, 1, 0.5, 1), transform 2.5s cubic-bezier(0.25, 1, 0.5, 1);
             will-change: opacity, transform;
         }
         .fade-up.active { opacity: 1; transform: translateY(0); }
         
-        /* 出現タイミングの間隔（ディレイ）を広く設定 */
-        .delay-1 { transition-delay: 0.15s; }
-        .delay-2 { transition-delay: 0.4s; }
-        .delay-3 { transition-delay: 0.7s; }
-        /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
+        .delay-1 { transition-delay: 0.1s; }
+        .delay-2 { transition-delay: 0.3s; }
 
         .item-label { font-size: 11px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px; display: block; }
         .item-title { font-size: 32px; font-weight: 900; margin-bottom: 30px; letter-spacing: -0.05em; line-height: 1.3; }
@@ -65,7 +60,7 @@
         .item-text b { color: #fff; font-weight: 600; }
 
         .video-wrapper { width: 100%; border-radius: 4px; overflow: hidden; background: #111; border: 1px solid #1a1a1a; aspect-ratio: 16 / 9; }
-        .item-video { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) brightness(0.75); transition: filter 2.0s ease; }
+        .item-video { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) brightness(0.75); transition: filter 2.5s ease; }
         .fade-up.active .item-video { filter: grayscale(100%) brightness(0.95); } 
 
         .ending-section { padding: 150px 0; text-align: center; }
@@ -98,15 +93,15 @@
 
         <section class="item-section">
             <div class="reveal-text">
-                <span class="item-label fade-up">Spatial Calculation</span> 
-                <h2 class="item-title fade-up delay-1">究極の、知的遊戯。</h2>
+                <span class="item-label fade-up">Thermal Management</span>
+                <h2 class="item-title fade-up delay-1">圧倒的な、熱量。</h2>
                 <div class="item-text fade-up delay-2">
-                    <p>広大な芝のフィールドは、彼にとって究極の<b>知的遊戯</b>である。複雑なグリーンの起伏は2Dプレーンとして脳内で解析され、数万の変数が瞬時に並列処理される。</p>
-                    <p>導き出された最適解は、精確な弾道を描く。かつて、パー4のセカンドショットを直接カップに叩きこんだその記録は、物理学とロジックが織りなす究極のパフォーマンスであり、<b>彼自身の創造物</b>なのだ。</p>
+                    <p>処理速度の速すぎる知性は常にオーバーヒートの危険を孕んでいる。凡庸な会話や停滞したロジックが生む摩擦は、彼の中で静かなストレスとして蓄積されていく。</p>
+                    <p>内面で溶岩のように燃えたぎるそのエネルギーを、彼は言葉ではなく、物理的な<b>炎</b>として大気に解き放つ。それは精神を冷却し、再び冷徹なロジックを取り戻すための不可欠なカタルシスなのである。</p>
                 </div>
             </div>
-            <div class="video-wrapper fade-up delay-3">
-                <video class="item-video" muted loop playsinline autoplay><source src="golf.mp4" type="video/mp4"></video>
+            <div class="video-wrapper fade-up">
+                <video class="item-video" muted loop playsinline autoplay><source src="fire.mp4" type="video/mp4"></video>
             </div>
         </section>
 
@@ -119,22 +114,36 @@
                     <p>外部からの侵入経路も、犯人の痕跡すら一切存在しない完全犯罪。あるいは、無意識下で暴走した彼自身の防衛本能が引き起こした自壊現象なのか。まるで<b>未知のゼロデイ攻撃</b>のごとく、システムが休眠する夜の時間は、彼にとって決して安眠を許されないサバイバルなのだ。</p>
                 </div>
             </div>
-            <div class="video-wrapper fade-up delay-3">
+            <div class="video-wrapper fade-up">
                 <video class="item-video" muted loop playsinline autoplay><source src="nightmare.mp4" type="video/mp4"></video>
             </div>
         </section>
 
         <section class="item-section">
             <div class="reveal-text">
-                <span class="item-label fade-up">Thermal Management</span>
-                <h2 class="item-title fade-up delay-1">圧倒的な、熱量。</h2>
+                <span class="item-label fade-up">Anatomic Defense</span>
+                <h2 class="item-title fade-up delay-1">衝撃の、無効化。</h2>
                 <div class="item-text fade-up delay-2">
-                    <p>処理速度の速すぎる知性は常にオーバーヒートの危険を孕んでいる。凡庸な会話や停滞したロジックが生む摩擦は、彼の中で静かなストレスとして蓄積されていく。</p>
-                    <p>内面で溶岩のように燃えたぎるそのエネルギーを、彼は言葉ではなく、物理的な<b>炎</b>として大気に解き放つ。それは精神を冷却し、再び冷徹なロジックを取り戻すための不可欠なカタルシスなのである。</p>
+                    <p>彼は知っている。人間の精神は脆弱だが、その構造体としての肉体は驚くほど精巧であることを。医学的知識に基づいた彼の身体操作は、美しくもあり、致命的でもある。</p>
+                    <p>かつて強盗に<b>顔面</b>をのれんで殴打されるという理不尽な襲撃を受けてなお、彼はその衝撃を無効化し、生存した。死の淵ですら、彼の生存アルゴリズムは停止することを知らない。</p>
                 </div>
             </div>
-            <div class="video-wrapper fade-up delay-3">
-                <video class="item-video" muted loop playsinline autoplay><source src="fire.mp4" type="video/mp4"></video>
+            <div class="video-wrapper fade-up">
+                <video class="item-video" muted loop playsinline autoplay><source src="violence.mp4" type="video/mp4"></video>
+            </div>
+        </section>
+
+        <section class="item-section">
+            <div class="reveal-text">
+                <span class="item-label fade-up">Spatial Calculation</span> 
+                <h2 class="item-title fade-up delay-1">究極の、知的遊戯。</h2>
+                <div class="item-text fade-up delay-2">
+                    <p>広大な芝のフィールドは、彼にとって究極の<b>知的遊戯</b>である。複雑なグリーンの起伏は2Dプレーンとして脳内で解析され、数万の変数が瞬時に並列処理される。</p>
+                    <p>導き出された最適解は、精確な弾道を描く。かつて、パー4のセカンドショットを直接カップに叩きこんだその記録は、物理学とロジックが織りなす究極のパフォーマンスであり、<b>彼自身の創造物</b>なのだ。</p>
+                </div>
+            </div>
+            <div class="video-wrapper fade-up">
+                <video class="item-video" muted loop playsinline autoplay><source src="golf.mp4" type="video/mp4"></video>
             </div>
         </section>
 
@@ -147,7 +156,7 @@
                     <p>両手に一本ずつ、計2本のタバコを同時にホールドし、<b>並列処理で吸引</b>するその異常なスタイル。それは、脳内の膨大なタスクを処理するために必要な化学物質を、最短時間で血中へインポートするための彼なりのハックなのである。</p>
                 </div>
             </div>
-            <div class="video-wrapper fade-up delay-3">
+            <div class="video-wrapper fade-up">
                 <video class="item-video" muted loop playsinline autoplay><source src="smoke.mp4" type="video/mp4"></video>
             </div>
         </section>
@@ -161,22 +170,8 @@
                     <p>かつて、<b>学園ホール</b>を熱狂と沈黙で支配した「一夜限りの共鳴」において、彼のリズムに脳を同期させられた観衆は、理由もわからず涙を流した。それは、計算だけでは到達できない、魂のハッキングだった。</p>
                 </div>
             </div>
-            <div class="video-wrapper fade-up delay-3">
+            <div class="video-wrapper fade-up">
                 <video class="item-video" muted loop playsinline autoplay><source src="music.mp4" type="video/mp4"></video>
-            </div>
-        </section>
-
-        <section class="item-section">
-            <div class="reveal-text">
-                <span class="item-label fade-up">Anatomic Defense</span>
-                <h2 class="item-title fade-up delay-1">衝撃の、無効化。</h2>
-                <div class="item-text fade-up delay-2">
-                    <p>彼は知っている。人間の精神は脆弱だが、その構造体としての肉体は驚くほど精巧であることを。医学的知識に基づいた彼の身体操作は、美しくもあり、致命的でもある。</p>
-                    <p>かつて強盗に<b>顔面</b>をのれんで殴打されるという理不尽な襲撃を受けてなお、彼はその衝撃を無効化し、生存した。死の淵ですら、彼の生存アルゴリズムは停止することを知らない。</p>
-                </div>
-            </div>
-            <div class="video-wrapper fade-up delay-3">
-                <video class="item-video" muted loop playsinline autoplay><source src="violence.mp4" type="video/mp4"></video>
             </div>
         </section>
 
@@ -198,7 +193,7 @@
                     entry.target.classList.add('active'); 
                 }
             });
-        }, { threshold: 0.15 }); 
+        }, { threshold: 0.1 }); 
         
         document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
