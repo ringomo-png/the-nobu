@@ -14,22 +14,21 @@
         }
         
         .bg-layer {
-            position: fixed; top: 0; left: 0; width: 100vw;
-            height: 100vh; height: -webkit-fill-available;
+            position: fixed; inset: 0;
             background-size: cover; background-position: center center;
             filter: grayscale(100%) contrast(110%) brightness(0.3);
-            z-index: -1; transition: opacity 1.2s ease-in-out; opacity: 0;
-            transform: scale(1) !important;
+            z-index: -1; transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0;
             will-change: opacity; backface-visibility: hidden;
         }
         .bg-1 { background-image: url('image_top.png'); }
         .bg-2 { background-image: url('image_logic.png'); }
-        .bg-3 { background-image: url('image_human.png'); }
+        .bg-3 { background-image: url('image_local.png'); }
+        .bg-4 { background-image: url('image_human.png'); }
+        .bg-5 { background-image: url('image_anomaly.png'); }
 
         .container { position: relative; z-index: 1; padding: 0 30px; max-width: 600px; margin: 0 auto; }
         
-        /* ヒーローエリアの調整 */
-        .hero-spacer { height: 100vh; height: -webkit-fill-available; display: flex; flex-direction: column; justify-content: center; }
+        .hero-spacer { height: 100vh; display: flex; flex-direction: column; justify-content: center; }
         .hero-title {
             font-size: 48px; font-weight: 900; letter-spacing: -0.05em; line-height: 1.05;
             background: linear-gradient(180deg, #fff 20%, #888 100%);
@@ -37,57 +36,64 @@
             margin-bottom: 10px;
         }
         
-        /* 追加：ミニマルプロフィール */
         .profile-specs {
-            font-family: 'Roboto Mono', monospace;
-            font-size: 10px;
-            color: var(--text-muted);
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            line-height: 2.2;
-            margin-top: 20px;
-            border-left: 1px solid #333;
-            padding-left: 15px;
+            font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--text-muted);
+            letter-spacing: 0.15em; text-transform: uppercase; line-height: 2.2;
+            margin-top: 20px; border-left: 1px solid #333; padding-left: 15px;
         }
-        .profile-specs b { color: #555; font-weight: 400; margin-right: 8px; }
 
-        .content-section { padding: 45vh 0; min-height: 55vh; }
+        .content-section { padding: 45vh 0; min-height: 65vh; }
         .section-label { color: var(--apple-blue); font-weight: 700; font-size: 13px; letter-spacing: 0.1em; margin-bottom: 20px; display: block; text-transform: uppercase; }
         .title { font-size: 28px; font-weight: 700; margin-bottom: 30px; line-height: 1.4; }
         .body-text { font-size: 17px; color: var(--text-muted); line-height: 1.9; }
         .body-text b { color: #fff; font-weight: 700; }
 
         .link-area { padding: 150px 0 250px; text-align: center; }
-        .next-label { color: #444; font-size: 13px; letter-spacing: 0.2em; margin-bottom: 15px; display: block; text-transform: uppercase; }
-        .next-teaser { color: var(--text-muted); font-size: 16px; margin-bottom: 40px; line-height: 1.6; }
         .more-btn {
             display: inline-block; text-decoration: none; color: #fff; border: 1px solid #fff;
-            padding: 14px 60px; border-radius: 2px; font-size: 14px; letter-spacing: 0.3em;
-            text-transform: uppercase; transition: all 0.4s ease;
+            padding: 14px 45px; border-radius: 2px; font-size: 14px; letter-spacing: 0.4em;
+            text-transform: uppercase; transition: all 0.4s ease; cursor: pointer;
+            font-weight: 700;
         }
         .more-btn:hover { background-color: #fff; color: #000; }
         
-        footer { padding: 60px 0; text-align: center; color: #333; font-size: 10px; }
+        #auth-overlay {
+            position: fixed; inset: 0; background: #000; z-index: 9999;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.5s ease;
+        }
+        #pass-input {
+            background: transparent; border: none; border-bottom: 1px solid #333;
+            color: #fff; font-family: 'Roboto Mono'; font-size: 24px; text-align: center;
+            outline: none; letter-spacing: 0.2em; width: 240px; margin-bottom: 30px;
+        }
+        .auth-submit {
+            background: transparent; border: 1px solid #444; color: #fff;
+            font-family: 'Roboto Mono'; font-size: 10px; padding: 10px 30px;
+            letter-spacing: 0.3em; cursor: pointer; transition: 0.3s;
+        }
+        .auth-submit:hover { border-color: #fff; background: #fff; color: #000; }
+        .error-msg { color: #ff3b30; font-size: 10px; font-family: 'Roboto Mono'; margin-top: 15px; opacity: 0; }
     </style>
 </head>
 <body>
     <div class="bg-layer bg-1" id="bg1"></div>
     <div class="bg-layer bg-2" id="bg2"></div>
     <div class="bg-layer bg-3" id="bg3"></div>
+    <div class="bg-layer bg-4" id="bg4"></div>
+    <div class="bg-layer bg-5" id="bg5"></div>
 
     <div class="container">
         <div class="hero-spacer">
             <h1 class="hero-title">超越する、<br>ロジック。</h1>
-            
             <div class="profile-specs">
                 <div><b>ID</b> NOBUYUKI</div>
                 <div><b>ROLE</b> SYSTEM ARCHITECT / ANALYST</div>
-                <div><b>CORE</b> DECODING SOCIAL SYSTEMS</div>
                 <div><b>STATUS</b> RECONSTRUCTING LIBERATION</div>
             </div>
         </div>
 
-        <section class="content-section" id="trigger-logic">
+        <section class="content-section" id="sec-1">
             <span class="section-label">System Disruption</span>
             <h2 class="title">搾取の盤面を、<br>知性でハックする。</h2>
             <div class="body-text">
@@ -96,41 +102,92 @@
             </div>
         </section>
 
-        <section class="content-section" id="trigger-human">
-            <span class="section-label">Absolute Reset</span>
-            <h2 class="title">既存のコードを捨て、<br>ゼロへ収束する。</h2>
+        <section class="content-section" id="sec-2">
+            <span class="section-label">Global Connectivity</span>
+            <h2 class="title">ネットワークの末端から、<br>世界の核へと直結させる。</h2>
+            <div class="body-text">
+                <p>大学卒業後、彼は自身のルーツである千葉・四街道へと視点を向ける。インフラから切り離されたその静寂を、彼は深く愛していた。既存の構造に従属することを拒み、単独でシステムのバイパスを構築。都会の資本に搾取されるだけの地方を、直接世界とつなぎ合わせる新たな回路を確立させた。</p>
+                <p>インバウンドの潮流が来る前に、辺境の価値を世界が選択できる状態を確立させたのだ。その偉業を見届けると同時に、彼は物流の再設計へと関心を移す。</p>
+            </div>
+        </section>
+
+        <section class="content-section" id="sec-3">
+            <span class="section-label">Void Processing</span>
+            <h2 class="title">ゼロへと回帰し、<br>空白から再定義する。</h2>
             <div class="body-text">
                 <p>完璧なロジックを維持するためには、時にシステムそのもののリビルドが必要になる。彼は自らの社会的なインフラをすべて破棄し、完全なゼロへと収束させる道を選んだ。</p>
                 <p>過去の履歴や既存の信用を消去し、一枚のデビットカードだけを唯一の生存インターフェースにする。それは不純物を取り除き、本質だけを抽出するための強制的デバッグだった。何も持たないがゆえに研ぎ澄まされる感覚が、彼のロジックに血の通った圧倒的な力強さを宿らせていく。</p>
             </div>
         </section>
 
+        <section class="content-section" id="sec-4">
+            <span class="section-label">Irrational Anomaly</span>
+            <h2 class="title">非論理的な干渉と、<br>致命的なペナルティ。</h2>
+            <div class="body-text">
+                <p>物流の最適化を進める過程で、彼は解析不能な一人の女性と遭遇する。自身のシステムを崩壊させかねない危険な接触。彼は周囲の警告を無視し、自らを「暴走機関車」へと書き換え同期を強行した。</p>
+                <p>過去を抹消した秘匿事象は後に苛烈な大激怒を招く致命的なバグとなったが、現在、そこには「子供」という新たな自律変数が生成されている。かつての演算では予測不能だったその存在を、彼は今、自身のアーキテクチャにおける「最も美しく、不可解な最適解」として静かに観測している。</p>
+            </div>
+        </section>
+
         <div class="link-area">
             <span class="next-label">Unlisted Records</span>
-            <p class="next-teaser">
-                論理の裏側に隠された、<br>
-                知性の断片を閲覧する。
-            </p>
-            <a href="more.html" class="more-btn">Beyond.</a>
+            <p class="next-teaser">論理の裏側に隠された、知性の断片を閲覧する。</p>
+            <a href="#" id="enter-beyond-btn" class="more-btn">BELONG BELONG.</a>
         </div>
-
         <footer>© THE GENIUS ARCHITECT.</footer>
     </div>
 
+    <div id="auth-overlay">
+        <span style="font-family:'Roboto Mono'; font-size:10px; color:#86868b; letter-spacing:0.3em; margin-bottom:30px; text-transform:uppercase;">Authentication Required</span>
+        <input type="password" id="pass-input" placeholder="····" autocomplete="off">
+        <button class="auth-submit" id="auth-btn">ENTER</button>
+        <div id="error-txt" class="error-msg">INVALID ACCESS CODE</div>
+    </div>
+
     <script>
-        window.onload = () => { document.getElementById('bg1').style.opacity = '1'; };
-        window.addEventListener('scroll', () => {
+        const updateBg = () => {
             const scrollY = window.scrollY;
             const h = window.innerHeight;
-            const bg1 = document.getElementById('bg1'), bg2 = document.getElementById('bg2'), bg3 = document.getElementById('bg3');
-            if (scrollY < h * 0.7) {
-                bg1.style.opacity = '1'; bg2.style.opacity = '0'; bg3.style.opacity = '0';
-            } else if (scrollY < h * 1.9) { 
-                bg1.style.opacity = '0'; bg2.style.opacity = '1'; bg3.style.opacity = '0';
+            const sections = [
+                { id: 'bg1', start: -1, end: h * 0.8 },
+                { id: 'bg2', start: h * 0.8, end: h * 2.2 },
+                { id: 'bg3', start: h * 2.2, end: h * 3.6 },
+                { id: 'bg4', start: h * 3.6, end: h * 5.0 },
+                { id: 'bg5', start: h * 5.0, end: Infinity }
+            ];
+            sections.forEach(s => {
+                const el = document.getElementById(s.id);
+                if (el) el.style.opacity = (scrollY >= s.start && scrollY < s.end) ? '1' : '0';
+            });
+        };
+        window.addEventListener('scroll', updateBg);
+        window.onload = updateBg;
+
+        const openBtn = document.getElementById('enter-beyond-btn');
+        const overlay = document.getElementById('auth-overlay');
+        const input = document.getElementById('pass-input');
+        const submitBtn = document.getElementById('auth-btn');
+        const errorTxt = document.getElementById('error-txt');
+
+        const attemptLogin = () => {
+            if (input.value === '777') {
+                sessionStorage.setItem('is_auth_beyond', 'true');
+                window.location.href = 'more.html';
             } else {
-                bg1.style.opacity = '0'; bg2.style.opacity = '0'; bg3.style.opacity = '1';
+                errorTxt.style.opacity = '1';
+                input.value = '';
+                setTimeout(() => { errorTxt.style.opacity = '0'; }, 2000);
             }
+        };
+
+        openBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            overlay.style.display = 'flex';
+            setTimeout(() => { overlay.style.opacity = '1'; input.focus(); }, 10);
         });
+
+        submitBtn.addEventListener('click', attemptLogin);
+        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
     </script>
 </body>
 </html>
