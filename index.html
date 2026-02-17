@@ -15,20 +15,38 @@
         
         body.locked { overflow: hidden; height: 100vh; }
 
+        /* 背景レイヤー：初期は少しズームインした状態（起動時に引いていく） */
         .bg-layer {
             position: fixed; inset: 0;
             background-size: cover; background-position: center center;
             filter: grayscale(100%) contrast(110%) brightness(0.3);
-            z-index: -1; transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0;
-            will-change: opacity; backface-visibility: hidden;
+            z-index: -1; opacity: 0;
+            will-change: opacity, transform; backface-visibility: hidden;
+            transform: scale(1.05);
+            transition: opacity 2.0s cubic-bezier(0.4, 0, 0.2, 1), transform 4.0s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
+        /* システム起動時にズームアウトを適用 */
+        body.system-active .bg-layer {
+            transform: scale(1);
+        }
+
         .bg-1 { background-image: url('image_top.png'); }
         .bg-2 { background-image: url('image_logic.png'); }
         .bg-3 { background-image: url('image_local.png'); }
         .bg-4 { background-image: url('image_human.png'); }
         .bg-5 { background-image: url('image_anomaly.png'); }
 
-        .container { position: relative; z-index: 1; padding: 0 30px; max-width: 600px; margin: 0 auto; }
+        /* コンテナ（文字コンテンツ）：初期は透明で下に配置 */
+        .container { 
+            position: relative; z-index: 1; padding: 0 30px; max-width: 600px; margin: 0 auto; 
+            opacity: 0; transform: translateY(30px);
+            /* 画像より少し遅れて（delay 0.8s）フワッと浮かび上がる */
+            transition: opacity 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.8s, transform 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.8s;
+        }
+        /* 起動で表示 */
+        .container.system-active {
+            opacity: 1; transform: translateY(0);
+        }
         
         .hero-spacer { height: 100vh; display: flex; flex-direction: column; justify-content: center; }
         .hero-title {
@@ -59,14 +77,23 @@
         }
         .more-btn:hover { background-color: #fff; color: #000; }
         
+        /* ログイン演出用オーバーレイ */
         #auth-overlay {
             position: fixed; inset: 0; background: #000; z-index: 9999;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.8s ease, visibility 0.8s;
+            /* 溶けるように消える設定（2秒） */
+            transition: opacity 2.0s ease, visibility 2.0s;
         }
         #auth-overlay.hidden {
             opacity: 0; visibility: hidden; pointer-events: none;
         }
+        
+        /* フェードアウト用クラス */
+        .fade-out { opacity: 0 !important; pointer-events: none; transition: 0.5s; }
+        
+        /* 入力フォーム群 */
+        #auth-label, #pass-input, #auth-btn { transition: 0.5s ease; }
+        
         #pass-input {
             background: transparent; border: none; border-bottom: 1px solid #333;
             color: #fff; font-family: 'Roboto Mono'; font-size: 24px; text-align: center;
@@ -75,15 +102,26 @@
         .auth-submit {
             background: transparent; border: 1px solid #444; color: #fff;
             font-family: 'Roboto Mono'; font-size: 10px; padding: 10px 30px;
-            letter-spacing: 0.3em; cursor: pointer; transition: 0.3s;
+            letter-spacing: 0.3em; cursor: pointer;
         }
         .auth-submit:hover { border-color: #fff; background: #fff; color: #000; }
-        .error-msg { color: #ff3b30; font-size: 10px; font-family: 'Roboto Mono'; margin-top: 15px; opacity: 0; }
+        
+        /* エラー＆成功メッセージ */
+        .error-msg { 
+            color: #ff3b30; font-size: 10px; font-family: 'Roboto Mono'; 
+            margin-top: 15px; opacity: 0; transition: 0.5s ease;
+        }
+        /* 認証成功時のスタイル */
+        .access-granted { 
+            color: var(--apple-blue) !important; 
+            letter-spacing: 0.5em !important; 
+            opacity: 1 !important; 
+        }
     </style>
 </head>
 <body class="locked">
     <div id="auth-overlay">
-        <span style="font-family:'Roboto Mono'; font-size:10px; color:#86868b; letter-spacing:0.3em; margin-bottom:30px; text-transform:uppercase;">Authentication Required</span>
+        <span id="auth-label" style="font-family:'Roboto Mono'; font-size:10px; color:#86868b; letter-spacing:0.3em; margin-bottom:30px; text-transform:uppercase;">Authentication Required</span>
         <input type="password" id="pass-input" placeholder="····" autocomplete="off">
         <button class="auth-submit" id="auth-btn">ENTER</button>
         <div id="error-txt" class="error-msg">INVALID ACCESS CODE</div>
@@ -152,13 +190,17 @@
 
     <script>
         const overlay = document.getElementById('auth-overlay');
+        const authLabel = document.getElementById('auth-label');
         const input = document.getElementById('pass-input');
         const submitBtn = document.getElementById('auth-btn');
         const errorTxt = document.getElementById('error-txt');
 
+        // ロード時の処理（既に認証済みなら最初から全表示）
         if (sessionStorage.getItem('is_auth_main') === 'true') {
             document.body.classList.remove('locked');
-            overlay.classList.add('hidden');
+            overlay.style.display = 'none';
+            document.body.classList.add('system-active');
+            document.querySelector('.container').classList.add('system-active');
         } else {
             setTimeout(() => input.focus(), 100);
         }
@@ -166,10 +208,34 @@
         const attemptLogin = () => {
             if (input.value === '777') {
                 sessionStorage.setItem('is_auth_main', 'true');
-                overlay.classList.add('hidden');
-                document.body.classList.remove('locked');
-                window.scrollTo(0, 0); 
-                updateBg(); 
+                
+                // 1. フォーム群をフェードアウト
+                authLabel.classList.add('fade-out');
+                input.classList.add('fade-out');
+                submitBtn.classList.add('fade-out');
+                
+                // 2. 青文字で「ACCESS GRANTED」を表示
+                errorTxt.innerText = 'ACCESS GRANTED...';
+                errorTxt.classList.add('access-granted');
+                
+                // 3. 少し待ってから、システム起動アニメーションを開始
+                setTimeout(() => {
+                    // 背景の透明度を更新（この時点で後ろで画像がジワッと出始める）
+                    updateBg(); 
+                    
+                    // オーバーレイをゆっくりフェードアウト
+                    overlay.style.opacity = '0';
+                    document.body.classList.remove('locked');
+                    window.scrollTo(0, 0); 
+                    
+                    // 背景のズームアウトとテキストの浮上をトリガー
+                    document.body.classList.add('system-active');
+                    document.querySelector('.container').classList.add('system-active');
+                    
+                    // 完全に消えた後に要素を隠す
+                    setTimeout(() => { overlay.style.display = 'none'; }, 2000); 
+                }, 1500); // 1.5秒間「ACCESS GRANTED」を見せる
+
             } else {
                 errorTxt.style.opacity = '1';
                 input.value = '';
