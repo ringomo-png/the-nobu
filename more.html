@@ -16,6 +16,7 @@
 
         .fixed-background {
             position: fixed; inset: 0;
+            width: 100vw; height: 100vh;
             background-image: url('image_more.png'); background-size: cover; background-position: center;
             filter: grayscale(100%) contrast(110%) brightness(0.2); z-index: -1; pointer-events: none;
             opacity: 0;
@@ -25,12 +26,16 @@
 
         .container { position: relative; z-index: 1; padding: 60px 30px; max-width: 600px; margin: 0 auto; }
         
+        /* LINEブラウザ対策で余白を固定値(px)に変更 */
         .page-header { 
-            height: 80vh; 
+            height: 700px; 
             display: flex; flex-direction: column; justify-content: center; align-items: center; 
             text-align: center; 
-            margin-bottom: 25vh; 
+            margin-bottom: 200px; 
         }
+        .item-section { margin-bottom: 350px; }
+        .reveal-text { margin-bottom: 300px; } 
+
         .page-title { font-size: 42px; font-weight: 900; letter-spacing: 0.15em; margin: 0; opacity: 0; transform: translateY(40px); animation: titleReveal 3.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s forwards; }
         .header-line { width: 0; height: 1px; background: var(--accent); margin: 30px 0; animation: lineExpand 2.5s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards; }
         .page-subtitle { font-family: 'Roboto Mono', monospace; font-size: 13px; color: var(--text-muted); letter-spacing: 0.2em; line-height: 1.8; text-transform: uppercase; opacity: 0; transform: translateY(30px); animation: subtitleReveal 3.5s cubic-bezier(0.2, 0.8, 0.2, 1) 1.0s forwards; }
@@ -42,9 +47,6 @@
         .nav-back { display: inline-block; text-decoration: none; color: var(--text-muted); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 60px; transition: color 0.3s; opacity: 0; animation: subtitleReveal 3.0s 0.2s forwards;}
         .nav-back:hover { color: #fff; }
         
-        .item-section { margin-bottom: 45vh; }
-        .reveal-text { margin-bottom: 40vh; } 
-
         .fade-up {
             opacity: 0; 
             transform: translateY(120px); 
@@ -190,13 +192,18 @@
     <script>
         if (sessionStorage.getItem("is_auth_main") !== "true") { window.location.href = "index.html"; }
         
+        // ▼ 修正：安定したrootMarginを採用し、さらに動画を強制再生させる処理を追加
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => { 
                 if (entry.isIntersecting) {
                     entry.target.classList.add('active'); 
+                    
+                    // 画面に入った瞬間に動画を強制的に再生する（LINEの停止バグ対策）
+                    const video = entry.target.querySelector('video');
+                    if (video) { video.play().catch(e => {}); }
                 }
             });
-        }, { threshold: 0.15 }); 
+        }, { rootMargin: '0px 0px -15% 0px' }); 
         
         document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
