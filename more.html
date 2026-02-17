@@ -14,7 +14,6 @@
             -webkit-font-smoothing: antialiased; overflow-x: hidden;
         }
 
-        /* ▼ トップ背景：無（透明）から3秒かけてゆっくり姿を現す */
         .fixed-background {
             position: fixed; inset: 0;
             background-image: url('image_more.png'); background-size: cover; background-position: center;
@@ -32,7 +31,6 @@
             text-align: center; 
             margin-bottom: 25vh; 
         }
-        /* トップ文字もメインに合わせて3.5秒かけてゆっくり浮上 */
         .page-title { font-size: 42px; font-weight: 900; letter-spacing: 0.15em; margin: 0; opacity: 0; transform: translateY(40px); animation: titleReveal 3.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s forwards; }
         .header-line { width: 0; height: 1px; background: var(--accent); margin: 30px 0; animation: lineExpand 2.5s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards; }
         .page-subtitle { font-family: 'Roboto Mono', monospace; font-size: 13px; color: var(--text-muted); letter-spacing: 0.2em; line-height: 1.8; text-transform: uppercase; opacity: 0; transform: translateY(30px); animation: subtitleReveal 3.5s cubic-bezier(0.2, 0.8, 0.2, 1) 1.0s forwards; }
@@ -47,7 +45,6 @@
         .item-section { margin-bottom: 45vh; }
         .reveal-text { margin-bottom: 40vh; } 
 
-        /* ▼ スクロールアニメーション：さらに深く(120px)、さらにゆっくり(3.0s)に進化 */
         .fade-up {
             opacity: 0; 
             transform: translateY(120px); 
@@ -65,7 +62,6 @@
         .item-text p { margin-bottom: 25px; }
         .item-text b { color: #fff; font-weight: 600; }
 
-        /* ▼ 動画演出：最初は極端に暗く（0.3）、スクロールで3秒かけてジワッと明るく（0.95）なる */
         .video-wrapper { width: 100%; border-radius: 4px; overflow: hidden; background: #111; border: 1px solid #1a1a1a; aspect-ratio: 16 / 9; }
         .item-video { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) brightness(0.3); transition: filter 3.0s cubic-bezier(0.2, 0.8, 0.2, 1); }
         .fade-up.active .item-video { filter: grayscale(100%) brightness(0.95); } 
@@ -103,8 +99,8 @@
                 <span class="item-label fade-up">Thermal Management</span>
                 <h2 class="item-title fade-up delay-1">圧倒的な、熱量。</h2>
                 <div class="item-text fade-up delay-2">
-                    <p>処理速度の速すぎる知性は常にオーバーヒートの危険を孕んでいる。凡庸な会話や停滞したロジックが生む摩擦は、彼の中で静かなストレスとして蓄積されていく。</p>
-                    <p>内面で溶岩のように燃えたぎるそのエネルギーを、彼は言葉ではなく、物理的な<b>炎</b>として大気に解き放つ。それは精神を冷却し、再び冷徹なロジックを取り戻すための不可欠なカタルシスなのである。</p>
+                    <p>処理速度の速すぎる知性は常にオーバーヒートの危険を孕んでいる。凡庸な会話や停滞したロジックが生む摩擦は、彼の中で静かなストレスとして蓄積され、やがて臨界点へと達する。</p>
+                    <p>その時、彼が選ぶのは感情的な爆発ではない。内面で溶岩のように燃えたぎるそのエネルギーを、彼は言葉ではなく、物理的な<b>炎</b>として大気に解き放つ。夜の闇を切り裂くように炎を操るその姿は、一見すると危険な暴挙にも映る。しかしそれは、精神を急速冷凍し、再び冷徹なロジックを取り戻すための、彼にとって不可欠なカタルシスなのである。</p>
                 </div>
             </div>
             <div class="video-wrapper fade-up">
@@ -115,7 +111,7 @@
         <section class="item-section">
             <div class="reveal-text">
                 <span class="item-label fade-up">Midnight Sabotage</span>
-                <h2 class="item-title fade-up delay-1">真夜中の、完全犯罪。</h2>
+                <h2 class="item-title fade-up delay-1">無意識下の、自律崩壊。</h2>
                 <div class="item-text fade-up delay-2">
                     <p>彼は常に、見えざる敵に命を狙われている。友人たちとの遠征（旅行）の際、翌朝になると彼の<b>アンダーウェア（パンツ）</b>は決まって無残に引き裂かれた状態で発見される。</p>
                     <p>外部からの侵入経路も、犯人の痕跡すら一切存在しない完全犯罪。あるいは、無意識下で暴走した彼自身の防衛本能が引き起こした自壊現象なのか。まるで<b>未知のゼロデイ攻撃</b>のごとく、システムが休眠する夜の時間は、彼にとって決して安眠を許されないサバイバルなのだ。</p>
@@ -129,10 +125,10 @@
         <section class="item-section">
             <div class="reveal-text">
                 <span class="item-label fade-up">Anatomic Defense</span>
-                <h2 class="item-title fade-up delay-1">衝撃の、無効化。</h2>
+                <h2 class="item-title fade-up delay-1">肉体の、構造的ハック。</h2>
                 <div class="item-text fade-up delay-2">
-                    <p>彼は知っている。人間の精神は脆弱だが、その構造体としての肉体は驚くほど精巧であることを。医学的知識に基づいた彼の身体操作は、美しくもあり、致命的でもある。</p>
-                    <p>かつて強盗に<b>顔面</b>をのれんで殴打されるという理不尽な襲撃を受けてなお、彼はその衝撃を無効化し、生存した。死の淵ですら、彼の生存アルゴリズムは停止することを知らない。</p>
+                    <p>彼は知っている。人間の精神は脆く不完全だが、その構造体としての肉体は驚くほど精巧なハードウェアであることを。膨大な医学的知識と解剖学に基づいた彼の身体操作は、無駄を削ぎ落とした美しさを持つと同時に、致命的な脅威となり得る。</p>
+                    <p>かつて、深夜の自宅へ帰宅したまさにその瞬間。暗がりに潜んでいた強盗に遭遇し、<b>頭にのれんを叩き込まれる</b>という予測不能かつ理不尽な急襲を受けた。しかし、視界を奪われるその瞬間すら、彼は冷静だった。急所へのダメージを瞬時に演算し、その衝撃を完全に分散・無効化して生存を確定させたのだ。死の淵に立たされてなお、彼の冷徹な生存アルゴリズムは決して停止することを知らない。</p>
                 </div>
             </div>
             <div class="video-wrapper fade-up">
@@ -145,8 +141,8 @@
                 <span class="item-label fade-up">Spatial Calculation</span> 
                 <h2 class="item-title fade-up delay-1">究極の、知的遊戯。</h2>
                 <div class="item-text fade-up delay-2">
-                    <p>広大な芝のフィールドは、彼にとって究極の<b>知的遊戯</b>である。複雑なグリーンの起伏は2Dプレーンとして脳内で解析され、数万の変数が瞬時に並列処理される。</p>
-                    <p>導き出された最適解は、精確な弾道を描く。かつて、パー4のセカンドショットを直接カップに叩きこんだその記録は、物理学とロジックが織りなす究極のパフォーマンスであり、<b>彼自身の創造物</b>なのだ。</p>
+                    <p>広大な芝のフィールドは、彼にとって究極の<b>知的遊戯</b>である。複雑なグリーンの起伏は2Dプレーンとして脳内で解析され、風速や芝目といった不確定要素すらも彼にとっては単なる入力データとして瞬時に並列処理される。</p>
+                    <p>クラブを振り下ろす瞬間に至るまで、全ては制御されたアルゴリズムの実行である。導き出された最適解は自然界の抵抗を切り裂き、精確な弾道を描く。かつて、パー4のセカンドショットを直接カップに叩きこんだその記録は、単なる奇跡ではなく、物理学とロジックが織りなす究極のパフォーマンスであり、<b>彼自身が設計した芸術的な創造物</b>なのだ。</p>
                 </div>
             </div>
             <div class="video-wrapper fade-up">
@@ -157,10 +153,10 @@
         <section class="item-section">
             <div class="reveal-text">
                 <span class="item-label fade-up">Optimized Motion</span>
-                <h2 class="item-title fade-up delay-1">究極の、並列処理。</h2>
+                <h2 class="item-title fade-up delay-1">異常なまでの、最適化。</h2>
                 <div class="item-text fade-up delay-2">
-                    <p>彼の物理的動作には一切の無駄（冗長性）が存在しない。その最適化への執着は、日常のルーティンである<b>ニコチン摂取（喫煙）</b>において極まる。</p>
-                    <p>両手に一本ずつ、計2本のタバコを同時にホールドし、<b>並列処理で吸引</b>するその異常なスタイル。それは、脳内の膨大なタスクを処理するために必要な化学物質を、最短時間で血中へインポートするための彼なりのハックなのである。</p>
+                    <p>彼の物理的動作には一切の無駄（冗長性）が存在しない。その究極の効率化への執着は、日常のルーティンである<b>ニコチン摂取（喫煙）</b>において極まる。通常の人間が1本のタバコを消費する時間に、彼は迷わず2倍の効率を求めるのだ。</p>
+                    <p>両手に一本ずつ、計2本のタバコを同時にホールドし、<b>並列処理で吸引</b>するその異常なスタイル。それは一見するとシュールな奇行に映るだろう。しかし真実は、脳内の膨大なタスクを処理するために必要な化学物質を、最短時間で血中へインポートするための彼なりのハックなのである。肺の容量すらも計算に組み込んだその所作に、妥協はない。</p>
                 </div>
             </div>
             <div class="video-wrapper fade-up">
@@ -173,8 +169,8 @@
                 <span class="item-label fade-up">Unseen Resonance</span> 
                 <h2 class="item-title fade-up delay-1">魂を揺さぶる、共鳴。</h2>
                 <div class="item-text fade-up delay-2">
-                    <p>冷徹なロジックの底から響く、人を惑わす<b>悪魔の囁き</b>。彼が隠し持つもう一つの顔、それは音楽への情熱である。黒人のリズムミュージックをルーツに持つ彼は、破壊的な<b>スラップ奏法</b>を得意とする。</p>
-                    <p>かつて、<b>学園ホール</b>を熱狂と沈黙で支配した「一夜限りの共鳴」において、彼のリズムに脳を同期させられた観衆は、理由もわからず涙を流した。それは、計算だけでは到達できない、魂のハッキングだった。</p>
+                    <p>冷徹なロジックの底から響く、人を惑わす<b>悪魔の囁き</b>。彼が隠し持つもう一つの顔、それは音楽への情熱である。重低音が空気を震わせるたび、彼の指先から放たれるのは単なる音符ではなく、緻密に計算された周波数の波だ。黒人のリズムミュージックをルーツに持つ彼は、弦を叩き弾きちぎるような破壊的な<b>スラップ奏法</b>を得意とする。</p>
+                    <p>かつて、<b>学園ホール</b>を熱狂と沈黙で支配した「一夜限りの共鳴」において、彼のリズムに脳を直接同期させられた観衆は、理由もわからず涙を流した。それは、デジタルな演算だけでは決して到達できない、人間の本能を直接書き換える魂のハッキングだった。</p>
                 </div>
             </div>
             <div class="video-wrapper fade-up">
@@ -194,7 +190,6 @@
     <script>
         if (sessionStorage.getItem("is_auth_main") !== "true") { window.location.href = "index.html"; }
         
-        // 交差監視の設定。画面に15%入ったら発火させる
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => { 
                 if (entry.isIntersecting) {
