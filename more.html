@@ -14,11 +14,15 @@
             -webkit-font-smoothing: antialiased; overflow-x: hidden;
         }
 
+        /* ▼ トップ背景：無（透明）から3秒かけてゆっくり姿を現す */
         .fixed-background {
             position: fixed; inset: 0;
             background-image: url('image_more.png'); background-size: cover; background-position: center;
             filter: grayscale(100%) contrast(110%) brightness(0.2); z-index: -1; pointer-events: none;
+            opacity: 0;
+            animation: bgSlowIn 3.0s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
+        @keyframes bgSlowIn { to { opacity: 1; } }
 
         .container { position: relative; z-index: 1; padding: 60px 30px; max-width: 600px; margin: 0 auto; }
         
@@ -28,30 +32,32 @@
             text-align: center; 
             margin-bottom: 25vh; 
         }
-        .page-title { font-size: 42px; font-weight: 900; letter-spacing: 0.15em; margin: 0; opacity: 0; transform: translateY(30px); animation: titleReveal 2.0s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .header-line { width: 0; height: 1px; background: var(--accent); margin: 30px 0; animation: lineExpand 1.5s 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .page-subtitle { font-family: 'Roboto Mono', monospace; font-size: 13px; color: var(--text-muted); letter-spacing: 0.2em; line-height: 1.8; text-transform: uppercase; opacity: 0; transform: translateY(20px); animation: subtitleReveal 1.5s 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        /* トップ文字もメインに合わせて3.5秒かけてゆっくり浮上 */
+        .page-title { font-size: 42px; font-weight: 900; letter-spacing: 0.15em; margin: 0; opacity: 0; transform: translateY(40px); animation: titleReveal 3.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s forwards; }
+        .header-line { width: 0; height: 1px; background: var(--accent); margin: 30px 0; animation: lineExpand 2.5s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards; }
+        .page-subtitle { font-family: 'Roboto Mono', monospace; font-size: 13px; color: var(--text-muted); letter-spacing: 0.2em; line-height: 1.8; text-transform: uppercase; opacity: 0; transform: translateY(30px); animation: subtitleReveal 3.5s cubic-bezier(0.2, 0.8, 0.2, 1) 1.0s forwards; }
 
         @keyframes titleReveal { 100% { opacity: 1; transform: translateY(0); letter-spacing: 0.25em; } }
         @keyframes lineExpand { 100% { width: 120px; } }
         @keyframes subtitleReveal { 100% { opacity: 1; transform: translateY(0); } }
 
-        .nav-back { display: inline-block; text-decoration: none; color: var(--text-muted); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 60px; transition: color 0.3s;}
+        .nav-back { display: inline-block; text-decoration: none; color: var(--text-muted); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 60px; transition: color 0.3s; opacity: 0; animation: subtitleReveal 3.0s 0.2s forwards;}
         .nav-back:hover { color: #fff; }
         
         .item-section { margin-bottom: 45vh; }
         .reveal-text { margin-bottom: 40vh; } 
 
+        /* ▼ スクロールアニメーション：さらに深く(120px)、さらにゆっくり(3.0s)に進化 */
         .fade-up {
             opacity: 0; 
-            transform: translateY(100px); 
-            transition: opacity 2.5s cubic-bezier(0.25, 1, 0.5, 1), transform 2.5s cubic-bezier(0.25, 1, 0.5, 1);
+            transform: translateY(120px); 
+            transition: opacity 3.0s cubic-bezier(0.2, 0.8, 0.2, 1), transform 3.0s cubic-bezier(0.2, 0.8, 0.2, 1);
             will-change: opacity, transform;
         }
         .fade-up.active { opacity: 1; transform: translateY(0); }
         
-        .delay-1 { transition-delay: 0.1s; }
-        .delay-2 { transition-delay: 0.3s; }
+        .delay-1 { transition-delay: 0.2s; }
+        .delay-2 { transition-delay: 0.4s; }
 
         .item-label { font-size: 11px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px; display: block; }
         .item-title { font-size: 32px; font-weight: 900; margin-bottom: 30px; letter-spacing: -0.05em; line-height: 1.3; }
@@ -59,8 +65,9 @@
         .item-text p { margin-bottom: 25px; }
         .item-text b { color: #fff; font-weight: 600; }
 
+        /* ▼ 動画演出：最初は極端に暗く（0.3）、スクロールで3秒かけてジワッと明るく（0.95）なる */
         .video-wrapper { width: 100%; border-radius: 4px; overflow: hidden; background: #111; border: 1px solid #1a1a1a; aspect-ratio: 16 / 9; }
-        .item-video { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) brightness(0.75); transition: filter 2.5s ease; }
+        .item-video { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) brightness(0.3); transition: filter 3.0s cubic-bezier(0.2, 0.8, 0.2, 1); }
         .fade-up.active .item-video { filter: grayscale(100%) brightness(0.95); } 
 
         .ending-section { padding: 150px 0; text-align: center; }
@@ -82,10 +89,10 @@
         <nav><a href="index.html" class="nav-back">← Back to Terminal</a></nav>
         
         <header class="page-header">
-            <span class="item-label" style="opacity: 0; animation: subtitleReveal 1.0s 0.5s forwards;">Unlisted Records</span>
+            <span class="item-label" style="opacity: 0; animation: subtitleReveal 3.0s 0.2s forwards;">Unlisted Records</span>
             <h1 class="page-title">BELONG</h1>
             <div class="header-line"></div>
-            <div class="page-subtitle" style="text-transform: none; letter-spacing: 0.15em; line-height: 2.2; font-family: 'Inter', sans-serif;">
+            <div class="page-subtitle">
                 表層のロジックでは語られない、<br>
                 彼を構成する未定義の断片。
             </div>
@@ -187,13 +194,14 @@
     <script>
         if (sessionStorage.getItem("is_auth_main") !== "true") { window.location.href = "index.html"; }
         
+        // 交差監視の設定。画面に15%入ったら発火させる
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => { 
                 if (entry.isIntersecting) {
                     entry.target.classList.add('active'); 
                 }
             });
-        }, { threshold: 0.1 }); 
+        }, { threshold: 0.15 }); 
         
         document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 

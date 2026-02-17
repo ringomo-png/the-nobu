@@ -15,19 +15,16 @@
         
         body.locked { overflow: hidden; height: 100vh; }
 
-        /* 背景レイヤー：初期は少しズームインした状態（起動時に引いていく） */
+        /* 背景レイヤー：サイズ変更バグを防ぐためscaleを削除し、純粋なフェードインに */
         .bg-layer {
             position: fixed; inset: 0;
+            width: 100vw; height: 100vh; /* スマホのスクロールバグ対策 */
             background-size: cover; background-position: center center;
             filter: grayscale(100%) contrast(110%) brightness(0.3);
             z-index: -1; opacity: 0;
-            will-change: opacity, transform; backface-visibility: hidden;
-            transform: scale(1.05);
-            transition: opacity 2.0s cubic-bezier(0.4, 0, 0.2, 1), transform 4.0s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        /* システム起動時にズームアウトを適用 */
-        body.system-active .bg-layer {
-            transform: scale(1);
+            will-change: opacity; backface-visibility: hidden;
+            /* 3秒かけて非常にゆっくりと現れる */
+            transition: opacity 3.0s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .bg-1 { background-image: url('image_top.png'); }
@@ -36,14 +33,13 @@
         .bg-4 { background-image: url('image_human.png'); }
         .bg-5 { background-image: url('image_anomaly.png'); }
 
-        /* コンテナ（文字コンテンツ）：初期は透明で下に配置 */
+        /* 初回起動時のコンテナ（文字）：画像より遅れて、さらにゆっくり現れる */
         .container { 
             position: relative; z-index: 1; padding: 0 30px; max-width: 600px; margin: 0 auto; 
             opacity: 0; transform: translateY(30px);
-            /* 画像より少し遅れて（delay 0.8s）フワッと浮かび上がる */
-            transition: opacity 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.8s, transform 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.8s;
+            /* ディレイ1.5秒、3.5秒かけてゆっくり浮上 */
+            transition: opacity 3.5s cubic-bezier(0.2, 0.8, 0.2, 1) 1.5s, transform 3.5s cubic-bezier(0.2, 0.8, 0.2, 1) 1.5s;
         }
-        /* 起動で表示 */
         .container.system-active {
             opacity: 1; transform: translateY(0);
         }
@@ -62,7 +58,19 @@
             margin-top: 20px; border-left: 1px solid #333; padding-left: 15px;
         }
 
-        .content-section { padding: 45vh 0; min-height: 65vh; }
+        /* ▼▼▼ モアと同じ、スクロール浮上アニメーションを追加 ▼▼▼ */
+        .fade-up {
+            opacity: 0; 
+            transform: translateY(60px); 
+            transition: opacity 2.0s cubic-bezier(0.2, 0.8, 0.2, 1), transform 2.0s cubic-bezier(0.2, 0.8, 0.2, 1);
+            will-change: opacity, transform;
+        }
+        .fade-up.active { opacity: 1; transform: translateY(0); }
+        .delay-1 { transition-delay: 0.15s; }
+        .delay-2 { transition-delay: 0.3s; }
+        /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
+
+        .content-section { padding: 35vh 0; min-height: 65vh; }
         .section-label { color: var(--apple-blue); font-weight: 700; font-size: 13px; letter-spacing: 0.1em; margin-bottom: 20px; display: block; text-transform: uppercase; }
         .title { font-size: 28px; font-weight: 700; margin-bottom: 30px; line-height: 1.4; }
         .body-text { font-size: 17px; color: var(--text-muted); line-height: 1.9; }
@@ -81,18 +89,15 @@
         #auth-overlay {
             position: fixed; inset: 0; background: #000; z-index: 9999;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            /* 溶けるように消える設定（2秒） */
-            transition: opacity 2.0s ease, visibility 2.0s;
+            /* オーバーレイ自体も3秒かけてゆっくり消える */
+            transition: opacity 3.0s ease, visibility 3.0s;
         }
         #auth-overlay.hidden {
             opacity: 0; visibility: hidden; pointer-events: none;
         }
         
-        /* フェードアウト用クラス */
-        .fade-out { opacity: 0 !important; pointer-events: none; transition: 0.5s; }
-        
-        /* 入力フォーム群 */
-        #auth-label, #pass-input, #auth-btn { transition: 0.5s ease; }
+        .fade-out { opacity: 0 !important; pointer-events: none; transition: 0.8s; }
+        #auth-label, #pass-input, #auth-btn { transition: 0.8s ease; }
         
         #pass-input {
             background: transparent; border: none; border-bottom: 1px solid #333;
@@ -106,12 +111,10 @@
         }
         .auth-submit:hover { border-color: #fff; background: #fff; color: #000; }
         
-        /* エラー＆成功メッセージ */
         .error-msg { 
             color: #ff3b30; font-size: 10px; font-family: 'Roboto Mono'; 
-            margin-top: 15px; opacity: 0; transition: 0.5s ease;
+            margin-top: 15px; opacity: 0; transition: 0.8s ease;
         }
-        /* 認証成功時のスタイル */
         .access-granted { 
             color: var(--apple-blue) !important; 
             letter-spacing: 0.5em !important; 
@@ -144,43 +147,43 @@
         </div>
 
         <section class="content-section" id="sec-1">
-            <span class="section-label">System Disruption</span>
-            <h2 class="title">搾取の盤面を、<br>知性でハックする。</h2>
-            <div class="body-text">
+            <span class="section-label fade-up">System Disruption</span>
+            <h2 class="title fade-up delay-1">搾取の盤面を、<br>知性でハックする。</h2>
+            <div class="body-text fade-up delay-2">
                 <p>世界は巨大な変数の集合体に過ぎない。彼が卒業論文でターゲットにしたのは、公認という名の免罪符を得た搾取システム、すなわち<b>競馬</b>を筆頭とする公営競技の解析だった。</p>
                 <p>大衆の情熱を餌に富を吸い上げるその絶対的な構造。彼はその盤面に潜む脆弱性を特定し、独自のアルゴリズムによってシステムの優位性を完全に無効化した。それは知性によるシステムの再定義であり、無自覚に搾取される人々を論理的に開放するための、静かな宣戦布告だった。</p>
             </div>
         </section>
 
         <section class="content-section" id="sec-2">
-            <span class="section-label">Global Connectivity</span>
-            <h2 class="title">ネットワークの末端から、<br>世界の核へと直結させる。</h2>
-            <div class="body-text">
+            <span class="section-label fade-up">Global Connectivity</span>
+            <h2 class="title fade-up delay-1">ネットワークの末端から、<br>世界の核へと直結させる。</h2>
+            <div class="body-text fade-up delay-2">
                 <p>大学卒業後、彼は自身のルーツである千葉・四街道へと視点を向ける。インフラから切り離されたその静寂を、彼は深く愛していた。既存の構造に従属することを拒み、彼はローカルな<b>宿泊システム</b>のネットワークを根底から再構築（リビルド）した。</p>
                 <p>中間搾取を排除した単独のバイパスを組み上げ、地方の滞在空間を直接世界とつなぐ新たな回路を確立。インバウンドの潮流が到達する前に、辺境の価値を世界中からアクセス可能な状態へと書き換えたのだ。その偉業を見届けると同時に、彼の視座は次なるフェーズへと移っていく。</p>
             </div>
         </section>
 
         <section class="content-section" id="sec-3">
-            <span class="section-label">Void Processing</span>
-            <h2 class="title">ゼロへと回帰し、<br>空白から再定義する。</h2>
-            <div class="body-text">
+            <span class="section-label fade-up">Void Processing</span>
+            <h2 class="title fade-up delay-1">ゼロへと回帰し、<br>空白から再定義する。</h2>
+            <div class="body-text fade-up delay-2">
                 <p>完璧なロジックを維持するためには、時にシステムそのもののリビルドが必要になる。彼は自らの社会的なインフラをすべて破棄し、完全なゼロへと収束させる道を選んだ。</p>
                 <p>過去の履歴や既存の信用を消去し、一枚のデビットカードだけを唯一の生存インターフェースにする。それは不純物を取り除き、本質だけを抽出するための強制的デバッグだった。何も持たないがゆえに研ぎ澄まされる感覚が、彼のロジックに血の通った圧倒的な力強さを宿らせていく。</p>
             </div>
         </section>
 
         <section class="content-section" id="sec-4">
-            <span class="section-label">Irrational Anomaly</span>
-            <h2 class="title">非論理的な干渉と、<br>致命的なペナルティ。</h2>
-            <div class="body-text">
+            <span class="section-label fade-up">Irrational Anomaly</span>
+            <h2 class="title fade-up delay-1">非論理的な干渉と、<br>致命的なペナルティ。</h2>
+            <div class="body-text fade-up delay-2">
                 <p>新たな最適化フェーズへと進む過程で、彼は解析不能な一人の女性と遭遇する。自身のシステムを崩壊させかねない危険な接触。</p>
                 <p>彼は周囲の警告を無視し、自らを「暴走機関車」へと書き換え同期（結婚）を強行した。過去を抹消した秘匿事象は、後に<b>重大なペナルティ</b>を招く致命的なバグとなったが——</p>
                 <p>現在、システムからは「子供」という新たな自律変数が生成されている。かつては予測不能だったその存在を、彼は今、自身のアーキテクチャにおける「最も美しく、不可解な最適解」として静かに観測している。</p>
             </div>
         </section>
 
-        <div class="link-area">
+        <div class="link-area fade-up">
             <span class="next-label">Unlisted Records</span>
             <p class="next-teaser">論理の裏側に隠された、知性の断片を閲覧する。</p>
             <a href="more.html" class="more-btn">BELONG BELONG.</a>
@@ -195,7 +198,7 @@
         const submitBtn = document.getElementById('auth-btn');
         const errorTxt = document.getElementById('error-txt');
 
-        // ロード時の処理（既に認証済みなら最初から全表示）
+        // ロード時の処理
         if (sessionStorage.getItem('is_auth_main') === 'true') {
             document.body.classList.remove('locked');
             overlay.style.display = 'none';
@@ -209,32 +212,26 @@
             if (input.value === '777') {
                 sessionStorage.setItem('is_auth_main', 'true');
                 
-                // 1. フォーム群をフェードアウト
                 authLabel.classList.add('fade-out');
                 input.classList.add('fade-out');
                 submitBtn.classList.add('fade-out');
                 
-                // 2. 青文字で「ACCESS GRANTED」を表示
                 errorTxt.innerText = 'ACCESS GRANTED...';
                 errorTxt.classList.add('access-granted');
                 
-                // 3. 少し待ってから、システム起動アニメーションを開始
+                // 余韻を長く：2秒間「ACCESS GRANTED」を見せる
                 setTimeout(() => {
-                    // 背景の透明度を更新（この時点で後ろで画像がジワッと出始める）
                     updateBg(); 
                     
-                    // オーバーレイをゆっくりフェードアウト
-                    overlay.style.opacity = '0';
+                    overlay.style.opacity = '0'; // 3秒かけてゆっくり暗闇が晴れる
                     document.body.classList.remove('locked');
                     window.scrollTo(0, 0); 
                     
-                    // 背景のズームアウトとテキストの浮上をトリガー
                     document.body.classList.add('system-active');
                     document.querySelector('.container').classList.add('system-active');
                     
-                    // 完全に消えた後に要素を隠す
-                    setTimeout(() => { overlay.style.display = 'none'; }, 2000); 
-                }, 1500); // 1.5秒間「ACCESS GRANTED」を見せる
+                    setTimeout(() => { overlay.style.display = 'none'; }, 3000); 
+                }, 2000); 
 
             } else {
                 errorTxt.style.opacity = '1';
@@ -263,6 +260,17 @@
         };
         window.addEventListener('scroll', updateBg);
         window.onload = updateBg;
+
+        // ▼▼▼ スクロール連動アニメーションの監視 ▼▼▼
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { 
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active'); 
+                }
+            });
+        }, { threshold: 0.15 }); 
+        
+        document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
     </script>
 </body>
 </html>
