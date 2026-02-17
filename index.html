@@ -4,362 +4,224 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>The Architect | Logic</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Roboto+Mono:wght@300&display=swap" rel="stylesheet">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection"></script>
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-color: #000; --text-muted: #86868b; --apple-blue: #0071e3; --cyber-blue: #00f0ff; }
+        :root {
+            --bg-color: #000;
+            --text-muted: #86868b;
+            --apple-blue: #0071e3;
+        }
+
         body {
-            margin: 0; background-color: var(--bg-color); color: #fff;
-            font-family: 'Inter', -apple-system, sans-serif; -webkit-font-smoothing: antialiased;
-            overflow-x: hidden; touch-action: manipulation;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: #fff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
-        body.locked { overflow: hidden; height: 100vh; }
 
+        /* 背景レイヤー：3つのシーンを重ねる */
         .bg-layer {
-            position: fixed; inset: 0;
-            width: 100vw; height: 100vh;
-            background-size: cover; background-position: center center;
-            filter: grayscale(100%) contrast(110%) brightness(0.2);
-            z-index: -2; opacity: 0; 
-            will-change: opacity; backface-visibility: hidden;
-            transition: opacity 3.0s cubic-bezier(0.4, 0, 0.2, 1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            filter: grayscale(100%) contrast(110%) brightness(0.35);
+            z-index: -1;
+            transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .bg-layer.system-active { opacity: 0.4; } 
+        /* 1枚目：トップ（象徴的な姿） */
+        .bg-1 { background-image: url('image_top.png'); opacity: 1; }
+        /* 2枚目：ロジック（知性とシステム） */
+        .bg-2 { background-image: url('image_logic.png'); opacity: 0; }
+        /* 3枚目：人間味（死角と再生） */
+        .bg-3 { background-image: url('image_human.png'); opacity: 0; }
 
-        .bg-1 { background-image: url('image_top.png'); }
-        .bg-2 { background-image: url('image_logic.png'); }
-        .bg-3 { background-image: url('image_local.png'); }
-        .bg-4 { background-image: url('image_human.png'); }
-        .bg-5 { background-image: url('image_anomaly.png'); }
-
-        #three-container {
-            position: fixed; inset: 0; z-index: -1; pointer-events: none;
-            opacity: 0; transition: opacity 3.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s;
-            transform: translateY(-5%) scale(1.1);
+        .container {
+            position: relative;
+            z-index: 1;
+            padding: 0 30px;
+            max-width: 600px;
+            margin: 0 auto;
         }
-        #three-container.system-active { opacity: 1; transform: translateY(-15%) scale(1); }
 
-        .container { 
-            position: relative; z-index: 1; padding: 0 30px; max-width: 600px; margin: 0 auto; 
-            opacity: 0; transform: translateY(30px);
-            transition: opacity 3.5s cubic-bezier(0.2, 0.8, 0.2, 1) 1.5s, transform 3.5s cubic-bezier(0.2, 0.8, 0.2, 1) 1.5s;
+        /* 1. ヒーロー：トップの余韻を長く */
+        .hero-spacer {
+            height: 120vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
-        .container.system-active { opacity: 1; transform: translateY(0); }
-        
-        .hero-spacer { height: 100vh; display: flex; flex-direction: column; justify-content: center; }
         .hero-title {
-            font-size: 48px; font-weight: 900; letter-spacing: -0.05em; line-height: 1.05;
-            background: linear-gradient(180deg, #fff 30%, var(--text-muted) 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
-            text-shadow: 0 0 20px rgba(0, 240, 255, 0.3); 
-        }
-        
-        .profile-specs {
-            font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--cyber-blue);
-            letter-spacing: 0.15em; text-transform: uppercase; line-height: 2.2;
-            margin-top: 20px; border-left: 1px solid var(--cyber-blue); padding-left: 15px;
-            text-shadow: 0 0 5px var(--cyber-blue);
+            font-size: 48px;
+            font-weight: 900;
+            letter-spacing: -0.05em;
+            line-height: 1.05;
+            margin: 0;
+            background: linear-gradient(180deg, #fff 20%, #888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .fade-up {
-            opacity: 0; transform: translateY(60px); 
-            transition: opacity 2.0s cubic-bezier(0.2, 0.8, 0.2, 1), transform 2.0s cubic-bezier(0.2, 0.8, 0.2, 1);
-            will-change: opacity, transform;
+        /* 2. 物語セクション */
+        .content-section {
+            padding: 150px 0;
+            min-height: 80vh;
         }
-        .fade-up.active { opacity: 1; transform: translateY(0); }
-        .delay-1 { transition-delay: 0.15s; }
-        .delay-2 { transition-delay: 0.3s; }
-
-        .content-section { padding: 250px 0; min-height: 500px; }
-        .section-label { color: var(--apple-blue); font-weight: 700; font-size: 13px; letter-spacing: 0.1em; margin-bottom: 20px; display: block; text-transform: uppercase; }
-        .title { font-size: 28px; font-weight: 700; margin-bottom: 30px; line-height: 1.4; }
-        .body-text { font-size: 17px; color: var(--text-muted); line-height: 1.9; }
-        .body-text b { color: #fff; font-weight: 700; }
-
-        .link-area { padding: 150px 0 250px; text-align: center; }
-        .more-btn {
-            display: inline-block; text-decoration: none; color: #fff; border: 1px solid #fff;
-            padding: 14px 45px; border-radius: 2px; font-size: 14px; letter-spacing: 0.4em;
-            text-transform: uppercase; transition: all 0.4s ease; cursor: pointer;
+        .section-label {
+            color: var(--apple-blue);
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+            display: block;
+            text-transform: uppercase;
+        }
+        .title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            line-height: 1.3;
+            letter-spacing: -0.02em;
+        }
+        .body-text {
+            font-size: 17px;
+            color: var(--text-muted);
+            line-height: 1.9;
+        }
+        .body-text b {
+            color: #fff;
             font-weight: 700;
         }
-        .more-btn:hover { background-color: #fff; color: #000; }
-        
-        #auth-overlay {
-            position: fixed; inset: 0; background: #000; z-index: 9999;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 3.0s ease, visibility 3.0s;
+
+        /* 3. リンクエリア：Beyond. ボタン */
+        .link-area {
+            padding: 150px 0 250px;
+            text-align: center;
         }
-        #auth-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        
-        .fade-out { opacity: 0 !important; pointer-events: none; transition: 0.8s; }
-        #auth-label, #pass-input, #auth-btn { transition: 0.8s ease; }
-        
-        #pass-input {
-            background: transparent; border: none; border-bottom: 1px solid #333;
-            color: #fff; font-family: 'Roboto Mono'; font-size: 24px; text-align: center;
-            outline: none; letter-spacing: 0.2em; width: 240px; margin-bottom: 30px;
+        .next-label {
+            color: #444;
+            font-size: 12px;
+            letter-spacing: 0.3em;
+            margin-bottom: 30px;
+            text-transform: uppercase;
         }
-        .auth-submit {
-            background: transparent; border: 1px solid #444; color: #fff;
-            font-family: 'Roboto Mono'; font-size: 10px; padding: 10px 30px;
-            letter-spacing: 0.3em; cursor: pointer;
+        .more-btn {
+            display: inline-block;
+            text-decoration: none;
+            color: #fff;
+            border: 1px solid #fff;
+            padding: 14px 60px;
+            border-radius: 2px;
+            font-weight: 400;
+            font-size: 14px;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            transition: all 0.4s ease;
+            background-color: transparent;
         }
-        .auth-submit:hover { border-color: #fff; background: #fff; color: #000; }
-        
-        .error-msg { color: #ff3b30; font-size: 10px; font-family: 'Roboto Mono'; margin-top: 15px; opacity: 0; transition: 0.8s ease; }
-        .access-granted { color: var(--cyber-blue) !important; letter-spacing: 0.5em !important; opacity: 1 !important; text-shadow: 0 0 10px var(--cyber-blue); }
-        
-        /* 顔写真（非表示にしてAIに読み込ませる） */
-        #source-image { display: none; }
+        .more-btn:active {
+            background-color: #fff;
+            color: #000;
+        }
+
+        footer {
+            padding: 60px 0;
+            text-align: center;
+            color: #333;
+            font-size: 10px;
+            letter-spacing: 0.1em;
+        }
     </style>
 </head>
-<body class="locked">
-    
-    <img id="source-image" src="face_target.jpg" alt="face" crossorigin="anonymous">
-
-    <div id="auth-overlay">
-        <span id="auth-label" style="font-family:'Roboto Mono'; font-size:10px; color:#86868b; letter-spacing:0.3em; margin-bottom:30px; text-transform:uppercase;">Authentication Required</span>
-        <input type="password" id="pass-input" placeholder="····" autocomplete="off">
-        <button class="auth-submit" id="auth-btn">ENTER</button>
-        <div id="error-txt" class="error-msg">INVALID ACCESS CODE</div>
-    </div>
-
-    <div id="three-container"></div>
+<body>
 
     <div class="bg-layer bg-1" id="bg1"></div>
     <div class="bg-layer bg-2" id="bg2"></div>
     <div class="bg-layer bg-3" id="bg3"></div>
-    <div class="bg-layer bg-4" id="bg4"></div>
-    <div class="bg-layer bg-5" id="bg5"></div>
 
     <div class="container">
+        
         <div class="hero-spacer">
             <h1 class="hero-title">超越する、<br>ロジック。</h1>
-            <div class="profile-specs">
-                <div><b>ID</b> NOBUYUKI</div>
-                <div><b>ROLE</b> SYSTEM ARCHITECT / ANALYST</div>
-                <div><b>STATUS</b> BIO-DATA INITIALIZED</div>
-            </div>
+            <p style="color: var(--text-muted); margin-top: 25px; font-size: 18px; font-weight: 400;">The Profile of a Genius Architect.</p>
         </div>
 
-        <section class="content-section" id="sec-1"><span class="section-label fade-up">System Disruption</span><h2 class="title fade-up delay-1">搾取の盤面を、<br>知性でハックする。</h2><div class="body-text fade-up delay-2"><p>世界は巨大な変数の集合体に過ぎない。彼が卒業論文でターゲットにしたのは、公認という名の免罪符を得た搾取システム、すなわち<b>競馬</b>を筆頭とする公営競技の解析だった。</p><p>大衆の情熱を餌に富を吸い上げるその絶対的な構造。彼はその盤面に潜む脆弱性を特定し、独自のアルゴリズムによってシステムの優位性を完全に無効化した。それは知性によるシステムの再定義であり、無自覚に搾取される人々を論理的に開放するための、静かな宣戦布告だった。</p></div></section>
-        <section class="content-section" id="sec-2"><span class="section-label fade-up">Global Connectivity</span><h2 class="title fade-up delay-1">ネットワークの末端から、<br>世界の核へと直結させる。</h2><div class="body-text fade-up delay-2"><p>大学卒業後、彼は自身のルーツである千葉・四街道へと視点を向ける。インフラから切り離されたその静寂を、彼は深く愛していた。既存の構造に従属することを拒み、彼はローカルな<b>宿泊システム</b>のネットワークを根底から再構築（リビルド）した。</p><p>中間搾取を排除した単独のバイパスを組み上げ、地方の滞在空間を直接世界とつなぐ新たな回路を確立。インバウンドの潮流が到達する前に、辺境の価値を世界中からアクセス可能な状態へと書き換えたのだ。その偉業を見届けると同時に、彼の視座は次なるフェーズへと移っていく。</p></div></section>
-        <section class="content-section" id="sec-3"><span class="section-label fade-up">Void Processing</span><h2 class="title fade-up delay-1">ゼロへと回帰し、<br>空白から再定義する。</h2><div class="body-text fade-up delay-2"><p>完璧なロジックを維持するためには、時にシステムそのもののリビルドが必要になる。彼は自らの社会的なインフラをすべて破棄し、完全なゼロへと収束させる道を選んだ。</p><p>過去の履歴や既存の信用を消去し、一枚のデビットカードだけを唯一の生存インターフェースにする。それは不純物を取り除き、本質だけを抽出するための強制的デバッグだった。何も持たないがゆえに研ぎ澄まされる感覚が、彼のロジックに血の通った圧倒的な力強さを宿らせていく。</p></div></section>
-        <section class="content-section" id="sec-4"><span class="section-label fade-up">Irrational Anomaly</span><h2 class="title fade-up delay-1">非論理的な干渉と、<br>致命的なペナルティ。</h2><div class="body-text fade-up delay-2"><p>新たな最適化フェーズへと進む過程で、彼は解析不能な一人の女性と遭遇する。自身のシステムを崩壊させかねない危険な接触。</p><p>彼は周囲の警告を無視し、自らを「暴走機関車」へと書き換え同期（結婚）を強行した。過去を抹消した秘匿事象は、後に<b>重大なペナルティ</b>を招く致命的なバグとなったが——</p><p>現在、システムからは「子供」という新たな自律変数が生成されている。かつては予測不能だったその存在を、彼は今、自身のアーキテクチャにおける「最も美しく、不可解な最適解」として静かに観測している。</p></div></section>
-        <div class="link-area fade-up"><span class="next-label">Unlisted Records</span><p class="next-teaser">論理の裏側に隠された、知性の断片を閲覧する。</p><a href="more.html" class="more-btn">BELONG BELONG.</a></div>
+        <section class="content-section" id="trigger-logic">
+            <span class="section-label">Theory</span>
+            <h2 class="title">伝統的市場への、<br>知性による介入。</h2>
+            <div class="body-text">
+                <p>
+                    彼にとって、世界は巨大な変数の集合体に過ぎない。
+                    卒業論文で挑んだのは、古より続く<b>確率論的競技市場</b>の解析だった。
+                </p>
+                <p>
+                    導き出されたアルゴリズムはシステムの根幹を揺るがし、運営組織が<b>ルールの変更</b>を余儀なくされるほどの衝撃を与えた。
+                    それは単なる予測ではない。支配的なシステムに対する、知性による再定義である。
+                </p>
+            </div>
+        </section>
+
+        <section class="content-section" id="trigger-human">
+            <span class="section-label">Humanity</span>
+            <h2 class="title">ロジックの死角、<br>そして空白の期間。</h2>
+            <div class="body-text">
+                <p>
+                    完璧に設計されたコードにも、時に予期せぬノイズが混入する。
+                    200万円の負債、そして債務整理。デビットカード一枚で過ごしたその空白は、彼に「究極のリアリズム」を突きつけた。
+                </p>
+                <p>
+                    破綻を経て、彼は再びキーボードの前に立った。
+                    今の彼が書くコードには、かつての首席という肩書きにはなかった、<b>血の通った生存本能</b>が宿っている。
+                </p>
+            </div>
+        </section>
+
+        <div class="link-area">
+            <p class="next-label">Next Chapter</p>
+            <a href="more.html" class="more-btn">Beyond.</a>
+        </div>
+
         <footer>© THE GENIUS ARCHITECT.</footer>
     </div>
 
     <script>
-        let scene, camera, renderer, threeMesh;
-        const container = document.getElementById('three-container');
-        const sourceImage = document.getElementById('source-image');
-
-        // ▼ AIによる顔解析の初期化 ▼
-        async function initFaceMesh() {
-            try {
-                // タイポ修正済！
-                const model = await faceLandmarksDetection.load(
-                    faceLandmarksDetection.SupportedPackages.mediapipeFacemesh
-                );
-                
-                const predictions = await model.estimateFaces({
-                    input: sourceImage,
-                    returnTensors: false,
-                    flipHorizontal: false,
-                    predictIrises: false
-                });
-
-                if (predictions.length > 0) {
-                    initThreePointCloud(predictions[0].scaledMesh);
-                } else {
-                    console.log("No face detected, loading fallback.");
-                    initFallbackThree(); // 顔が見つからない場合は予備をロード
-                }
-            } catch (e) {
-                console.log("AI Load Error or Local Security Block:", e);
-                initFallbackThree(); // Coderアプリ等でブロックされた場合は予備をロード
-            }
-        }
-
-        // ▼ 成功時：顔データから点描画を作成 ▼
-        function initThreePointCloud(landmarks) {
-            scene = new THREE.Scene();
-            scene.fog = new THREE.Fog(0x000000, 500, 2500);
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 5000);
-            camera.position.z = 1000;
-
-            const geometry = new THREE.BufferGeometry();
-            const positions = [];
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY;
+            const windowHeight = window.innerHeight;
             
-            let centerX = 0, centerY = 0, centerZ = 0;
-            landmarks.forEach(pt => { centerX += pt[0]; centerY += pt[1]; centerZ += pt[2]; });
-            centerX /= landmarks.length; centerY /= landmarks.length; centerZ /= landmarks.length;
+            // 各セクションの位置を取得
+            const triggerLogic = document.getElementById('trigger-logic').offsetTop;
+            const triggerHuman = document.getElementById('trigger-human').offsetTop;
 
-            landmarks.forEach(pt => {
-                positions.push((pt[0] - centerX) * 3);
-                positions.push(-(pt[1] - centerY) * 3);
-                positions.push(-(pt[2] - centerZ) * 5);
-            });
+            const bg1 = document.getElementById('bg1');
+            const bg2 = document.getElementById('bg2');
+            const bg3 = document.getElementById('bg3');
 
-            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-
-            const material = new THREE.PointsMaterial({ 
-                color: 0x00f0ff, size: 6, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending 
-            });
-
-            threeMesh = new THREE.Points(geometry, material);
-            threeMesh.rotation.x = THREE.Math.degToRad(10); 
-            scene.add(threeMesh);
-
-            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            container.appendChild(renderer.domElement);
-
-            animateThree('points');
-        }
-
-        // ▼ 失敗時（アプリ制限時）：巨大なワイヤーフレームコアを表示 ▼
-        function initFallbackThree() {
-            scene = new THREE.Scene();
-            scene.fog = new THREE.Fog(0x000000, 500, 2000);
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
-            camera.position.z = 1000;
-
-            const geometry = new THREE.IcosahedronGeometry(400, 2); 
-            const wireframe = new THREE.WireframeGeometry(geometry);
-            const material = new THREE.LineBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.3 });
-            
-            threeMesh = new THREE.LineSegments(wireframe, material);
-            scene.add(threeMesh);
-
-            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            container.appendChild(renderer.domElement);
-
-            animateThree('wireframe');
-        }
-
-        // ▼ アニメーションループ ▼
-        function animateThree(type) {
-            requestAnimationFrame(() => animateThree(type));
-            
-            if (threeMesh) {
-                if (type === 'points') {
-                    const time = Date.now() * 0.0005;
-                    threeMesh.rotation.y = Math.sin(time) * 0.3; 
-                    threeMesh.rotation.x = THREE.Math.degToRad(10) + Math.cos(time * 0.8) * 0.1; 
-                } else {
-                    threeMesh.rotation.x += 0.0005;
-                    threeMesh.rotation.y += 0.001;
-                    const scale = 1 + Math.sin(Date.now() * 0.001 * 0.5) * 0.05;
-                    threeMesh.scale.set(scale, scale, scale);
-                }
-            }
-            renderer.render(scene, camera);
-        }
-
-        window.addEventListener('resize', () => {
-            if(camera && renderer) {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
+            // 1枚目：トップからエピソード1が見えるまで
+            if (scrollY < triggerLogic - (windowHeight * 0.4)) {
+                bg1.style.opacity = '1';
+                bg2.style.opacity = '0';
+                bg3.style.opacity = '0';
+            } 
+            // 2枚目：エピソード1（ロジック）の間
+            else if (scrollY >= triggerLogic - (windowHeight * 0.4) && scrollY < triggerHuman - (windowHeight * 0.4)) {
+                bg1.style.opacity = '0';
+                bg2.style.opacity = '1';
+                bg3.style.opacity = '0';
+            } 
+            // 3枚目：エピソード2（死角）から最後まで
+            else {
+                bg1.style.opacity = '0';
+                bg2.style.opacity = '0';
+                bg3.style.opacity = '1';
             }
         });
-
-        // 画像のロード完了を待ってからAI解析を実行
-        if (sourceImage.complete) {
-            initFaceMesh();
-        } else {
-            sourceImage.onload = initFaceMesh;
-            sourceImage.onerror = initFallbackThree; // 画像がない場合も予備を発動
-        }
-
-        // --- 以下、画面遷移と背景制御スクリプト ---
-        const overlay = document.getElementById('auth-overlay');
-        const authLabel = document.getElementById('auth-label');
-        const input = document.getElementById('pass-input');
-        const submitBtn = document.getElementById('auth-btn');
-        const errorTxt = document.getElementById('error-txt');
-
-        if (sessionStorage.getItem('is_auth_main') === 'true') {
-            document.body.classList.remove('locked');
-            overlay.style.display = 'none';
-            activateSystem();
-        } else {
-            setTimeout(() => input.focus(), 100);
-        }
-
-        function activateSystem() {
-            document.body.classList.add('system-active');
-            document.querySelector('.container').classList.add('system-active');
-            document.getElementById('three-container').classList.add('system-active');
-            document.querySelectorAll('.bg-layer').forEach(el => el.classList.add('system-active'));
-        }
-
-        const attemptLogin = () => {
-            if (input.value === '777') {
-                sessionStorage.setItem('is_auth_main', 'true');
-                authLabel.classList.add('fade-out');
-                input.classList.add('fade-out');
-                submitBtn.classList.add('fade-out');
-                errorTxt.innerText = 'ACCESS GRANTED...';
-                errorTxt.classList.add('access-granted');
-                
-                setTimeout(() => {
-                    updateBg(); 
-                    overlay.style.opacity = '0'; 
-                    document.body.classList.remove('locked');
-                    window.scrollTo(0, 0); 
-                    activateSystem();
-                    setTimeout(() => { overlay.style.display = 'none'; }, 3000); 
-                }, 2000); 
-            } else {
-                errorTxt.style.opacity = '1';
-                input.value = '';
-                setTimeout(() => { errorTxt.style.opacity = '0'; }, 2000);
-            }
-        };
-
-        submitBtn.addEventListener('click', attemptLogin);
-        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
-
-        const updateBg = () => {
-            const trigger = window.innerHeight * 0.6;
-            const s1 = document.getElementById('sec-1').getBoundingClientRect().top;
-            const s2 = document.getElementById('sec-2').getBoundingClientRect().top;
-            const s3 = document.getElementById('sec-3').getBoundingClientRect().top;
-            const s4 = document.getElementById('sec-4').getBoundingClientRect().top;
-
-            document.getElementById('bg1').style.opacity = s1 > trigger ? '1' : '0';
-            document.getElementById('bg2').style.opacity = (s1 <= trigger && s2 > trigger) ? '1' : '0';
-            document.getElementById('bg3').style.opacity = (s2 <= trigger && s3 > trigger) ? '1' : '0';
-            document.getElementById('bg4').style.opacity = (s3 <= trigger && s4 > trigger) ? '1' : '0';
-            document.getElementById('bg5').style.opacity = s4 <= trigger ? '1' : '0';
-        };
-        
-        window.addEventListener('scroll', updateBg);
-        window.onload = updateBg;
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => { 
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active'); 
-                }
-            });
-        }, { rootMargin: '0px 0px -15% 0px' }); 
-        
-        document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
     </script>
+
 </body>
 </html>
