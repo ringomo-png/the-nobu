@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NOBUYUKI QUEST - 冒険の書</title>
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        body { margin: 0; background-color: #08084a; color: #fff; font-family: 'DotGothic16', sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; overflow: hidden; user-select: none; }
+        #game-container { position: relative; display: flex; flex-direction: column; width: 1000px; max-width: 100vw; height: 100vh; }
+        #game-area { position: relative; flex: 1; background: #000; overflow: hidden; border-bottom: 2px solid #fff; border-top: 2px solid #fff; }
+        
+        canvas { display: block; width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
+        
+        #ui { position: absolute; top: 10px; left: 10px; pointer-events: none; z-index: 10; font-size: 18px; text-shadow: 2px 2px 0 #000; display: none; }
+        #val-score { color: #ffd700; margin-left: 15px; }
+        #val-lv { color: #00f3ff; margin-right: 15px; }
+        .retro-hp { color: #fff; margin-top: 5px; }
+        .heart-icon { color: #ff3b30; }
+
+        #message-box { height: 90px; background-color: #08084a; border: 3px solid #fff; border-radius: 6px; margin: 10px; padding: 12px 15px; box-sizing: border-box; font-size: 18px; line-height: 1.5; color: #fff; display: flex; align-items: flex-start; }
+        .blink { animation: blinker 1s linear infinite; margin-left: auto; align-self: flex-end;}
+        @keyframes blinker { 50% { opacity: 0; } }
+
+        #title-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #08084a; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 50; }
+        
+        #sound-btn { position: absolute; top: 20px; right: 20px; font-size: 20px; cursor: pointer; z-index: 100; border: 2px solid #fff; padding: 5px 10px; background: #000; }
+        
+        .stats-window { border: 3px solid #fff; border-radius: 6px; padding: 10px; background: #000; margin-bottom: 15px; width: 80%; max-width: 400px; font-size: 16px; text-align: center; }
+        .stat-val { color: #ff3b30; font-size: 20px; }
+        
+        .start-prompt { font-size: 24px; color: #fff; margin-bottom: 15px; cursor: pointer; padding: 10px 30px; border: 3px solid #fff; background: #000; }
+        .sys-btn { font-size: 14px; color: #aaa; cursor: pointer; text-decoration: underline; }
+
+        #system-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 200; }
+        .sys-box { border: 3px solid #fff; padding: 20px; background: #08084a; text-align: center; }
+        .sys-box input { width: 60px; font-size: 18px; margin: 5px; background: #000; color: #fff; border: 1px solid #fff; text-align: center; font-family: 'DotGothic16';}
+
+        #bag-btn { position: absolute; top: 15px; right: 15px; display: none; cursor: pointer; z-index: 20; background: #8b4513; border: 2px solid #fff; padding: 8px; font-size: 14px; pointer-events: auto;}
+        
+        #transition-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; justify-content: center; align-items: center; z-index: 300; font-size: 40px; }
+
+        .assets { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="sound-btn">🔇 BGM: OFF</div>
+
+        <div id="title-screen">
+            <svg width="900" height="250" viewBox="0 0 900 250" style="margin-bottom: 5px; max-width: 100vw;">
+                <path id="title-curve" d="M 50,180 Q 450,-40 850,180" fill="transparent" />
+                <text font-family="'DotGothic16', sans-serif" font-size="96" fill="#ffd700" font-weight="bold" filter="drop-shadow(6px 6px 0 #ff0000)">
+                    <textPath href="#title-curve" startOffset="50%" text-anchor="middle">NOBUYUKI QUEST</textPath>
+                </text>
+            </svg>
+            
+            <div class="stats-window">
+                <div style="color:#ffd700;">【 せかいの ぼうけん きろく 】</div>
+                <div>しぼう：<span class="stat-val" id="global-deaths">--</span> 回</div>
+                <div>クリアりつ：<span class="stat-val" style="color:#00f3ff;" id="global-clear-rate">--.-</span> %</div>
+            </div>
+
+            <div class="start-prompt blink" id="start-btn">＞ ぼうけん に でる ＜</div>
+            <div class="sys-btn" id="open-sys">システム せってい</div>
+        </div>
+
+        <div id="system-screen">
+            <div class="sys-box">
+                <div style="color:#ffd700; margin-bottom:10px;">【 ボス HP ちょうせい 】</div>
+                <div>BOSS 1: <input type="number" id="hp-boss1" value="50"></div>
+                <div>BOSS 2: <input type="number" id="hp-boss2" value="70"></div>
+                <div>BOSS 3: <input type="number" id="hp-boss3" value="200"></div>
+                <button class="sys-btn" id="close-sys" style="margin-top:15px; cursor:pointer; font-family:'DotGothic16'; color:#fff;">けってい</button>
+            </div>
+        </div>
+
+        <div id="transition-screen">STAGE 2</div>
+
+        <div id="game-area">
+            <div id="ui">
+                <div>ステージ：<span id="val-lv">１</span></div>
+                <div class="retro-hp">いのち：<span class="heart-icon">♥</span> × <span id="val-lives">3</span> <span id="val-score">SCORE: 0</span></div>
+            </div>
+            <div id="bag-btn">💊 ふくろ つかう</div>
+            <canvas id="view-canvas"></canvas>
+        </div>
+
+        <div id="message-box">
+            <span id="msg-text">・・・・・・。</span>
+            <span class="blink" id="msg-cursor" style="display:none;">▼</span>
+        </div>
+    </div>
+
+    <div class="assets">
+        <img id="walk1" src="1-uma.nobu.png"><img id="walk2" src="2-uma.nobu.png">
+        <img id="sword1" src="3-uma.nobu.png"><img id="sword2" src="4-uma.nobu.png"><img id="sword3" src="5-uma.nobu.png">
+        <img id="monster1" src="monster1.png"><img id="monster2" src="monster2.png"><img id="monster3" src="monster3.png">
+    </div>
+
+    <script>
+        // ==========================================
+        // 🌟 あなたの Firebase 設定 (ここに入れてください)
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDrDTNLFOC93bBsjzcBrdLt4miPgrat2zY",
+            authDomain: "nobuyukiquest.firebaseapp.com",
+            projectId: "nobuyukiquest",
+            storageBucket: "nobuyukiquest.firebasestorage.app",
+            messagingSenderId: "504992212070",
+            appId: "1:504992212070:web:79f0ccca4e1d136bd639a7"
+        };
+        
+        try { 
+            firebase.initializeApp(firebaseConfig); 
+            window.db = firebase.firestore(); 
+            loadGlobalStats(); 
+        } catch(e) { console.log("Firebase Error"); }
+
+        async function loadGlobalStats() {
+            if(!window.db) return;
+            try {
+                const doc = await db.collection("stats").doc("global").get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    document.getElementById('global-deaths').innerText = data.deaths || 0;
+                    let rate = data.plays > 0 ? ((data.clears / data.plays) * 100).toFixed(1) : 0;
+                    document.getElementById('global-clear-rate').innerText = rate;
+                } else { await db.collection("stats").doc("global").set({ plays: 0, deaths: 0, clears: 0 }); }
+            } catch (e) {}
+        }
+        async function updateStat(type) { if(window.db) db.collection("stats").doc("global").set({ [type]: firebase.firestore.FieldValue.increment(1) }, { merge: true }); }
+
+        // ==========================================
+        // 🎮 ゲームロジック
+        // ==========================================
+        const canvas = document.getElementById('view-canvas'); const ctx = canvas.getContext('2d');
+        const GW = 1000, GH = 400; const PLAYER_X = 50; const CHAR_SIZE = 180;
+        const UPPER_Y = 280, LOWER_Y = 340; 
+
+        let gameState = 'TITLE', currentLevel = 1, score = 0, frameCount = 0, lives = 3;
+        let phase = 'zako', zakoKills = 0, enemies = [], swordWaves = [], projectiles = [], boss = null;
+        let attackFrame = -1, attackCooldown = 0, playerTint = '', playerTintTimer = 0;
+        let hasBag = false, bagSpawned = false, diedAtBoss = false;
+        let bossHP = [50, 70, 200];
+        let waitFrames = 0, waitCallback = null;
+
+        const imgWalk = [document.getElementById('walk1'), document.getElementById('walk2')];
+        const imgSword = [document.getElementById('sword1'), document.getElementById('sword2'), document.getElementById('sword3')];
+        const imgMonsters = [document.getElementById('monster1'), document.getElementById('monster2'), document.getElementById('monster3')];
+
+        // 🎵 オーディオ
+        let audioCtx, soundEnabled = false, bgmInterval, titleBgmInterval;
+        const soundBtn = document.getElementById('sound-btn');
+        soundBtn.onclick = () => {
+            soundEnabled = !soundEnabled;
+            if (soundEnabled) { 
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                soundBtn.innerText = '🔊 BGM: ON'; if(gameState === 'TITLE') playTitleBgm(); else startBgm();
+            } else { soundBtn.innerText = '🔇 BGM: OFF'; stopBgm(); stopTitleBgm(); }
+        };
+
+        function playSound(type) {
+            if(!soundEnabled || !audioCtx) return;
+            const osc = audioCtx.createOscillator(); const g = audioCtx.createGain();
+            osc.connect(g); g.connect(audioCtx.destination); const now = audioCtx.currentTime;
+            if(type==='slash'){ osc.type='sawtooth'; osc.frequency.setValueAtTime(600,now); osc.frequency.exponentialRampToValueAtTime(100,now+0.1); g.gain.setValueAtTime(0.2,now); osc.start(); osc.stop(now+0.1); }
+            if(type==='boss_dead'){ osc.type='square'; osc.frequency.setValueAtTime(100,now); osc.frequency.linearRampToValueAtTime(20,now+1.5); g.gain.setValueAtTime(0.5,now); osc.start(); osc.stop(now+1.5); }
+            if(type==='boss_appear'){ const ns=[311,293,277,261]; ns.forEach((f,i)=>{const o=audioCtx.createOscillator(); const gn=audioCtx.createGain(); o.type='square'; o.frequency.value=f; o.connect(gn); gn.connect(audioCtx.destination); gn.gain.setValueAtTime(0.2,now+i*0.15); o.start(now+i*0.15); o.stop(now+i*0.15+0.15);}); }
+            if(type==='hit'){ osc.type='square'; osc.frequency.setValueAtTime(150,now); osc.frequency.exponentialRampToValueAtTime(40,now+0.1); g.gain.setValueAtTime(0.4,now); osc.start(); osc.stop(now+0.1); } 
+            if(type==='damage'){ osc.type='sawtooth'; osc.frequency.setValueAtTime(100,now); osc.frequency.linearRampToValueAtTime(40,now+0.3); g.gain.setValueAtTime(0.6,now); osc.start(); osc.stop(now+0.3); } 
+            if(type==='heal'){ osc.type='sine'; osc.frequency.setValueAtTime(500,now); osc.frequency.setValueAtTime(1000,now+0.1); g.gain.setValueAtTime(0.3,now); osc.start(); osc.stop(now+0.3); } 
+            if(type==='parry'){ osc.type='triangle'; osc.frequency.setValueAtTime(1000,now); osc.frequency.exponentialRampToValueAtTime(2000,now+0.1); g.gain.setValueAtTime(0.6,now); osc.start(); osc.stop(now+0.2); } 
+            if(type==='gameover'){ const notes=[{f:150,t:0},{f:140,t:0.3},{f:130,t:0.6},{f:90,t:0.9}]; notes.forEach(n=>{const o=audioCtx.createOscillator(); const gn=audioCtx.createGain(); o.type='sawtooth'; o.frequency.value=n.f; o.connect(gn); gn.connect(audioCtx.destination); gn.gain.setValueAtTime(0.5,now+n.t); gn.gain.linearRampToValueAtTime(0.01,now+n.t+0.3); o.start(now+n.t); o.stop(now+n.t+0.3);}); }
+        }
+
+        function playTitleBgm(){ if(!soundEnabled || titleBgmInterval || !audioCtx) return; titleBgmInterval=setInterval(()=>{ const osc=audioCtx.createOscillator(); const g=audioCtx.createGain(); osc.type='square'; osc.frequency.value=[261,392,329,392][frameCount%4]; osc.connect(g); g.connect(audioCtx.destination); g.gain.setValueAtTime(0.05,audioCtx.currentTime); osc.start(); osc.stop(audioCtx.currentTime+0.1); }, 200); }
+        function stopTitleBgm(){ clearInterval(titleBgmInterval); titleBgmInterval=null; }
+        function startBgm(){ if(!soundEnabled || bgmInterval || !audioCtx) return; bgmInterval=setInterval(()=>{ const osc=audioCtx.createOscillator(); const g=audioCtx.createGain(); osc.type='square'; osc.frequency.value=[110,130,146,164][frameCount%4]; osc.connect(g); g.connect(audioCtx.destination); g.gain.setValueAtTime(0.05,audioCtx.currentTime); osc.start(); osc.stop(audioCtx.currentTime+0.1); }, 180); }
+        function stopBgm(){ clearInterval(bgmInterval); bgmInterval=null; }
+
+        function showMsg(t){ document.getElementById('msg-text').innerText = t; }
+        function updateUI(){ document.getElementById('val-lives').innerText = lives; document.getElementById('val-score').innerText = "SCORE: " + score; document.getElementById('val-lv').innerText = currentLevel==3?"ファイナル":currentLevel; }
+
+        function resetGame(retryBoss = false) {
+            stopTitleBgm(); 
+            if(!retryBoss){ currentLevel=1; score=0; zakoKills=0; bagSpawned=false; hasBag=false; updateStat('plays'); }
+            
+            lives=3; enemies=[]; swordWaves=[]; projectiles=[]; boss=null; 
+            attackFrame=-1; waitFrames=0; playerTintTimer=0; diedAtBoss=false;
+            document.getElementById('bag-btn').style.display = hasBag?'block':'none';
+            document.getElementById('ui').style.display='block'; updateUI(); if(soundEnabled) startBgm();
+            
+            if(retryBoss) {
+                phase='wait_boss';
+                zakoKills = (currentLevel === 3) ? 10 : 5;
+                showMsg("ボスとの さいせん だ！"); waitFrames = 60; waitCallback = spawnBoss;
+            } else {
+                phase='zako';
+                showMsg("ぼうけん が はじまった！");
+            }
+        }
+
+        function spawnBoss(){
+            playSound('boss_appear');
+            boss = { x:GW+200, y:310, hp:bossHP[currentLevel-1], maxHp:bossHP[currentLevel-1], w:180, h:180, timer:-90, targetX:GW-220, shake:0, attackCount:0, restTimer:0 };
+            phase = 'boss'; showMsg(currentLevel>=3?"さいしゅう ボス が あらわれた！！":"きょうりょくな ボス が あらわれた！");
+        }
+
+        function checkPhaseProgress() {
+            let requiredKills = (currentLevel === 3) ? 10 : 5;
+            if (phase === 'zako' && zakoKills >= requiredKills) {
+                phase = 'wait_boss'; showMsg("・・・・・・。"); waitFrames = 120; waitCallback = spawnBoss;
+            }
+        }
+
+        function spawnEnemy(){
+            if(phase!=='zako' || frameCount%60!==0) return;
+            if(!bagSpawned && currentLevel>=2 && Math.random()<0.05){ enemies.push({x:GW+50, y:UPPER_Y, speed:8, type:'bag', w:40, h:40}); bagSpawned=true; return; }
+            enemies.push({x:GW+50, y:Math.random()<0.5?UPPER_Y:LOWER_Y, speed:10, type:Math.random()<0.15?'heal':'normal', w:60, h:50});
+        }
+
+        function drawBackground(ctx, level, frame) {
+            ctx.save(); const groundY = 280; 
+            if (level === 1) { ctx.fillStyle = '#4cb4e6'; ctx.fillRect(0, 0, GW, groundY); ctx.fillStyle = '#ffffff'; ctx.fillRect((100 - frame*0.5)%GW, 50, 60, 20); ctx.fillRect((300 - frame*0.5)%GW, 80, 80, 25); ctx.fillRect((700 - frame*0.5)%GW, 40, 50, 15); ctx.fillStyle = '#4eb04b'; ctx.fillRect(0, groundY, GW, GH - groundY); ctx.fillStyle = '#3a8a38'; for(let i=0; i<GW; i+=40) ctx.fillRect(i, groundY+10, 10, 5); for(let i=20; i<GW; i+=50) ctx.fillRect(i, groundY+30, 15, 5); } 
+            else if (level === 2) { ctx.fillStyle = '#c77a44'; ctx.fillRect(0, 0, GW, groundY); ctx.fillStyle = '#e8a97b'; ctx.fillRect((200 - frame*0.8)%GW, 100, 100, 10); ctx.fillRect((600 - frame*0.8)%GW, 150, 150, 10); ctx.fillStyle = '#8c4b27'; ctx.fillRect(0, groundY, GW, GH - groundY); ctx.fillStyle = '#5c2d13'; for(let i=10; i<GW; i+=50) ctx.fillRect(i, groundY+20, 15, 10); for(let i=30; i<GW; i+=70) ctx.fillRect(i, groundY+50, 20, 15); } 
+            else { ctx.fillStyle = '#3d0c45'; ctx.fillRect(0, 0, GW, groundY); ctx.fillStyle = '#82133b'; ctx.fillRect((150 - frame)%GW, 80, 80, 5); ctx.fillRect((550 - frame)%GW, 120, 120, 5); ctx.fillStyle = '#1a0510'; ctx.fillRect(0, groundY, GW, GH - groundY); ctx.fillStyle = '#d91818'; for(let i=20; i<GW; i+=60) ctx.fillRect(i, groundY+30, 20, 4); for(let i=5; i<GW; i+=45) ctx.fillRect(i, groundY+60, 15, 4); }
+            ctx.restore();
+        }
+
+        function drawCrescent(x, y, shadowColor, fillColor) { ctx.save(); ctx.translate(x, y); ctx.fillStyle = fillColor; ctx.shadowBlur = 15; ctx.shadowColor = shadowColor; ctx.beginPath(); ctx.moveTo(0, -35); ctx.quadraticCurveTo(20, 0, 0, 35); ctx.quadraticCurveTo(8, 0, 0, -35); ctx.fill(); ctx.restore(); }
+        function drawHeart(x, y, size) { ctx.save(); ctx.translate(x, y - size/4); ctx.fillStyle = '#ff69b4'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.bezierCurveTo(-size/2, -size/2, -size, size/3, 0, size); ctx.bezierCurveTo(size, size/3, size/2, -size/2, 0, 0); ctx.fill(); ctx.restore(); }
+        function drawBag(x, y) { ctx.save(); ctx.translate(x, y); ctx.fillStyle = '#8b4513'; ctx.fillRect(-15, -15, 30, 35); ctx.fillStyle = '#d2b48c'; ctx.fillRect(-10, -25, 20, 10); ctx.fillStyle = '#ffd700'; ctx.fillRect(-5, -15, 10, 5); ctx.restore(); }
+
+        function animate() {
+            requestAnimationFrame(animate); 
+            if(gameState==='TITLE') return;
+            
+            drawBackground(ctx, currentLevel, frameCount);
+            ctx.imageSmoothingEnabled = false; 
+
+            if (waitFrames > 0) { waitFrames--; if (waitFrames === 0 && waitCallback) { let cb = waitCallback; waitCallback = null; cb(); } }
+            if (playerTintTimer > 0) playerTintTimer--;
+
+            if (attackCooldown > 0) attackCooldown--;
+
+            // --- BOSS ---
+            if(boss && (phase === 'boss' || phase === 'boss_dead')){
+                if (phase === 'boss') boss.timer++; 
+                if (boss.timer > 0 && phase === 'boss'){
+                    if(boss.x > boss.targetX) boss.x -= 3;
+                    if(boss.shake > 0) { boss.shake *= 0.8; if(boss.shake < 0.5) boss.shake = 0; }
+                    
+                    if(boss.restTimer > 0) { boss.restTimer--; } else {
+                        let shootRate = Math.max(20, 60 - (currentLevel * 10));
+                        if(currentLevel === 3 && boss.timer % 60 === 0) shootRate = 20 + Math.floor(Math.random() * 40);
+
+                        if(boss.timer % shootRate === 0 && boss.x <= boss.targetX && gameState === 'PLAYING'){
+                            let isUp = Math.random() < 0.5;
+                            let isFeint = (currentLevel === 3 && Math.random() < 0.20); // フェイント20%
+                            let startY = isUp ? UPPER_Y : LOWER_Y;
+                            let endY = isFeint ? (isUp ? LOWER_Y : UPPER_Y) : startY;
+                            projectiles.push({ x: boss.x, y: startY, targetY: endY, speed: currentLevel === 3 ? 12 + Math.random() * 8 : 12 + (currentLevel * 2), isParried: false });
+                            
+                            boss.attackCount++; if(boss.attackCount >= 5 + Math.random() * 2) { boss.restTimer = 120; boss.attackCount = 0; }
+                        }
+                    }
+                }
+                
+                let bx = boss.x + (Math.random() - 0.5) * boss.shake; let by = boss.y + (Math.random() - 0.5) * boss.shake;
+                const bossImg = imgMonsters[Math.min(currentLevel - 1, 2)];
+                if (bossImg && bossImg.complete && bossImg.naturalWidth > 0) { ctx.drawImage(bossImg, bx - boss.w/2, by - boss.h/2, boss.w, boss.h); } 
+                else { ctx.fillStyle = '#222'; ctx.fillRect(bx - boss.w/2, by - boss.h/2, boss.w, boss.h); }
+                
+                if(phase === 'boss') {
+                    ctx.fillStyle = '#111'; ctx.fillRect(GW/2 - 150, 15, 300, 10);
+                    ctx.fillStyle = '#ff3b30'; ctx.fillRect(GW/2 - 150, 15, 300 * (boss.hp/boss.maxHp), 10);
+                    ctx.fillStyle = '#fff'; ctx.font = '16px DotGothic16'; ctx.textAlign = 'center'; ctx.fillText('BOSS', GW/2, 10); ctx.textAlign = 'left';
+                }
+            }
+
+            // --- PROJECTILES (逆順ループで安全に削除) ---
+            for (let i = projectiles.length - 1; i >= 0; i--) {
+                let p = projectiles[i]; p.x -= p.speed; 
+                
+                if (!p.isParried && p.y !== p.targetY && p.x < GW / 2 + 100) { p.y += (p.targetY > p.y) ? 12 : -12; if (Math.abs(p.y - p.targetY) < 12) p.y = p.targetY; }
+                
+                if (p.isParried) { drawCrescent(p.x, p.y, '#ff8800', '#ffff00'); } 
+                else { ctx.fillStyle = '#ff0000'; ctx.fillRect(p.x - 10, p.y - 10, 20, 20); ctx.fillRect(p.x + 10, p.y - 6, 8, 12); ctx.fillRect(p.x + 18, p.y - 2, 6, 8); ctx.fillStyle = '#ff8800'; ctx.fillRect(p.x - 6, p.y - 6, 12, 12); ctx.fillStyle = '#ffff00'; ctx.fillRect(p.x - 2, p.y - 2, 4, 4); }
+                
+                if (p.x < PLAYER_X + 60 && !p.isParried && gameState === 'PLAYING') { projectiles.splice(i, 1); damagePlayer(); }
+                else if (p.isParried && boss && phase === 'boss' && p.x > boss.x - boss.w/2) { projectiles.splice(i, 1); boss.hp -= 5; boss.shake = 20; playSound('hit'); score += 50; updateUI(); if (boss.hp <= 0) win(); }
+                else if (p.x < -100 || p.x > GW + 200) projectiles.splice(i, 1);
+            }
+
+            // --- ENEMIES (逆順ループで安全に削除) ---
+            spawnEnemy();
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                let e = enemies[i]; if (gameState === 'PLAYING' && phase !== 'transition') e.x -= e.speed;
+                
+                if (e.type === 'heal') { drawHeart(e.x, e.y, 25); } 
+                else if (e.type === 'bag') { drawBag(e.x, e.y); }
+                else { 
+                    if (currentLevel === 3) { ctx.fillStyle = '#eee'; ctx.beginPath(); ctx.ellipse(e.x, e.y, e.w/2, e.h/2, 0, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#ff0055'; ctx.fillRect(e.x - 15, e.y - 5, 8, 3); } 
+                    else { ctx.fillStyle = '#111'; ctx.beginPath(); ctx.ellipse(e.x, e.y, e.w/2, e.h/2, 0, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = 'red'; ctx.fillRect(e.x - 15, e.y - 5, 8, 3); }
+                }
+                
+                if (e.x < PLAYER_X + 80 && gameState === 'PLAYING' && phase !== 'transition') {
+                    if (e.type === 'heal') { 
+                        if (lives < 3) lives++; showMsg("いのちのきのみ を てに入れた！ いのちが かいふくした！"); playSound('heal'); playerTint = 'rgba(0, 255, 0, 0.5)'; playerTintTimer = 15; updateUI(); 
+                    } else if (e.type === 'bag') {
+                        hasBag = true; document.getElementById('bag-btn').style.display = 'block'; showMsg("かいふくの ふくろ を てに入れた！ (右上のボタンで つかえる)"); playSound('heal'); 
+                    } else { damagePlayer(); }
+                    enemies.splice(i, 1); 
+                } else if (e.x < -100) { enemies.splice(i, 1); }
+            }
+
+            // --- SWORD WAVES (逆順ループで安全に削除) ---
+            for (let i = swordWaves.length - 1; i >= 0; i--) {
+                let sw = swordWaves[i]; sw.x += 10; drawCrescent(sw.x, sw.y, '#00f3ff', '#ffffff'); 
+                
+                let hitSomething = false;
+                for(let j = enemies.length - 1; j >= 0; j--) {
+                    let e = enemies[j];
+                    if (Math.abs(sw.x - e.x) < 80 && Math.abs(sw.y - e.y) < 30) { 
+                        if (e.type === 'bag') { playSound('hit'); showMsg("ふくろ を きってしまった... なかみ が こぼれた。"); }
+                        else if (e.type === 'heal') { playSound('hit'); } 
+                        else { playSound('hit'); score += 10; zakoKills++; updateUI(); checkPhaseProgress(); }
+                        enemies.splice(j, 1); hitSomething = true; break; 
+                    } 
+                }
+                if(hitSomething){ swordWaves.splice(i, 1); continue; }
+
+                for(let j = projectiles.length - 1; j >= 0; j--) {
+                    let p = projectiles[j];
+                    if (!p.isParried && Math.abs(sw.x - p.x) < 80 && Math.abs(sw.y - p.y) < 30) { 
+                        hitSomething = true;
+                        if (p.x < PLAYER_X + 220) { p.isParried = true; p.speed = -40; playSound('parry'); score += 50; updateUI(); } 
+                        else { projectiles.splice(j, 1); playSound('hit'); score += 10; updateUI(); }
+                        break;
+                    } 
+                }
+                if(hitSomething){ swordWaves.splice(i, 1); continue; }
+
+                if (boss && phase === 'boss' && Math.abs(sw.x - boss.x) < boss.w/2) { boss.hp -= 1; boss.shake = 10; swordWaves.splice(i, 1); playSound('hit'); if (boss.hp <= 0) win(); }
+                else if (sw.x > GW + 100) swordWaves.splice(i, 1);
+            }
+
+            // --- NOBUYUKI ---
+            let currentImg = (attackFrame >= 0) ? imgSword[0] : imgWalk[Math.floor(frameCount / 10) % 2];
+            if (currentImg && currentImg.complete && currentImg.naturalWidth > 0) { 
+                const pw = CHAR_SIZE * (currentImg.naturalWidth/currentImg.naturalHeight); const py = GH - CHAR_SIZE - 20;
+                ctx.save(); ctx.drawImage(currentImg, PLAYER_X, py, pw, CHAR_SIZE); 
+                if (playerTintTimer > 0) { ctx.globalCompositeOperation = 'source-atop'; ctx.fillStyle = playerTint; ctx.fillRect(PLAYER_X, py, pw, CHAR_SIZE); }
+                ctx.restore();
+            }
+            if(attackFrame >= 0) { attackFrame++; if(attackFrame > 10) attackFrame = -1; }
+
+            if (gameState === 'GAMEOVER_WAIT' || gameState === 'GAMEOVER_PROMPT') { ctx.fillStyle = 'rgba(255,0,0,0.3)'; ctx.fillRect(0, 0, GW, GH); }
+            if (gameState === 'PLAYING') frameCount++;
+        }
+
+        function damagePlayer() {
+            lives--; updateUI(); playSound('damage'); playerTint = 'rgba(255, 0, 0, 0.6)'; playerTintTimer = 15;
+            if (lives <= 0) {
+                gameState = 'GAMEOVER_WAIT'; stopBgm(); playSound('gameover'); 
+                diedAtBoss = (phase === 'boss'); updateStat('deaths');
+                showMsg("あなたは しんでしまった。");
+                waitFrames = 240; waitCallback = () => { gameState = 'GAMEOVER_PROMPT'; showMsg(diedAtBoss ? "ボスから さいかい しますか？" : "もういちど たたかいますか？", true); };
+            }
+        }
+
+        function win(){
+            phase = 'boss_dead'; stopBgm(); playSound('boss_dead'); showMsg("ボス を たおした！"); score += 500 * currentLevel; updateUI();
+            waitFrames = 100; // 約1.5秒待つ
+            waitCallback = () => {
+                if (currentLevel >= 3) {
+                    gameState = 'CLEAR'; updateStat('clears'); showMsg("すべての まものを とうばつした！ ＞ タップで もどる", true);
+                } else {
+                    phase = 'transition'; document.getElementById('transition-screen').style.display = 'flex';
+                    document.getElementById('transition-screen').innerText = "STAGE " + (currentLevel + 1);
+                    waitFrames = 150; 
+                    waitCallback = () => {
+                        document.getElementById('transition-screen').style.display = 'none'; currentLevel++; resetGame();
+                    };
+                }
+            };
+        }
+
+        // 入力処理
+        document.getElementById('start-btn').onclick = () => { if(!audioCtx && soundEnabled){ audioCtx = new AudioContext(); audioCtx.resume(); } gameState='PLAYING'; document.getElementById('title-screen').style.display='none'; resetGame(); };
+        document.getElementById('open-sys').onclick = () => document.getElementById('system-screen').style.display='flex';
+        document.getElementById('close-sys').onclick = () => { bossHP = [parseInt(document.getElementById('hp-boss1').value), parseInt(document.getElementById('hp-boss2').value), parseInt(document.getElementById('hp-boss3').value)]; document.getElementById('system-screen').style.display='none'; };
+        
+        document.getElementById('bag-btn').onclick = (e) => {
+            e.stopPropagation(); 
+            if(hasBag && lives < 3 && gameState === 'PLAYING'){ lives=3; hasBag=false; document.getElementById('bag-btn').style.display='none'; updateUI(); showMsg("ひやく を のんだ！ いのち が ぜんかいふくした！"); playSound('heal'); playerTint = 'rgba(0, 255, 0, 0.5)'; playerTintTimer = 20; }
+        };
+
+        canvas.onmousedown = (e) => {
+            if(gameState === 'PLAYING' && phase !== 'transition'){
+                if(attackCooldown > 0) return; attackFrame = 0; attackCooldown = 30; 
+                let rect = canvas.getBoundingClientRect(); let x = (e.clientX - rect.left) * (canvas.width / rect.width);
+                swordWaves.push({x: PLAYER_X + 110, y: x < GW/2 ? UPPER_Y : LOWER_Y}); playSound('slash');
+            } else if(gameState === 'GAMEOVER_PROMPT' || gameState === 'CLEAR'){
+                if(diedAtBoss && gameState === 'GAMEOVER_PROMPT'){
+                    if(confirm("ボスから さいかい しますか？\n\n[OK] ボス戦へ\n[キャンセル] タイトルへ")){ gameState = 'PLAYING'; resetGame(true); return; }
+                }
+                gameState = 'TITLE'; document.getElementById('ui').style.display='none'; document.getElementById('bag-btn').style.display='none'; document.getElementById('title-screen').style.display='flex'; showMsg("・・・・・・。"); playTitleBgm();
+            }
+        };
+        
+        // スマホ用タップ対応
+        canvas.ontouchstart = (e) => { e.preventDefault(); canvas.onmousedown({clientX: e.touches[0].clientX}); };
+
+        window.onload = init;
+    </script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>THE NOBLE | ABOUT & HISTORY</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Roboto+Mono:wght@300;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --bg-color: #000; --text-muted: #86868b; --noble-white: #ffffff; }
+        html { scroll-behavior: smooth; scroll-padding-top: 120px; }
+        body { margin: 0; background-color: var(--bg-color); color: #fff; font-family: 'Inter', 'Hiragino Mincho Pro', 'Yu Mincho', serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+        .bg-layer { position: fixed; inset: 0; width: 100vw; height: 100vh; background-size: cover; background-position: center center; filter: grayscale(100%) contrast(100%) brightness(0.6); z-index: -2; opacity: 0; will-change: opacity; transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .bg-1 { background-image: url('image_top.png'); }
+        .bg-2 { background-image: url('image_logic.png'); }
+        .bg-3 { background-image: url('image_local.png'); }
+        .bg-4 { background-image: url('image_human.png'); }
+        .bg-5 { background-image: url('money.png'); }
+
+        .top-nav { position: fixed; top: 0; left: 0; width: 100%; height: 90px; padding: 0 40px; box-sizing: border-box; z-index: 1000; pointer-events: none; }
+        .nav-right { display: flex; align-items: center; justify-content: flex-end; gap: 15px; height: 100%; width: 100%; pointer-events: auto; }
+        .global-play-btn { background: transparent; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; color: #fff; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.3s ease; opacity: 0.5; padding: 0; }
+        .global-play-btn:hover { opacity: 1; border-color: #fff; transform: scale(1.1); }
+        .back-btn { font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--text-muted); text-decoration: none; letter-spacing: 0.2em; text-transform: uppercase; transition: color 0.3s; }
+        .back-btn:hover { color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+
+        .profile-container { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; padding: 80px 30px 100px; display: flex; flex-direction: column; align-items: flex-start; opacity: 0; transform: translateY(20px); animation: fadeIn 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.3s; }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+
+        .page-title { font-family: 'Inter', sans-serif; font-size: 40px; font-weight: 900; letter-spacing: 0.1em; color: var(--noble-white); margin: 0 0 30px 0; border-bottom: 1px solid #333; padding-bottom: 10px; width: 100%; }
+        .profile-img { width: 100%; max-width: 160px; height: 160px; object-fit: cover; border-radius: 4px; filter: grayscale(100%) contrast(110%) brightness(0.8); margin: 0 auto 30px auto; display: block; }
+        .profile-name { font-size: 18px; letter-spacing: 0.1em; font-weight: 700; margin: 0 0 5px 0; font-family: 'Inter', sans-serif; }
+        .profile-name-jp { font-size: 11px; color: var(--text-muted); letter-spacing: 0.2em; margin: 0 0 15px 0; }
+        .profile-bio { font-size: 13px; line-height: 2.0; letter-spacing: 0.1em; color: rgba(255,255,255,0.85); margin-bottom: 50px; }
+
+        .disco-title { font-family: 'Roboto Mono', monospace; font-size: 12px; letter-spacing: 0.2em; color: var(--text-muted); margin: 0 0 15px 0; }
+        .disco-list { display: flex; flex-direction: column; width: 100%; }
+        .disco-item { display: flex; justify-content: flex-start; align-items: flex-start; border-bottom: 1px solid #222; padding: 12px 0; text-decoration: none; color: inherit; transition: 0.3s ease; }
+        .disco-item:hover { background: rgba(255,255,255,0.03); padding-left: 10px; border-bottom: 1px solid #555; }
+        .disco-year { font-family: 'Roboto Mono', monospace; font-size: 12px; color: var(--text-muted); width: 70px; flex-shrink: 0; padding-top: 2px; transition: color 0.3s; }
+        .disco-item:hover .disco-year { color: #fff; }
+        .disco-desc { display: flex; flex-direction: column; gap: 4px; }
+        .disco-desc-en { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.05em; color: #fff; }
+        .disco-desc-ja { font-size: 10px; letter-spacing: 0.1em; color: var(--text-muted); }
+
+        .history-container { position: relative; z-index: 1; padding: 0 30px; max-width: 600px; margin: 0 auto; }
+        .content-section { padding: 80px 0 120px; min-height: 400px; }
+        .fade-up { opacity: 0; transform: translateY(40px); transition: opacity 1.5s cubic-bezier(0.2, 0.8, 0.2, 1), transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1); will-change: opacity, transform; }
+        .fade-up.active { opacity: 1; transform: translateY(0); }
+        .section-label { color: #fff; font-family: 'Roboto Mono', monospace; font-size: 11px; letter-spacing: 0.2em; margin-bottom: 15px; display: block; border-bottom: 1px solid rgba(255,255,255,0.5); padding-bottom: 5px; width: max-content; }
+        .title { font-size: 24px; font-weight: 700; margin-bottom: 25px; line-height: 1.5; letter-spacing: 0.05em; font-family: 'Inter', sans-serif; }
+        .body-text { font-size: 13px; color: var(--text-muted); line-height: 2.2; letter-spacing: 0.12em; }
+        .body-text p { margin-bottom: 1.5em; }
+        .body-text b { color: #fff; font-weight: 700; }
+        .site-footer { text-align: center; font-size: 10px; color: #444; letter-spacing: 0.2em; font-family: 'Roboto Mono'; margin-bottom: 50px; }
+    </style>
+</head>
+<body>
+    <div class="bg-layer bg-1" id="bg1"></div>
+    <div class="bg-layer bg-2" id="bg2"></div>
+    <div class="bg-layer bg-3" id="bg3"></div>
+    <div class="bg-layer bg-4" id="bg4"></div>
+    <div class="bg-layer bg-5" id="bg5"></div>
+
+    <div class="top-nav">
+        <div class="nav-right">
+            <button class="global-play-btn" id="global-play-btn">
+                <svg viewBox="0 0 24 24" fill="currentColor" style="width:10px; height:10px; margin-left:1px;"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <a href="index.html" class="back-btn">[ BACK ]</a>
+        </div>
+    </div>
+
+    <audio id="global-bgm" preload="auto" src="about.sound.MOV" loop></audio>
+
+    <div class="profile-container">
+        <h1 class="page-title">ABOUT</h1>
+        <img src="image_local.png" alt="Kurosaki Nobuyuki" class="profile-img">
+        <h2 class="profile-name">KUROSAKI NOBUYUKI</h2>
+        <p class="profile-name-jp">黒崎 信行</p>
+        <p class="profile-bio">
+            1989年生まれ、千葉県四街道出身。<br>蕎麦屋の実家で家業の背中を見て育つ。<br><br>
+            公営競技の解析や、地方インフラ・物流の再構築を経て、自身の社会的基盤を一度完全に破棄（デバッグ）。現在は「家族」という新たな変数をシステムに組み込み、人生の最適解を模索し続けている。
+        </p>
+
+        <h3 class="disco-title">DISCOGRAPHY</h3>
+        <div class="disco-list">
+            <a href="#sec-1" class="disco-item"><span class="disco-year">2012</span><span class="disco-desc"><span class="disco-desc-en">SYSTEM DISRUPTION // Algorithm Override</span><span class="disco-desc-ja">搾取システムの解析と独自のアルゴリズム構築</span></span></a>
+            <a href="#sec-2" class="disco-item"><span class="disco-year">2015</span><span class="disco-desc"><span class="disco-desc-en">GLOBAL CONNECTIVITY // Infrastructure & Logistics</span><span class="disco-desc-ja">全国地方都市のインフラ解放と物流網の再構築</span></span></a>
+            <a href="#sec-3" class="disco-item"><span class="disco-year">2017</span><span class="disco-desc"><span class="disco-desc-en">VOID PROCESSING // Forced Debug & Erase</span><span class="disco-desc-ja">全インフラの破棄と強制的デバッグフェーズ</span></span></a>
+            <a href="#sec-4" class="disco-item"><span class="disco-year">2022</span><span class="disco-desc"><span class="disco-desc-en">IRRATIONAL ANOMALY // Unknown Variables</span><span class="disco-desc-ja">暴走機関車への書き換え・解析不能な変数との同期</span></span></a>
+            <a href="#sec-5" class="disco-item"><span class="disco-year">20XX</span><span class="disco-desc"><span class="disco-desc-en">ZERO-DAY EXPLOIT // Legal Reset</span><span class="disco-desc-ja">【追記】システムの脆弱性と、意図的なゼロへの収束</span></span></a>
+        </div>
+    </div>
+
+    <div class="history-container">
+        <section class="content-section" id="sec-1">
+            <span class="section-label fade-up">01. System Disruption</span>
+            <h2 class="title fade-up">搾取の盤面を、<br>知性でハックする。</h2>
+            <div class="body-text fade-up">
+                <p>世界は巨大な変数の集合体に過ぎない。彼が卒業論文でターゲットにしたのは、公認という名の免罪符を得た搾取システム、すなわち<b>競馬</b>を筆頭とする公営競技の解析だった。</p>
+                <p>大衆の情熱を餌に富を吸い上げるその絶対的な構造。彼はその盤面に潜む脆弱性を特定し、独自のアルゴリズムによってシステムの優位性を完全に無効化した。それは知性によるシステムの再定義であり、無自覚に搾取される人々を論理的に開放するための、静かな宣戦布告だった。</p>
+            </div>
+        </section>
+
+        <section class="content-section" id="sec-2">
+            <span class="section-label fade-up">02. Global Connectivity & Logistics</span>
+            <h2 class="title fade-up">ネットワークの拡張と、<br>物流網の再構築。</h2>
+            <div class="body-text fade-up">
+                <p>彼がこよなく愛する自身のルーツ、千葉・四街道を原点とし、彼の視座は全国の地方都市へと向けられた。既存のインフラから切り離された地域のポテンシャルを見抜き、ローカルな宿泊システムを再構築。地方と世界を直接つなぐ新たな回路（バイパス）を全国規模で確立した。</p>
+                <p>辺境の価値を世界へと解放した後、彼の思考は止まることなく「物流」という次なる巨大フェーズへと移行していく。物理的なモノの流動すらも、彼にとっては最適化し、再定義すべきひとつのアルゴリズムに過ぎなかった。</p>
+            </div>
+        </section>
+
+        <section class="content-section" id="sec-3">
+            <span class="section-label fade-up">03. Void Processing</span>
+            <h2 class="title fade-up">ゼロへと回帰し、<br>空白から再定義する。</h2>
+            <div class="body-text fade-up">
+                <p>完璧なロジックを維持するためには、時にシステムそのもののリビルドが必要になる。彼は自らの社会的なインフラをすべて破棄し、完全なゼロへと収束させる道を選んだ。</p>
+                <p>過去の履歴や既存の信用を消去し、一枚のデビットカードだけを唯一の生存インターフェースにする。それは不純物を取り除き、本質だけを抽出するための強制的デバッグだった。何も持たないがゆえに研ぎ澄まされる感覚が、彼のロジックに血の通った圧倒的な力強さを宿らせていく。</p>
+            </div>
+        </section>
+
+        <section class="content-section" id="sec-4">
+            <span class="section-label fade-up">04. Irrational Anomaly</span>
+            <h2 class="title fade-up">非論理的な干渉と、<br>致命的なペナルティ。</h2>
+            <div class="body-text fade-up">
+                <p>新たな最適化フェーズへと進む過程で、彼は解析不能な一人の女性と遭遇する。自身のシステムを崩壊させかねない危険な接触。</p>
+                <p>彼は周囲の警告を無視し、自らを「暴走機関車」へと書き換え同期（結婚）を強行した。過去を抹消した秘匿事象は、後に<b>重大なペナルティ</b>を招く致命的なバグとなったが——</p>
+                <p>現在、システムからは「子供」という新たな自律変数が生成されている。かつては予測不能だったそのイレギュラーな存在を、彼は今、自身のアーキテクチャにおける「最も美しく、不可解な最適解」として静かに観測している。</p>
+            </div>
+        </section>
+
+        <section class="content-section" id="sec-5">
+            <span class="section-label fade-up">05. Zero-Day Exploit (Unlisted)</span>
+            <h2 class="title fade-up">システムの脆弱性と、<br>完璧なゼロへの回帰。</h2>
+            <div class="body-text fade-up">
+                <p>確率の海——パチンコ。彼は公表されたスペックでは到底説明のつかない不確定要素の正体を解析するため、無限の試行回数（遊戯）を求めた。その演算リソースを確保すべく、彼は自身の信用を担保に資金を循環させる「永久機関」の構築へと踏み切る。</p>
+                <p>しかし、システムに組み込んだはずの「複利」という変数は、やがて彼自身の首を絞める致命的なエラーへと変貌する。一見して解除不能なデッドロックに陥ったかに見えたが、彼は決して慌てることはなかった。</p>
+                <p>国家の法システムそのものに存在する「合法的なリセット」という脆弱性を突き、膨れ上がったエラーデータを完全に消去。自らのインフラを一度強制シャットダウンさせることで、完璧なゼロへの回帰を果たしたのである。</p>
+            </div>
+        </section>
+
+        <footer class="site-footer">© THE NOBLE. ALL RIGHTS RESERVED.</footer>
+    </div>
+
+    <script>
+        if (sessionStorage.getItem("is_auth_main") !== "true") { window.location.href = "index.html"; }
+
+        const bgm = document.getElementById('global-bgm');
+        const playBtn = document.getElementById('global-play-btn');
+        const playSvg = '<svg viewBox="0 0 24 24" fill="currentColor" style="width:10px; height:10px; margin-left:1px;"><path d="M8 5v14l11-7z"/></svg>';
+        const pauseSvg = '<svg viewBox="0 0 24 24" fill="currentColor" style="width:10px; height:10px; margin-left:0px;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+
+        let isPlaying = false; 
+
+        const updatePlayState = () => {
+            if (isPlaying) { playBtn.innerHTML = pauseSvg; bgm.play().catch(e => console.log(e)); } 
+            else { playBtn.innerHTML = playSvg; bgm.pause(); }
+        };
+
+        playBtn.addEventListener('click', () => { isPlaying = !isPlaying; updatePlayState(); });
+
+        const updateBg = () => {
+            const trigger = window.innerHeight * 0.7; 
+            const s1 = document.getElementById('sec-1').getBoundingClientRect().top;
+            const s2 = document.getElementById('sec-2').getBoundingClientRect().top;
+            const s3 = document.getElementById('sec-3').getBoundingClientRect().top;
+            const s4 = document.getElementById('sec-4').getBoundingClientRect().top;
+            const s5 = document.getElementById('sec-5').getBoundingClientRect().top;
+
+            document.getElementById('bg1').style.opacity = (s1 <= trigger && s2 > trigger) ? '0.6' : '0';
+            document.getElementById('bg2').style.opacity = (s2 <= trigger && s3 > trigger) ? '0.6' : '0';
+            document.getElementById('bg3').style.opacity = (s3 <= trigger && s4 > trigger) ? '0.6' : '0';
+            document.getElementById('bg4').style.opacity = (s4 <= trigger && s5 > trigger) ? '0.6' : '0';
+            document.getElementById('bg5').style.opacity = s5 <= trigger ? '0.6' : '0';
+        };
+        window.addEventListener('scroll', updateBg); 
+        window.onload = updateBg;
+
+        const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); }); }, { rootMargin: '0px 0px -15% 0px' }); 
+        document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>

@@ -5,38 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Belong | The Other Side</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=Roboto+Mono:wght@300;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root { --bg-color: #000; --text-muted: #86868b; --accent: #fff; }
+        body { margin: 0; background-color: var(--bg-color); color: #fff; font-family: 'Inter', 'Hiragino Mincho Pro', 'Yu Mincho', serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 
-        body {
-            margin: 0; background-color: var(--bg-color); color: #fff;
-            font-family: 'Inter', -apple-system, sans-serif; line-height: 2.0;
-            -webkit-font-smoothing: antialiased; overflow-x: hidden;
-        }
-
-        .fixed-background {
-            position: fixed; inset: 0;
-            width: 100vw; height: 100vh;
-            background-image: url('image_more.png'); background-size: cover; background-position: center;
-            filter: grayscale(100%) contrast(110%) brightness(0.2); z-index: -1; pointer-events: none;
-            opacity: 0;
-            animation: bgSlowIn 3.0s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
+        .fixed-background { position: fixed; inset: 0; width: 100vw; height: 100vh; background-image: url('image_more.png'); background-size: cover; background-position: center; filter: grayscale(100%) contrast(110%) brightness(0.2); z-index: -2; pointer-events: none; opacity: 0; animation: bgSlowIn 3.0s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         @keyframes bgSlowIn { to { opacity: 1; } }
 
-        .container { position: relative; z-index: 1; padding: 60px 30px; max-width: 600px; margin: 0 auto; }
-        
-        /* LINEブラウザ対策で余白を固定値(px)に変更 */
-        .page-header { 
-            height: 700px; 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            text-align: center; 
-            margin-bottom: 200px; 
-        }
-        .item-section { margin-bottom: 350px; }
-        .reveal-text { margin-bottom: 300px; } 
+        #canvas-container { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0; animation: bgSlowIn 4.0s cubic-bezier(0.4, 0, 0.2, 1) forwards 1s; }
 
-        .page-title { font-size: 42px; font-weight: 900; letter-spacing: 0.15em; margin: 0; opacity: 0; transform: translateY(40px); animation: titleReveal 3.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s forwards; }
+        .top-nav { position: fixed; top: 0; left: 0; width: 100%; height: 90px; padding: 0 40px; box-sizing: border-box; z-index: 1000; pointer-events: none; }
+        .nav-right { display: flex; align-items: center; justify-content: flex-end; gap: 15px; height: 100%; width: 100%; pointer-events: auto; }
+        .global-play-btn { background: transparent; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; color: #fff; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.3s ease; opacity: 0.5; padding: 0; }
+        .global-play-btn:hover { opacity: 1; border-color: #fff; transform: scale(1.1); }
+        .back-btn { font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--text-muted); text-decoration: none; letter-spacing: 0.2em; text-transform: uppercase; transition: color 0.3s; }
+        .back-btn:hover { color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+
+        .container { position: relative; z-index: 1; padding: 60px 30px; max-width: 600px; margin: 0 auto; }
+        .page-header { height: 600px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; margin-bottom: 150px; }
+        .item-section { margin-bottom: 250px; }
+        .reveal-text { margin-bottom: 150px; } 
+
+        .page-title { font-family: 'Inter', sans-serif; font-size: 40px; font-weight: 900; letter-spacing: 0.15em; margin: 0; opacity: 0; transform: translateY(40px); animation: titleReveal 3.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s forwards; }
         .header-line { width: 0; height: 1px; background: var(--accent); margin: 30px 0; animation: lineExpand 2.5s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards; }
         .page-subtitle { font-family: 'Roboto Mono', monospace; font-size: 13px; color: var(--text-muted); letter-spacing: 0.2em; line-height: 1.8; text-transform: uppercase; opacity: 0; transform: translateY(30px); animation: subtitleReveal 3.5s cubic-bezier(0.2, 0.8, 0.2, 1) 1.0s forwards; }
 
@@ -44,146 +35,146 @@
         @keyframes lineExpand { 100% { width: 120px; } }
         @keyframes subtitleReveal { 100% { opacity: 1; transform: translateY(0); } }
 
-        .nav-back { display: inline-block; text-decoration: none; color: var(--text-muted); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 60px; transition: color 0.3s; opacity: 0; animation: subtitleReveal 3.0s 0.2s forwards;}
-        .nav-back:hover { color: #fff; }
-        
-        .fade-up {
-            opacity: 0; 
-            transform: translateY(120px); 
-            transition: opacity 3.0s cubic-bezier(0.2, 0.8, 0.2, 1), transform 3.0s cubic-bezier(0.2, 0.8, 0.2, 1);
-            will-change: opacity, transform;
-        }
+        .fade-up { opacity: 0; transform: translateY(80px); transition: opacity 2.5s cubic-bezier(0.2, 0.8, 0.2, 1), transform 2.5s cubic-bezier(0.2, 0.8, 0.2, 1); will-change: opacity, transform; }
         .fade-up.active { opacity: 1; transform: translateY(0); }
-        
         .delay-1 { transition-delay: 0.2s; }
         .delay-2 { transition-delay: 0.4s; }
 
-        .item-label { font-size: 11px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px; display: block; }
-        .item-title { font-size: 32px; font-weight: 900; margin-bottom: 30px; letter-spacing: -0.05em; line-height: 1.3; }
-        .item-text { font-size: 17px; color: var(--text-muted); text-align: left; line-height: 1.9;}
-        .item-text p { margin-bottom: 25px; }
-        .item-text b { color: #fff; font-weight: 600; }
+        .item-label { font-family: 'Roboto Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px; display: block; }
+        .item-title { font-family: 'Inter', sans-serif; font-size: 24px; font-weight: 900; margin-bottom: 25px; letter-spacing: 0.05em; line-height: 1.5; }
+        .item-text { font-size: 13px; color: var(--text-muted); text-align: left; line-height: 2.2;}
+        .item-text p { margin-bottom: 1.5em; }
+        .item-text b { color: #fff; font-weight: 700; }
 
         .video-wrapper { width: 100%; border-radius: 4px; overflow: hidden; background: #111; border: 1px solid #1a1a1a; aspect-ratio: 16 / 9; }
         .item-video { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) brightness(0.3); transition: filter 3.0s cubic-bezier(0.2, 0.8, 0.2, 1); }
         .fade-up.active .item-video { filter: grayscale(100%) brightness(0.95); } 
 
-        .ending-section { padding: 150px 0; text-align: center; }
+        .ending-section { padding: 100px 0; text-align: center; }
         .final-statement { color: var(--text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.2em; display: block; line-height: 2.5; margin-bottom: 40px; font-family: 'Roboto Mono', monospace; }
-        .reboot-btn { display: inline-block; text-decoration: none; color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 15px 50px; border-radius: 2px; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; transition: 0.3s; }
-        .reboot-btn:hover { background: #fff; color: #000; border-color: #fff; }
-        
-        .share-area { margin-top: 80px; padding-top: 40px; border-top: 1px solid #111; }
-        .share-btn { font-size: 10px; color: var(--text-muted); text-decoration: none; letter-spacing: 0.2em; text-transform: uppercase; transition: 0.3s; }
-        .share-btn:hover { color: #fff; }
-        
-        .footer-logo { font-weight: 900; font-size: 18px; letter-spacing: 0.5em; color: #151515; margin-top: 100px; text-transform: uppercase; }
+        .footer-logo { font-family: 'Inter', sans-serif; font-weight: 900; font-size: 18px; letter-spacing: 0.5em; color: #151515; margin-top: 80px; text-transform: uppercase; }
         footer { padding: 60px 0; text-align: center; color: #333; font-size: 10px; }
     </style>
 </head>
 <body>
     <div class="fixed-background"></div>
+    <div id="canvas-container"></div>
+
+    <div class="top-nav">
+        <div class="nav-right">
+            <button class="global-play-btn" id="global-play-btn"><svg viewBox="0 0 24 24" fill="currentColor" style="width:10px; height:10px; margin-left:1px;"><path d="M8 5v14l11-7z"/></svg></button>
+            <a href="index.html" class="back-btn">[ BACK ]</a>
+        </div>
+    </div>
+
+    <audio id="global-bgm" preload="auto" src="more.music.MOV" loop></audio>
+
     <div class="container">
-        <nav><a href="index.html" class="nav-back">← Back to Terminal</a></nav>
-        
         <header class="page-header">
-            <span class="item-label" style="opacity: 0; animation: subtitleReveal 3.0s 0.2s forwards;">Unlisted Records</span>
-            <h1 class="page-title">BELONG</h1>
+            <span class="item-label decode-text" data-text="Unlisted Records" style="opacity: 0; animation: subtitleReveal 3.0s 0.2s forwards;">Unlisted Records</span>
+            <h1 class="page-title decode-text" data-text="BELONG">BELONG</h1>
             <div class="header-line"></div>
-            <div class="page-subtitle">
-                表層のロジックでは語られない、<br>
-                彼を構成する未定義の断片。
-            </div>
+            <div class="page-subtitle">表層のロジックでは語られない、<br>彼を構成する未定義の断片。</div>
         </header>
 
         <section class="item-section">
             <div class="reveal-text">
-                <span class="item-label fade-up">Thermal Management</span>
-                <h2 class="item-title fade-up delay-1">圧倒的な、熱量。</h2>
+                <span class="item-label fade-up decode-text" data-text="Thermal Management">Thermal Management</span>
+                <h2 class="item-title fade-up delay-1 decode-text" data-text="圧倒的な、熱量。">圧倒的な、熱量。</h2>
                 <div class="item-text fade-up delay-2">
                     <p>処理速度の速すぎる知性は常にオーバーヒートの危険を孕んでいる。凡庸な会話や停滞したロジックが生む摩擦は、彼の中で静かなストレスとして蓄積され、やがて臨界点へと達する。</p>
                     <p>その時、彼が選ぶのは感情的な爆発ではない。内面で溶岩のように燃えたぎるそのエネルギーを、彼は言葉ではなく、物理的な<b>炎</b>として大気に解き放つ。夜の闇を切り裂くように炎を操るその姿は、一見すると危険な暴挙にも映る。しかしそれは、精神を急速冷凍し、再び冷徹なロジックを取り戻すための、彼にとって不可欠なカタルシスなのである。</p>
                 </div>
             </div>
-            <div class="video-wrapper fade-up">
-                <video class="item-video" muted loop playsinline autoplay><source src="fire.mp4" type="video/mp4"></video>
-            </div>
+            <div class="video-wrapper fade-up"><video class="item-video" muted loop playsinline autoplay><source src="fire.mp4" type="video/mp4"></video></div>
         </section>
 
         <section class="item-section">
             <div class="reveal-text">
-                <span class="item-label fade-up">Midnight Sabotage</span>
-                <h2 class="item-title fade-up delay-1">無意識下の、自律崩壊。</h2>
+                <span class="item-label fade-up decode-text" data-text="Midnight Sabotage">Midnight Sabotage</span>
+                <h2 class="item-title fade-up delay-1 decode-text" data-text="無意識下の、自律崩壊。">無意識下の、自律崩壊。</h2>
                 <div class="item-text fade-up delay-2">
-                    <p>彼は常に、見えざる敵に命を狙われている。友人たちとの遠征（旅行）の際、翌朝になると彼の<b>アンダーウェア（パンツ）</b>は決まって無残に引き裂かれた状態で発見される。</p>
+                    <p>彼は常に、見えざる敵に命を狙われている。友人たちとの遠征の際、翌朝になると彼の<b>アンダーウェア（パンツ）</b>は決まって無残に引き裂かれた状態で発見される。</p>
                     <p>外部からの侵入経路も、犯人の痕跡すら一切存在しない完全犯罪。あるいは、無意識下で暴走した彼自身の防衛本能が引き起こした自壊現象なのか。まるで<b>未知のゼロデイ攻撃</b>のごとく、システムが休眠する夜の時間は、彼にとって決して安眠を許されないサバイバルなのだ。</p>
                 </div>
             </div>
-            <div class="video-wrapper fade-up">
-                <video class="item-video" muted loop playsinline autoplay><source src="nightmare.mp4" type="video/mp4"></video>
-            </div>
+            <div class="video-wrapper fade-up"><video class="item-video" muted loop playsinline autoplay><source src="nightmare.mp4" type="video/mp4"></video></div>
         </section>
 
         <section class="item-section">
             <div class="reveal-text">
-                <span class="item-label fade-up">Anatomic Defense</span>
-                <h2 class="item-title fade-up delay-1">肉体の、構造的ハック。</h2>
+                <span class="item-label fade-up decode-text" data-text="Identity Masking">Identity Masking</span>
+                <h2 class="item-title fade-up delay-1 decode-text" data-text="完璧な、秘匿性。">完璧な、秘匿性。</h2>
+                <div class="item-text fade-up delay-2">
+                    <p>高度なデジタル・ロジックを操る一方で、彼は時として極めてアナログな防壁を展開した。学生時代、彼とのアクセス権限を持たない人間に対しては、玩具のお面で自らの素顔（オリジナル・データ）を物理的に暗号化して接していたのだ。</p>
+                    <p>自らがシステムを破る側にいたからこそ、誰よりも「匿名性の保護」を重んじていた。物理空間（遊戯場）において、不用心に財布を放置して場所取りをする者たちがいる。彼に言わせれば当人のセキュリティが脆弱すぎるゆえの自己責任だ。無防備なリソースが気付けば彼のインベントリへ移し替えられていたとしても、それは完璧なステルス性能がもたらした些細な副産物に過ぎない。</p>
+                </div>
+            </div>
+            <div class="video-wrapper fade-up"><video class="item-video" muted loop playsinline autoplay><source src="secure.mp4" type="video/mp4"></video></div>
+        </section>
+
+        <section class="item-section">
+            <div class="reveal-text">
+                <span class="item-label fade-up decode-text" data-text="Anatomic Defense">Anatomic Defense</span>
+                <h2 class="item-title fade-up delay-1 decode-text" data-text="肉体の、構造的ハック。">肉体の、構造的ハック。</h2>
                 <div class="item-text fade-up delay-2">
                     <p>彼は知っている。人間の精神は脆く不完全だが、その構造体としての肉体は驚くほど精巧なハードウェアであることを。膨大な医学的知識と解剖学に基づいた彼の身体操作は、無駄を削ぎ落とした美しさを持つと同時に、致命的な脅威となり得る。</p>
                     <p>かつて、深夜の自宅へ帰宅したまさにその瞬間。暗がりに潜んでいた強盗に遭遇し、<b>頭にのれんを叩き込まれる</b>という予測不能かつ理不尽な急襲を受けた。しかし、視界を奪われるその瞬間すら、彼は冷静だった。急所へのダメージを瞬時に演算し、その衝撃を完全に分散・無効化して生存を確定させたのだ。死の淵に立たされてなお、彼の冷徹な生存アルゴリズムは決して停止することを知らない。</p>
                 </div>
             </div>
-            <div class="video-wrapper fade-up">
-                <video class="item-video" muted loop playsinline autoplay><source src="violence.mp4" type="video/mp4"></video>
-            </div>
+            <div class="video-wrapper fade-up"><video class="item-video" muted loop playsinline autoplay><source src="violence.mp4" type="video/mp4"></video></div>
         </section>
 
         <section class="item-section">
             <div class="reveal-text">
-                <span class="item-label fade-up">Spatial Calculation</span> 
-                <h2 class="item-title fade-up delay-1">究極の、知的遊戯。</h2>
+                <span class="item-label fade-up decode-text" data-text="Spatial Calculation">Spatial Calculation</span> 
+                <h2 class="item-title fade-up delay-1 decode-text" data-text="究極の、知的遊戯。">究極の、知的遊戯。</h2>
                 <div class="item-text fade-up delay-2">
                     <p>広大な芝のフィールドは、彼にとって究極の<b>知的遊戯</b>である。複雑なグリーンの起伏は2Dプレーンとして脳内で解析され、風速や芝目といった不確定要素すらも彼にとっては単なる入力データとして瞬時に並列処理される。</p>
                     <p>クラブを振り下ろす瞬間に至るまで、全ては制御されたアルゴリズムの実行である。導き出された最適解は自然界の抵抗を切り裂き、精確な弾道を描く。かつて、パー4のセカンドショットを直接カップに叩きこんだその記録は、単なる奇跡ではなく、物理学とロジックが織りなす究極のパフォーマンスであり、<b>彼自身が設計した芸術的な創造物</b>なのだ。</p>
                 </div>
             </div>
-            <div class="video-wrapper fade-up">
-                <video class="item-video" muted loop playsinline autoplay><source src="golf.mp4" type="video/mp4"></video>
-            </div>
+            <div class="video-wrapper fade-up"><video class="item-video" muted loop playsinline autoplay><source src="golf.mp4" type="video/mp4"></video></div>
         </section>
 
         <section class="item-section">
             <div class="reveal-text">
-                <span class="item-label fade-up">Optimized Motion</span>
-                <h2 class="item-title fade-up delay-1">異常なまでの、最適化。</h2>
+                <span class="item-label fade-up decode-text" data-text="Optimized Motion">Optimized Motion</span>
+                <h2 class="item-title fade-up delay-1 decode-text" data-text="異常なまでの、最適化。">異常なまでの、最適化。</h2>
                 <div class="item-text fade-up delay-2">
                     <p>彼の物理的動作には一切の無駄（冗長性）が存在しない。その究極の効率化への執着は、日常のルーティンである<b>ニコチン摂取（喫煙）</b>において極まる。通常の人間が1本のタバコを消費する時間に、彼は迷わず2倍の効率を求めるのだ。</p>
                     <p>両手に一本ずつ、計2本のタバコを同時にホールドし、<b>並列処理で吸引</b>するその異常なスタイル。それは一見するとシュールな奇行に映るだろう。しかし真実は、脳内の膨大なタスクを処理するために必要な化学物質を、最短時間で血中へインポートするための彼なりのハックなのである。肺の容量すらも計算に組み込んだその所作に、妥協はない。</p>
                 </div>
             </div>
-            <div class="video-wrapper fade-up">
-                <video class="item-video" muted loop playsinline autoplay><source src="smoke.mp4" type="video/mp4"></video>
-            </div>
+            <div class="video-wrapper fade-up"><video class="item-video" muted loop playsinline autoplay><source src="smoke.mp4" type="video/mp4"></video></div>
         </section>
 
         <section class="item-section">
             <div class="reveal-text">
-                <span class="item-label fade-up">Unseen Resonance</span> 
-                <h2 class="item-title fade-up delay-1">魂を揺さぶる、共鳴。</h2>
+                <span class="item-label fade-up decode-text" data-text="Velocity Override">Velocity Override</span>
+                <h2 class="item-title fade-up delay-1 decode-text" data-text="法則を凌駕する、加速。">法則を凌駕する、加速。</h2>
+                <div class="item-text fade-up delay-2">
+                    <p>物理法則という絶対的なシステムすらも、彼にとっては書き換え可能なパラメータに過ぎない。かつて、遠征のため湾岸線を限界速度で駆け抜けていた彼は、ついにシステム側の監視プロセス（警察）に捕捉され、強制的な一時停止を受けた。</p>
+                    <p>だが、彼はただペナルティを受け入れるような男ではない。違反切符を切られるという硬直した時間の中に生じた、わずか数フレームの脆弱性。それを突いた彼は、あろうことか監視側のモビリティ（白バイ）をジャックし、瞬時に自身の機動力として再定義してのけた。抑圧を拒み、常に自身の最高速度をアップデートし続ける圧倒的な反逆の記録である。</p>
+                </div>
+            </div>
+            <div class="video-wrapper fade-up"><video class="item-video" muted loop playsinline autoplay><source src="speed.mp4" type="video/mp4"></video></div>
+        </section>
+
+        <section class="item-section">
+            <div class="reveal-text">
+                <span class="item-label fade-up decode-text" data-text="Unseen Resonance">Unseen Resonance</span> 
+                <h2 class="item-title fade-up delay-1 decode-text" data-text="魂を揺さぶる、共鳴。">魂を揺さぶる、共鳴。</h2>
                 <div class="item-text fade-up delay-2">
                     <p>冷徹なロジックの底から響く、人を惑わす<b>悪魔の囁き</b>。彼が隠し持つもう一つの顔、それは音楽への情熱である。重低音が空気を震わせるたび、彼の指先から放たれるのは単なる音符ではなく、緻密に計算された周波数の波だ。黒人のリズムミュージックをルーツに持つ彼は、弦を叩き弾きちぎるような破壊的な<b>スラップ奏法</b>を得意とする。</p>
                     <p>かつて、<b>学園ホール</b>を熱狂と沈黙で支配した「一夜限りの共鳴」において、彼のリズムに脳を直接同期させられた観衆は、理由もわからず涙を流した。それは、デジタルな演算だけでは決して到達できない、人間の本能を直接書き換える魂のハッキングだった。</p>
                 </div>
             </div>
-            <div class="video-wrapper fade-up">
-                <video class="item-video" muted loop playsinline autoplay><source src="music.mp4" type="video/mp4"></video>
-            </div>
+            <div class="video-wrapper fade-up"><video class="item-video" muted loop playsinline autoplay><source src="music.mp4" type="video/mp4"></video></div>
         </section>
 
         <div class="fade-up ending-section">
-            <p class="final-statement">Data fragments collected. Next sequence is loading...</p>
-            <a href="index.html" class="reboot-btn">Main Sequence</a>
-            <div class="share-area"><a id="line-share-btn" href="#" target="_blank" class="share-btn">Share via LINE</a></div>
+            <p class="final-statement decode-text" data-text="Data fragments collected...">Data fragments collected...</p>
             <div class="footer-logo">NOBUYUKI</div>
         </div>
         <footer>© THE GENIUS ARCHITECT.</footer>
@@ -192,26 +183,125 @@
     <script>
         if (sessionStorage.getItem("is_auth_main") !== "true") { window.location.href = "index.html"; }
         
-        // ▼ 修正：安定したrootMarginを採用し、さらに動画を強制再生させる処理を追加
+        const bgm = document.getElementById('global-bgm');
+        const playBtn = document.getElementById('global-play-btn');
+        const playSvg = '<svg viewBox="0 0 24 24" fill="currentColor" style="width:10px; height:10px; margin-left:1px;"><path d="M8 5v14l11-7z"/></svg>';
+        const pauseSvg = '<svg viewBox="0 0 24 24" fill="currentColor" style="width:10px; height:10px; margin-left:0px;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+
+        let isPlaying = false;
+        const updatePlayState = () => { if (isPlaying) { playBtn.innerHTML = pauseSvg; bgm.play().catch(e => console.log(e)); } else { playBtn.innerHTML = playSvg; bgm.pause(); } };
+        playBtn.addEventListener('click', () => { isPlaying = !isPlaying; updatePlayState(); });
+
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+        const decodeEffect = (element) => {
+            const originalText = element.getAttribute('data-text'); 
+            if (!originalText) return;
+            let iterations = 0;
+            const increment = Math.max(originalText.length / 150, 0.2); 
+            const interval = setInterval(() => {
+                element.innerText = originalText.split('').map((letter, index) => {
+                    if (index < iterations) return letter;
+                    if (letter === ' ' || letter === '　' || letter === '\n') return letter;
+                    return chars[Math.floor(Math.random() * chars.length)];
+                }).join('');
+                if (iterations >= originalText.length) { clearInterval(interval); element.innerText = originalText; }
+                iterations += increment; 
+            }, 50); 
+        };
+
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => { 
                 if (entry.isIntersecting) {
-                    entry.target.classList.add('active'); 
-                    
-                    // 画面に入った瞬間に動画を強制的に再生する（LINEの停止バグ対策）
-                    const video = entry.target.querySelector('video');
-                    if (video) { video.play().catch(e => {}); }
+                    if (!entry.target.classList.contains('active')) {
+                        entry.target.classList.add('active'); 
+                        if (entry.target.classList.contains('decode-text')) decodeEffect(entry.target);
+                        entry.target.querySelectorAll('.decode-text').forEach(el => decodeEffect(el));
+                        const video = entry.target.querySelector('video');
+                        if (video) { video.play().catch(e => {}); }
+                    }
                 }
             });
         }, { rootMargin: '0px 0px -15% 0px' }); 
         
         document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+        document.querySelectorAll('header .decode-text').forEach(el => { setTimeout(() => decodeEffect(el), 1000); });
 
-        window.addEventListener('DOMContentLoaded', () => {
-            const lineBtn = document.getElementById('line-share-btn');
-            const mainPageUrl = window.location.origin + window.location.pathname.replace('more.html', 'index.html');
-            lineBtn.href = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(mainPageUrl)}`;
+        // ▼ Three.js 背景パーティクル（マトリックス・グリーン） ▼
+        let scene, camera, renderer, particles, lines;
+        const particleCount = 100; const maxDistance = 250;   
+
+        function initThree() {
+            const container = document.getElementById('canvas-container');
+            scene = new THREE.Scene(); scene.fog = new THREE.FogExp2(0x000000, 0.001);
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 1, 2000); camera.position.z = 800;
+            
+            const geometry = new THREE.BufferGeometry(); 
+            const positions = new Float32Array(particleCount * 3); 
+            const velocities = [];
+            
+            for (let i = 0; i < particleCount * 3; i+=3) {
+                positions[i] = (Math.random() - 0.5) * 1600; 
+                positions[i+1] = (Math.random() - 0.5) * 1600; 
+                positions[i+2] = (Math.random() - 0.5) * 1600;
+                velocities.push({ x: (Math.random() - 0.5) * 0.8, y: (Math.random() - 0.5) * 0.8, z: (Math.random() - 0.5) * 0.8 });
+            }
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3)); 
+            geometry.userData.velocities = velocities;
+            
+            // 色をマトリックスグリーン(0x00ff41)に変更し、存在感を強調
+            particles = new THREE.Points(geometry, new THREE.PointsMaterial({ color: 0x00ff41, size: 4, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending }));
+            scene.add(particles);
+            
+            lines = new THREE.LineSegments(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0x00ff41, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending }));
+            scene.add(lines);
+            
+            renderer = new THREE.WebGLRenderer({alpha: true, antialias: true}); 
+            renderer.setSize(window.innerWidth, window.innerHeight); 
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); 
+            container.appendChild(renderer.domElement);
+        }
+
+        function animateThree() {
+            requestAnimationFrame(animateThree);
+            const positions = particles.geometry.attributes.position.array; const velocities = particles.geometry.userData.velocities;
+            
+            for (let i = 0; i < particleCount; i++) {
+                positions[i*3] += velocities[i].x; 
+                positions[i*3+1] += velocities[i].y; 
+                positions[i*3+2] += velocities[i].z;
+                if (Math.abs(positions[i*3]) > 800) velocities[i].x *= -1; 
+                if (Math.abs(positions[i*3+1]) > 800) velocities[i].y *= -1; 
+                if (Math.abs(positions[i*3+2]) > 800) velocities[i].z *= -1;
+            }
+            particles.geometry.attributes.position.needsUpdate = true;
+            
+            const linePositions = [];
+            for (let i = 0; i < particleCount; i++) {
+                for (let j = i + 1; j < particleCount; j++) {
+                    const dx = positions[i*3] - positions[j*3]; 
+                    const dy = positions[i*3+1] - positions[j*3+1]; 
+                    const dz = positions[i*3+2] - positions[j*3+2];
+                    if (dx*dx + dy*dy + dz*dz < maxDistance * maxDistance) linePositions.push(positions[i*3], positions[i*3+1], positions[i*3+2], positions[j*3], positions[j*3+1], positions[j*3+2]);
+                }
+            }
+            lines.geometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+            
+            scene.rotation.y += 0.001; 
+            scene.rotation.x += 0.0005; 
+            renderer.render(scene, camera);
+        }
+        
+        window.addEventListener('resize', () => { 
+            if(camera && renderer) { 
+                camera.aspect = window.innerWidth / window.innerHeight; 
+                camera.updateProjectionMatrix(); 
+                renderer.setSize(window.innerWidth, window.innerHeight); 
+            }
         });
+        
+        initThree(); 
+        animateThree();
     </script>
 </body>
 </html>

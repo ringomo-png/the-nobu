@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>THE NOBLE | GALLERY</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Roboto+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-color: #000; --text-muted: #86868b; }
+        body { margin: 0; background-color: var(--bg-color); color: #fff; font-family: 'Inter', -apple-system, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+        /* ナビゲーション（BGMボタン含む） */
+        .top-nav { position: fixed; top: 0; left: 0; width: 100%; height: 90px; padding: 0 40px; box-sizing: border-box; z-index: 1000; background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%); pointer-events: none; }
+        .nav-right { display: flex; align-items: center; justify-content: flex-end; gap: 20px; height: 100%; width: 100%; pointer-events: auto; }
+        
+        .global-play-btn { background: transparent; border: 1px solid rgba(255,255,255,0.3); border-radius: 50%; color: #fff; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.3s ease; opacity: 0.6; padding: 0; }
+        .global-play-btn:hover { opacity: 1; border-color: #fff; transform: scale(1.05); }
+        
+        .back-btn { font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--text-muted); text-decoration: none; letter-spacing: 0.2em; text-transform: uppercase; transition: color 0.3s; }
+        .back-btn:hover { color: #fff; }
+
+        /* ヘッダー */
+        .gallery-header { padding: 150px 20px 80px; text-align: center; }
+        .page-title { font-size: 12px; font-weight: 400; letter-spacing: 0.4em; margin: 0; color: #fff; text-transform: uppercase; font-family: 'Roboto Mono', monospace; }
+
+        /* ギャラリーコンテナ */
+        .gallery-container { padding: 0 20px 200px; max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 150px; }
+
+        /* ギャラリーアイテム（スクロールアニメーション） */
+        .g-item { 
+            display: flex; flex-direction: column; opacity: 0; transform: translateY(60px); 
+            transition: opacity 1.5s cubic-bezier(0.2, 0.8, 0.2, 1), transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1); 
+            will-change: opacity, transform; cursor: pointer;
+        }
+        .g-item.active { opacity: 1; transform: translateY(0); }
+
+        /* 写真部分（背景から浮かび上がるフロートデザイン） */
+        .g-photo {
+            position: relative; width: 100%; overflow: hidden; background: #050505;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 5px 15px rgba(255,255,255,0.04);
+            transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.6s ease;
+        }
+        .g-photo img { width: 100%; height: auto; display: block; filter: grayscale(100%) brightness(0.8) contrast(1.1); transition: filter 0.8s ease, transform 1.5s ease; }
+        
+        /* ホバーエフェクト */
+        .g-item:hover .g-photo { transform: translateY(-5px); box-shadow: 0 30px 60px rgba(0,0,0,0.9), 0 10px 20px rgba(255,255,255,0.08); }
+        .g-item:hover .g-photo img { filter: grayscale(0%) brightness(1) contrast(1); transform: scale(1.02); }
+
+        /* タイトル部分 */
+        .g-info { margin-top: 20px; text-align: left; }
+        .g-info-title { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 300; letter-spacing: 0.1em; color: #fff; margin: 0 0 5px 0; }
+        .g-info-sub { font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--text-muted); letter-spacing: 0.15em; margin: 0; }
+
+        /* ▼ ランダムなサイズと配置の指定 ▼ */
+        .size-l { width: 85%; max-width: 900px; }
+        .size-m { width: 60%; max-width: 600px; }
+        .size-s { width: 45%; max-width: 450px; }
+        
+        .align-left { align-self: flex-start; margin-left: 5%; }
+        .align-center { align-self: center; }
+        .align-right { align-self: flex-end; margin-right: 5%; }
+
+        @media (max-width: 768px) {
+            .gallery-container { gap: 100px; padding-bottom: 100px; }
+            .size-l, .size-m, .size-s { width: 100%; max-width: 100%; margin: 0; }
+        }
+
+        /* ライトボックス（拡大表示） */
+        #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 3000; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.4s; cursor: zoom-out; backdrop-filter: blur(5px); }
+        #lightbox.active { display: flex; opacity: 1; }
+        #lightbox img { max-width: 90vw; max-height: 90vh; object-fit: contain; box-shadow: 0 20px 60px rgba(0,0,0,0.8); }
+
+        footer { text-align: center; padding: 40px 0 80px; font-family: 'Roboto Mono', monospace; font-size: 10px; color: #333; letter-spacing: 0.2em; }
+    </style>
+</head>
+<body>
+
+    <div class="top-nav">
+        <div class="nav-right">
+            <button class="global-play-btn" id="global-play-btn">
+                <svg viewBox="0 0 24 24" fill="currentColor" style="width:12px; height:12px; margin-left:2px;"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <a href="index.html" class="back-btn">[ BACK ]</a>
+        </div>
+    </div>
+
+    <audio id="gallery-bgm" preload="auto" src="photo.music.MOV" loop></audio>
+
+    <header class="gallery-header">
+        <h1 class="page-title">CAPTURED FRAGMENTS</h1>
+    </header>
+
+    <div class="gallery-container">
+        
+        <div class="g-item size-l align-center">
+            <div class="g-photo"><img src="image_top.png" alt="THE ORIGIN"></div>
+            <div class="g-info">
+                <h2 class="g-info-title">THE ORIGIN</h2>
+                <p class="g-info-sub">001 // BASE DIRECTORY</p>
+            </div>
+        </div>
+
+        <div class="g-item size-m align-left">
+            <div class="g-photo"><img src="image_logic.png" alt="PURE LOGIC"></div>
+            <div class="g-info">
+                <h2 class="g-info-title">PURE LOGIC</h2>
+                <p class="g-info-sub">002 // SYSTEM CORE</p>
+            </div>
+        </div>
+
+        <div class="g-item size-s align-right">
+            <div class="g-photo"><img src="image_mask.png" alt="IDENTITY MASKING"></div>
+            <div class="g-info">
+                <h2 class="g-info-title">IDENTITY MASKING</h2>
+                <p class="g-info-sub">003 // PHYSICAL FIREWALL</p>
+            </div>
+        </div>
+
+        <div class="g-item size-l align-center">
+            <div class="g-photo"><img src="image_local.png" alt="LOCAL INFRASTRUCTURE"></div>
+            <div class="g-info">
+                <h2 class="g-info-title">LOCAL INFRASTRUCTURE</h2>
+                <p class="g-info-sub">004 // EXTERNAL ENVIRONMENT</p>
+            </div>
+        </div>
+
+        <div class="g-item size-m align-right">
+            <div class="g-photo"><img src="money.png" alt="RESOURCE ALLOCATION"></div>
+            <div class="g-info">
+                <h2 class="g-info-title">RESOURCE ALLOCATION</h2>
+                <p class="g-info-sub">005 // ASSET MANAGEMENT</p>
+            </div>
+        </div>
+
+        <div class="g-item size-s align-left">
+            <div class="g-photo"><img src="image_more.png" alt="UNLISTED RECORDS"></div>
+            <div class="g-info">
+                <h2 class="g-info-title">UNLISTED RECORDS</h2>
+                <p class="g-info-sub">006 // HIDDEN DIRECTORY</p>
+            </div>
+        </div>
+
+        <div class="g-item size-m align-right">
+            <div class="g-photo"><img src="image_hiphop.png" alt="RHYTHM & OVERRIDE"></div>
+            <div class="g-info">
+                <h2 class="g-info-title">RHYTHM & OVERRIDE</h2>
+                <p class="g-info-sub">007 // AUDIO PROCESSING</p>
+            </div>
+        </div>
+
+        <div class="g-item size-m align-left">
+            <div class="g-photo"><img src="image_samurai.png" alt="SAMURAI SPIRIT"></div>
+            <div class="g-info">
+                <h2 class="g-info-title">SAMURAI SPIRIT</h2>
+                <p class="g-info-sub">008 // WARRIOR CODE</p>
+            </div>
+        </div>
+
+        <div class="g-item size-l align-center">
+            <div class="g-photo"><img src="image_human.png" alt="BIOLOGICAL HARDWARE"></div>
+            <div class="g-info">
+                <h2 class="g-info-title">BIOLOGICAL HARDWARE</h2>
+                <p class="g-info-sub">009 // FINAL VESSEL</p>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>© THE NOBLE. ALL RIGHTS RESERVED.</footer>
+
+    <div id="lightbox" onclick="closeLightbox()"><img id="lightbox-img" src=""></div>
+
+    <script>
+        if (sessionStorage.getItem("is_auth_main") !== "true") { window.location.href = "index.html"; }
+
+        const bgm = document.getElementById('gallery-bgm');
+        const playBtn = document.getElementById('global-play-btn');
+        const playSvg = '<svg viewBox="0 0 24 24" fill="currentColor" style="width:12px; height:12px; margin-left:2px;"><path d="M8 5v14l11-7z"/></svg>';
+        const pauseSvg = '<svg viewBox="0 0 24 24" fill="currentColor" style="width:12px; height:12px; margin-left:0px;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+
+        let isPlaying = false;
+        playBtn.addEventListener('click', () => { 
+            isPlaying = !isPlaying; 
+            if (isPlaying) { playBtn.innerHTML = pauseSvg; bgm.play().catch(e => console.log(e)); } 
+            else { playBtn.innerHTML = playSvg; bgm.pause(); }
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { rootMargin: '0px 0px -10% 0px' });
+
+        document.querySelectorAll('.g-item').forEach(item => { observer.observe(item); });
+
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        document.querySelectorAll('.g-item').forEach(item => {
+            item.addEventListener('click', () => {
+                lightboxImg.src = item.querySelector('img').src;
+                lightbox.style.display = 'flex'; void lightbox.offsetWidth; lightbox.classList.add('active');
+            });
+        });
+        function closeLightbox() { lightbox.classList.remove('active'); setTimeout(() => lightbox.style.display = 'none', 400); }
+    </script>
+</body>
+</html>
