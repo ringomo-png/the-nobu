@@ -190,10 +190,11 @@
             opacity: 0; letter-spacing: 0.2em; 
         }
 
+        /* ▼ バグ演出用文字のオーバーフロー対応（画面いっぱい用） ▼ */
         #intro-sequence { position: fixed; inset: 0; background: #000; z-index: 9998; display: flex; justify-content: center; align-items: center; overflow: hidden; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         #intro-sequence.active { opacity: 1; pointer-events: auto; }
         #pre-glitch-image { position: absolute; inset: -20px; background-size: cover; background-position: center; opacity: 0; z-index: 1; }
-        #code-bg { position: absolute; inset: -20px; padding: 30px; font-family: 'Roboto Mono', monospace; font-size: 14px; color: #fff; line-height: 1.1; word-break: break-all; text-align: left; opacity: 0; z-index: 2; transition: opacity 0.5s ease; }
+        #code-bg { position: absolute; inset: -20px; padding: 30px; font-family: 'Roboto Mono', monospace; font-size: 14px; color: #fff; line-height: 1.1; word-break: break-all; text-align: left; opacity: 0; z-index: 2; overflow: hidden; }
         #target-word { position: relative; z-index: 3; font-family: 'Roboto Mono', monospace; font-size: 32px; font-weight: 700; display: flex; gap: 12px; opacity: 0; transition: gap 0.8s cubic-bezier(0.8, 0, 0.2, 1), transform 0.6s ease, opacity 0.1s; }
         .t-char { display: inline-block; width: 32px; text-align: center; color: #111; transition: color 0.1s, text-shadow 0.1s, transform 3.0s cubic-bezier(0.2, 0.8, 0.2, 1); }
         .t-char.locked { color: #fff; text-shadow: 0 0 10px #fff, 0 0 25px rgba(255, 255, 255, 0.8); }
@@ -233,11 +234,11 @@
             <div class="menu-trigger" id="menu-btn">[ + MENU ]</div>
             <div class="menu-list" id="menu-list">
                 <a href="index.html" class="nav-link active">HOME</a>
-                <a href="about.html" class="nav-link" onclick="stopMusic()">ABOUT</a>
-                <a href="more.html" class="nav-link" onclick="stopMusic()">BELONG</a>
-                <a href="gallery.html" class="nav-link" onclick="stopMusic()">GALLERY</a>
-                <a href="music.html" class="nav-link locked-link" id="nav-music" onclick="stopMusic()">MUSIC</a>
-                <a href="otherside.html" class="nav-link" onclick="stopMusic()">GAME</a>
+                <a href="about.html" class="nav-link">ABOUT</a>
+                <a href="more.html" class="nav-link">BELONG</a>
+                <a href="gallery.html" class="nav-link">GALLERY</a>
+                <a href="music.html" class="nav-link locked-link" id="nav-music">MUSIC</a>
+                <a href="otherside.html" class="nav-link">OTHER SIDE</a>
             </div>
         </div>
 
@@ -291,10 +292,6 @@
                 if(musicLink) musicLink.classList.remove('locked-link');
             }
         });
-
-        function stopMusic() {
-            sessionStorage.setItem('is_playing', 'false');
-        }
 
         const topAudioFiles = ['main1.sound.MOV', 'main2.sound.MOV', 'main3.sound.MOV'];
         const hiphopAudioFiles = ['hiphop1.sound.MOV', 'hiphop2.sound.MOV', 'hiphop3.sound.MOV', 'hiphop4.sound.MOV', 'hiphop5.sound.MOV'];
@@ -491,8 +488,27 @@
         window.addEventListener('resize', () => { if(camera && renderer) { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }});
         initThree(); animateThree();
 
-        const menuBtn = document.getElementById('menu-btn'); const menuList = document.getElementById('menu-list'); let menuOpen = false;
-        menuBtn.addEventListener('click', () => { menuOpen = !menuOpen; if(menuOpen) { menuList.classList.add('active'); menuBtn.innerText = '[ - CLOSE ]'; } else { menuList.classList.remove('active'); menuBtn.innerText = '[ + MENU ]'; }});
+        // ▼ メニューの開閉状態を記憶・復元する処理 ▼
+        const menuBtn = document.getElementById('menu-btn'); 
+        const menuList = document.getElementById('menu-list'); 
+        let menuOpen = sessionStorage.getItem('menu_open') === 'true';
+        
+        if (menuOpen) {
+            menuList.classList.add('active'); 
+            menuBtn.innerText = '[ - CLOSE ]';
+        }
+
+        menuBtn.addEventListener('click', () => { 
+            menuOpen = !menuOpen; 
+            sessionStorage.setItem('menu_open', menuOpen);
+            if(menuOpen) { 
+                menuList.classList.add('active'); 
+                menuBtn.innerText = '[ - CLOSE ]'; 
+            } else { 
+                menuList.classList.remove('active'); 
+                menuBtn.innerText = '[ + MENU ]'; 
+            }
+        });
 
         document.getElementById('reboot-btn').addEventListener('click', function() {
             if (navigator.vibrate) navigator.vibrate(40);
@@ -518,42 +534,37 @@
         }
 
         const introSequence = document.getElementById('intro-sequence'); const codeBg = document.getElementById('code-bg'); const targetWord = document.getElementById('target-word'); const tChars = document.querySelectorAll('.t-char'); const preGlitchImage = document.getElementById('pre-glitch-image'); const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
-        let terminalInterval, scrambleInterval;
+        let scrambleInterval;
         tChars.forEach(el => { el.style.transform = `translate(${(Math.random()-0.5)*window.innerWidth*1.5}px, ${(Math.random()-0.5)*window.innerHeight*1.5}px)`; });
 
+        // ▼ タイピング演出を削除し、すぐに画面いっぱいのバグを発生させる ▼
         function playAnimationSequence(skipTyping = false) {
             document.body.classList.add('locked'); introSequence.style.opacity = '1'; introSequence.style.display = 'flex';
-            setTimeout(() => { codeBg.style.opacity = '0'; }, 100);
-            const glitchStartDelay = skipTyping ? 500 : 6000;
-            if (!skipTyping) { 
-                setTimeout(() => { 
-                    codeBg.style.opacity = '1'; codeBg.innerText = ''; 
-                    let typeStartTime = Date.now();
-                    terminalInterval = setInterval(() => { 
-                        let elapsed = Date.now() - typeStartTime;
-                        let speedMultiplier = 1 + Math.pow(elapsed / 6000, 2) * 20; 
-                        let chunk = ''; 
-                        let addCount = Math.floor((Math.random() * 12) + 8) * speedMultiplier; 
-                        for(let i=0; i<addCount; i++) chunk += chars.charAt(Math.floor(Math.random()*chars.length)); 
-                        codeBg.innerText += chunk; 
-                    }, 40); 
-                }, 500); 
-            } else { setTimeout(() => { codeBg.style.opacity = '1'; }, 400); }
+            codeBg.style.opacity = '1';
             
             setTimeout(() => {
-                if (!skipTyping) clearInterval(terminalInterval); targetWord.style.opacity = '1'; let startTime = Date.now(); const parseDuration = 7000; 
+                targetWord.style.opacity = '1'; let startTime = Date.now(); const parseDuration = 7000; 
+                
+                // 画面サイズに合わせて乱数の文字数を計算 (PCでも画面を埋め尽くす)
+                const charNeeded = Math.floor((window.innerWidth * window.innerHeight) / 30);
+                
                 scrambleInterval = setInterval(() => {
                     let progress = (Date.now() - startTime) / parseDuration; if (progress > 1) progress = 1;
-                    let bgText = ''; for(let i=0; i<2500; i++) bgText += chars.charAt(Math.floor(Math.random()*chars.length)); codeBg.innerText = bgText;
+                    
+                    let bgText = ''; 
+                    for(let i=0; i<charNeeded; i++) bgText += chars.charAt(Math.floor(Math.random()*chars.length)); 
+                    codeBg.innerText = bgText;
+                    
                     if (Math.random() > (0.6 + progress * 0.4)) { codeBg.style.color = '#fff'; codeBg.style.transform = `translate(${(Math.random()-0.5)*15}px, ${(Math.random()-0.5)*15}px)`; } else { codeBg.style.color = '#111'; codeBg.style.transform = 'translate(0, 0)'; }
                     if (Math.random() < (0.1 + progress * 0.8)) { preGlitchImage.style.opacity = 0.2 + (progress * 0.5); if (Math.random() > progress) { preGlitchImage.style.transform = `translate(${(Math.random()-0.5)*50*(1-progress)}px, ${(Math.random()-0.5)*50*(1-progress)}px)`; preGlitchImage.style.mixBlendMode = 'exclusion'; preGlitchImage.style.filter = Math.random() > 0.5 ? 'invert(1) contrast(3)' : 'hue-rotate(90deg) grayscale(1)'; } else { preGlitchImage.style.transform = 'translate(0, 0)'; preGlitchImage.style.mixBlendMode = 'normal'; preGlitchImage.style.filter = 'none'; } } else { preGlitchImage.style.opacity = '0'; }
                     tChars.forEach(el => { if(!el.classList.contains('locked')) el.innerText = chars.charAt(Math.floor(Math.random()*chars.length)); });
                 }, 40);
-            }, glitchStartDelay);
-            setTimeout(() => { tChars.forEach(el => { el.innerText = el.getAttribute('data-char'); el.classList.add('locked'); el.style.transform = 'translate(0, 0)'; }); }, glitchStartDelay + 7000);
-            setTimeout(() => { clearInterval(scrambleInterval); codeBg.style.opacity = '0'; preGlitchImage.style.opacity = '0.3'; preGlitchImage.style.transform = 'translate(0, 0)'; preGlitchImage.style.mixBlendMode = 'normal'; preGlitchImage.style.filter = 'none'; }, glitchStartDelay + 10000);
-            setTimeout(() => { targetWord.classList.add('merged'); }, glitchStartDelay + 11500);
-            setTimeout(() => { introSequence.style.opacity = '0'; document.body.classList.remove('locked'); window.scrollTo(0, 0); activateSystem(); setTimeout(() => { introSequence.style.display = 'none'; }, 1000); }, glitchStartDelay + 13000);
+            }, 100); // すぐにバグ開始
+            
+            setTimeout(() => { tChars.forEach(el => { el.innerText = el.getAttribute('data-char'); el.classList.add('locked'); el.style.transform = 'translate(0, 0)'; }); }, 7000);
+            setTimeout(() => { clearInterval(scrambleInterval); codeBg.style.opacity = '0'; preGlitchImage.style.opacity = '0.3'; preGlitchImage.style.transform = 'translate(0, 0)'; preGlitchImage.style.mixBlendMode = 'normal'; preGlitchImage.style.filter = 'none'; }, 10000);
+            setTimeout(() => { targetWord.classList.add('merged'); }, 11500);
+            setTimeout(() => { introSequence.style.opacity = '0'; document.body.classList.remove('locked'); window.scrollTo(0, 0); activateSystem(); setTimeout(() => { introSequence.style.display = 'none'; }, 1000); }, 13000);
         }
 
         const input = document.getElementById('pass-input'); const submitBtn = document.getElementById('auth-btn'); const errorTxt = document.getElementById('error-txt'); let typeInterval;
@@ -566,11 +577,9 @@
                 introSequence.style.display = 'none';
                 document.body.classList.remove('locked');
                 activateSystem();
-            } else if (input.value === '0711') { 
+            } else if (input.value === '777') { 
                 sessionStorage.setItem('is_auth_main', 'true'); 
                 
-                // パスワードとラベルは消さずにそのまま残す
-
                 errorTxt.style.transition = 'none';
                 errorTxt.style.opacity = '1';
                 errorTxt.style.transform = 'translateY(0)';
@@ -585,7 +594,6 @@
                     errorTxt.innerText = 'DECRYPTING' + '.'.repeat(dotCount); 
                 }, 400); 
                 
-                // ▼ 3000ミリ秒待つことで「...」をちょうど2周させる ▼
                 setTimeout(() => { 
                     clearInterval(typeInterval); 
                     
@@ -601,7 +609,6 @@
                     }, 1000); 
                 }, 3000); 
                 
-                // 画面全体のフェードアウト（ラベル・パスワードごと消える）
                 setTimeout(() => { 
                     document.getElementById('auth-overlay').style.opacity = '0'; 
                     setTimeout(() => { document.getElementById('auth-overlay').style.display = 'none'; }, 1500); 

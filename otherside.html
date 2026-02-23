@@ -6,13 +6,10 @@
     <title>NOBUYUKI QUEST - 冒険の書</title>
     <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
     
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
     <style>
-        body { margin: 0; background-color: #08084a; color: #fff; font-family: 'DotGothic16', sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; overflow: hidden; user-select: none; }
-        #game-container { position: relative; display: flex; flex-direction: column; width: 1000px; max-width: 100vw; height: 100vh; }
-        #game-area { position: relative; flex: 1; background: #000; overflow: hidden; border-bottom: 2px solid #fff; border-top: 2px solid #fff; }
+        body { margin: 0; background-color: #000; color: #fff; font-family: 'DotGothic16', sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; overflow: hidden; user-select: none; }
+        #game-container { position: relative; display: flex; flex-direction: column; width: 1000px; max-width: 100vw; height: 100vh; background: #000; }
+        #game-area { position: relative; flex: 1; background: #000; overflow: hidden; border-bottom: 2px solid #333; border-top: 2px solid #333; }
         
         canvas { display: block; width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
         
@@ -22,27 +19,45 @@
         .retro-hp { color: #fff; margin-top: 5px; }
         .heart-icon { color: #ff3b30; }
 
-        #message-box { height: 90px; background-color: #08084a; border: 3px solid #fff; border-radius: 6px; margin: 10px; padding: 12px 15px; box-sizing: border-box; font-size: 18px; line-height: 1.5; color: #fff; display: flex; align-items: flex-start; }
+        #message-box { height: 90px; background-color: #000; border: 2px solid #555; border-radius: 6px; margin: 10px; padding: 12px 15px; box-sizing: border-box; font-size: 18px; line-height: 1.5; color: #fff; display: flex; align-items: flex-start; }
         .blink { animation: blinker 1s linear infinite; margin-left: auto; align-self: flex-end;}
         @keyframes blinker { 50% { opacity: 0; } }
 
-        #title-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #08084a; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 50; }
+        /* 🌟 タイトル画面を完全に中央揃えに修正 */
+        #title-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 50; box-sizing: border-box; }
         
-        #sound-btn { position: absolute; top: 20px; right: 20px; font-size: 20px; cursor: pointer; z-index: 100; border: 2px solid #fff; padding: 5px 10px; background: #000; }
-        
-        .stats-window { border: 3px solid #fff; border-radius: 6px; padding: 10px; background: #000; margin-bottom: 15px; width: 80%; max-width: 400px; font-size: 16px; text-align: center; }
-        .stat-val { color: #ff3b30; font-size: 20px; }
-        
-        .start-prompt { font-size: 24px; color: #fff; margin-bottom: 15px; cursor: pointer; padding: 10px 30px; border: 3px solid #fff; background: #000; }
-        .sys-btn { font-size: 14px; color: #aaa; cursor: pointer; text-decoration: underline; }
+        .stats-box { border: 2px solid #555; border-radius: 8px; background: rgba(15,15,15,0.9); padding: 15px 30px; font-size: 18px; color: #ccc; text-align: center; margin: 20px 0; min-width: 250px; }
+        .stat-val { color: #ff3b30; font-size: 22px; font-weight: bold; margin: 0 5px; }
+        .stat-rate { color: #00f3ff; font-size: 22px; font-weight: bold; margin: 0 5px; }
 
-        #system-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 200; }
-        .sys-box { border: 3px solid #fff; padding: 20px; background: #08084a; text-align: center; }
-        .sys-box input { width: 60px; font-size: 18px; margin: 5px; background: #000; color: #fff; border: 1px solid #fff; text-align: center; font-family: 'DotGothic16';}
-
-        #bag-btn { position: absolute; top: 15px; right: 15px; display: none; cursor: pointer; z-index: 20; background: #8b4513; border: 2px solid #fff; padding: 8px; font-size: 14px; pointer-events: auto;}
+        .start-prompt { 
+            font-size: clamp(24px, 5vw, 40px); 
+            color: #fff; margin: 20px 0; cursor: pointer; padding: 15px 6vw; 
+            border: 3px solid #fff; border-radius: 10px; background: #111; 
+            transition: 0.2s; pointer-events: auto; font-weight: bold; 
+            white-space: nowrap; max-width: 90%; text-align: center; box-sizing: border-box;
+        }
+        .start-prompt:active { background: #fff; color: #000; }
         
-        #transition-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; justify-content: center; align-items: center; z-index: 300; font-size: 40px; }
+        .sys-btn-title { font-size: 16px; color: #888; cursor: pointer; pointer-events: auto; text-decoration: underline; margin-top: 15px; }
+        .sys-btn-title:hover { color: #fff; }
+
+        #system-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 200; overflow-y: auto; }
+        .sys-box { border: 2px solid #555; padding: 25px; background: #000; text-align: center; font-size: 16px; }
+        .sys-box-inner { text-align: right; margin-bottom: 20px; line-height: 1.8; }
+        .sys-box input { width: 50px; font-size: 16px; margin-left: 10px; background: #111; color: #fff; border: 1px solid #555; text-align: center; font-family: 'DotGothic16'; }
+
+        #gameover-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
+        .gameover-text { color: #ff3b30; font-size: 32px; margin-bottom: 40px; font-weight: bold; letter-spacing: 2px; }
+        .go-btn { font-size: 24px; color: #fff; margin: 10px; cursor: pointer; padding: 10px 30px; border: 2px solid #fff; transition: 0.2s; background: #111; pointer-events: auto; }
+        .go-btn:active { background: #fff; color: #000; }
+
+        #transition-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; justify-content: center; align-items: center; z-index: 300; font-size: 40px; letter-spacing: 4px; }
+
+        #ending-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; justify-content: center; align-items: center; z-index: 400; overflow: hidden; cursor: pointer; }
+        #ending-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.4; pointer-events: none; }
+        #credits { position: absolute; width: 100%; text-align: center; color: #fff; font-size: 24px; line-height: 2; z-index: 401; animation: scrollUp 15s linear forwards; pointer-events: none; }
+        @keyframes scrollUp { 0% { transform: translateY(100vh); } 100% { transform: translateY(-100vh); } }
 
         .assets { display: none; }
     </style>
@@ -50,44 +65,73 @@
 <body>
 
     <div id="game-container">
-        <div id="sound-btn">🔇 BGM: OFF</div>
-
+        
         <div id="title-screen">
-            <svg width="900" height="250" viewBox="0 0 900 250" style="margin-bottom: 5px; max-width: 100vw;">
+            <svg width="800" height="200" viewBox="0 0 900 250" style="max-width: 90vw;">
                 <path id="title-curve" d="M 50,180 Q 450,-40 850,180" fill="transparent" />
-                <text font-family="'DotGothic16', sans-serif" font-size="96" fill="#ffd700" font-weight="bold" filter="drop-shadow(6px 6px 0 #ff0000)">
+                <text font-family="'DotGothic16', sans-serif" font-size="96" fill="#fff" font-weight="bold" filter="drop-shadow(6px 6px 0 #555)">
                     <textPath href="#title-curve" startOffset="50%" text-anchor="middle">NOBUYUKI QUEST</textPath>
                 </text>
             </svg>
             
-            <div class="stats-window">
-                <div style="color:#ffd700;">【 せかいの ぼうけん きろく 】</div>
-                <div>しぼう：<span class="stat-val" id="global-deaths">--</span> 回</div>
-                <div>クリアりつ：<span class="stat-val" style="color:#00f3ff;" id="global-clear-rate">--.-</span> %</div>
+            <div class="stats-box">
+                <div style="color:#ffd700; margin-bottom:10px;">【 せかいデータ 】</div>
+                死亡数: <span class="stat-val" id="global-deaths">-</span> 回<br>
+                クリア率: <span class="stat-rate" id="global-clear-rate">-.-</span> %
             </div>
 
             <div class="start-prompt blink" id="start-btn">＞ ぼうけん に でる ＜</div>
-            <div class="sys-btn" id="open-sys">システム せってい</div>
+            
+            <div class="sys-btn-title" id="open-sys">⚙️ システム</div>
         </div>
 
         <div id="system-screen">
             <div class="sys-box">
-                <div style="color:#ffd700; margin-bottom:10px;">【 ボス HP ちょうせい 】</div>
-                <div>BOSS 1: <input type="number" id="hp-boss1" value="50"></div>
-                <div>BOSS 2: <input type="number" id="hp-boss2" value="70"></div>
-                <div>BOSS 3: <input type="number" id="hp-boss3" value="200"></div>
-                <button class="sys-btn" id="close-sys" style="margin-top:15px; cursor:pointer; font-family:'DotGothic16'; color:#fff;">けってい</button>
+                <div style="color:#ffd700; margin-bottom:15px; font-size:22px;">【 システム ちょうせい 】</div>
+                <div class="sys-box-inner">
+                    BOSS 1 HP: <input type="number" id="hp-boss1" value="30"><br>
+                    BOSS 2 HP: <input type="number" id="hp-boss2" value="50"><br>
+                    BOSS 3 HP: <input type="number" id="hp-boss3" value="100"><br>
+                    BOSS 3 前のザコ数: <input type="number" id="sys-zako3" value="15"><br>
+                    <hr style="border-color:#333; margin:10px 0;">
+                    敵の炎の大きさ(倍率): <input type="number" id="sys-fire-size" value="1.2" step="0.1"><br>
+                    パリィ判定の広さ: <input type="number" id="sys-parry" value="10"><br>
+                    攻撃の硬直(F): <input type="number" id="sys-cooldown" value="25"><br>
+                    <hr style="border-color:#333; margin:10px 0;">
+                    発狂モード突入HP(%): <input type="number" id="sys-mad-hp" value="50"><br>
+                    発狂時の曲がる弾確率(%): <input type="number" id="sys-mad-prob" value="40"><br>
+                </div>
+                <button id="close-sys" style="cursor:pointer; font-family:'DotGothic16'; font-size:18px; color:#fff; background:#222; border:2px solid #fff; padding:8px 30px;">けってい</button>
             </div>
         </div>
 
         <div id="transition-screen">STAGE 2</div>
+
+        <div id="ending-screen">
+            <video id="ending-video" src="game2.MOV" playsinline muted loop></video>
+            <div id="credits">
+                <br><br><br><br>
+                NOBUYUKI QUEST<br><br><br>
+                すべての まものを とうばつした！<br><br><br>
+                DIRECTOR / NOBUYUKI<br><br>
+                PROGRAM / AI<br><br><br><br>
+                THANK YOU FOR PLAYING<br><br><br><br><br>
+                <span style="font-size:16px;">＞ タップで タイトルへ ＜</span>
+            </div>
+        </div>
 
         <div id="game-area">
             <div id="ui">
                 <div>ステージ：<span id="val-lv">１</span></div>
                 <div class="retro-hp">いのち：<span class="heart-icon">♥</span> × <span id="val-lives">3</span> <span id="val-score">SCORE: 0</span></div>
             </div>
-            <div id="bag-btn">💊 ふくろ つかう</div>
+            
+            <div id="gameover-screen">
+                <div class="gameover-text">あなたは しんでしまった</div>
+                <div class="go-btn" id="btn-retry">＞ ボスから リトライ</div>
+                <div class="go-btn" id="btn-title">＞ タイトルへ もどる</div>
+            </div>
+
             <canvas id="view-canvas"></canvas>
         </div>
 
@@ -103,10 +147,10 @@
         <img id="monster1" src="monster1.png"><img id="monster2" src="monster2.png"><img id="monster3" src="monster3.png">
     </div>
 
-    <script>
-        // ==========================================
-        // 🌟 あなたの Firebase 設定 (ここに入れてください)
-        // ==========================================
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
         const firebaseConfig = {
             apiKey: "AIzaSyDrDTNLFOC93bBsjzcBrdLt4miPgrat2zY",
             authDomain: "nobuyukiquest.firebaseapp.com",
@@ -115,222 +159,403 @@
             messagingSenderId: "504992212070",
             appId: "1:504992212070:web:79f0ccca4e1d136bd639a7"
         };
-        
+
+        let db;
         try { 
-            firebase.initializeApp(firebaseConfig); 
-            window.db = firebase.firestore(); 
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
             loadGlobalStats(); 
-        } catch(e) { console.log("Firebase Error"); }
+        } catch(e) { console.log("Firebase Error", e); }
 
         async function loadGlobalStats() {
-            if(!window.db) return;
+            if(!db) return;
             try {
-                const doc = await db.collection("stats").doc("global").get();
-                if (doc.exists) {
-                    const data = doc.data();
+                const docRef = doc(db, "stats", "global");
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
                     document.getElementById('global-deaths').innerText = data.deaths || 0;
-                    let rate = data.plays > 0 ? ((data.clears / data.plays) * 100).toFixed(1) : 0;
-                    document.getElementById('global-clear-rate').innerText = rate;
-                } else { await db.collection("stats").doc("global").set({ plays: 0, deaths: 0, clears: 0 }); }
+                    let rate = data.plays > 0 ? ((data.clears || 0) / data.plays) * 100 : 0;
+                    document.getElementById('global-clear-rate').innerText = rate.toFixed(1);
+                } else { 
+                    await setDoc(docRef, { plays: 0, deaths: 0, clears: 0 }); 
+                }
             } catch (e) {}
         }
-        async function updateStat(type) { if(window.db) db.collection("stats").doc("global").set({ [type]: firebase.firestore.FieldValue.increment(1) }, { merge: true }); }
 
-        // ==========================================
-        // 🎮 ゲームロジック
-        // ==========================================
-        const canvas = document.getElementById('view-canvas'); const ctx = canvas.getContext('2d');
+        async function updateStat(type) { 
+            if(!db) return;
+            try {
+                const docRef = doc(db, "stats", "global");
+                await setDoc(docRef, { [type]: increment(1) }, { merge: true });
+                if(type === 'deaths' || type === 'clears') loadGlobalStats();
+            } catch (e) {}
+        }
+
+        const canvas = document.getElementById('view-canvas'); 
+        const ctx = canvas.getContext('2d');
         const GW = 1000, GH = 400; const PLAYER_X = 50; const CHAR_SIZE = 180;
         const UPPER_Y = 280, LOWER_Y = 340; 
 
+        // 🌟 システム設定変数
+        let bossHP = [30, 50, 100];
+        let parryWindow = 10;
+        let baseCooldown = 25;
+        let madHpRatio = 0.5; 
+        let madProb = 0.4;    
+        let boss3Zako = 15; 
+        let fireScale = 1.2; // 🌟 炎の大きさの倍率（デフォルト1.2倍）
+
         let gameState = 'TITLE', currentLevel = 1, score = 0, frameCount = 0, lives = 3;
         let phase = 'zako', zakoKills = 0, enemies = [], swordWaves = [], projectiles = [], boss = null;
-        let attackFrame = -1, attackCooldown = 0, playerTint = '', playerTintTimer = 0;
-        let hasBag = false, bagSpawned = false, diedAtBoss = false;
-        let bossHP = [50, 70, 200];
-        let waitFrames = 0, waitCallback = null;
+        let attackFrame = -1, attackCooldown = 0, currentCooldownMax = baseCooldown, playerTint = '', playerTintTimer = 0;
+        let diedAtBoss = false;
+        let waitFrames = 0, waitCallback = null, shake = 0, flash = 0; 
+        
+        let attackPower = 1; 
+        let powerUpTimer = 0;
 
         const imgWalk = [document.getElementById('walk1'), document.getElementById('walk2')];
         const imgSword = [document.getElementById('sword1'), document.getElementById('sword2'), document.getElementById('sword3')];
         const imgMonsters = [document.getElementById('monster1'), document.getElementById('monster2'), document.getElementById('monster3')];
 
-        // 🎵 オーディオ
-        let audioCtx, soundEnabled = false, bgmInterval, titleBgmInterval;
-        const soundBtn = document.getElementById('sound-btn');
-        soundBtn.onclick = () => {
-            soundEnabled = !soundEnabled;
-            if (soundEnabled) { 
+        let audioCtx, audioInitialized = false, bgmInterval, titleBgmInterval;
+        
+        function initAudio() {
+            if (!audioInitialized || audioCtx.state === 'suspended') {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                soundBtn.innerText = '🔊 BGM: ON'; if(gameState === 'TITLE') playTitleBgm(); else startBgm();
-            } else { soundBtn.innerText = '🔇 BGM: OFF'; stopBgm(); stopTitleBgm(); }
-        };
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                audioInitialized = true;
+                if(gameState === 'TITLE' && !titleBgmInterval) playTitleBgm();
+            }
+        }
+        window.addEventListener('mousedown', initAudio, { once: true });
+        window.addEventListener('touchstart', initAudio, { once: true });
 
         function playSound(type) {
-            if(!soundEnabled || !audioCtx) return;
-            const osc = audioCtx.createOscillator(); const g = audioCtx.createGain();
-            osc.connect(g); g.connect(audioCtx.destination); const now = audioCtx.currentTime;
-            if(type==='slash'){ osc.type='sawtooth'; osc.frequency.setValueAtTime(600,now); osc.frequency.exponentialRampToValueAtTime(100,now+0.1); g.gain.setValueAtTime(0.2,now); osc.start(); osc.stop(now+0.1); }
-            if(type==='boss_dead'){ osc.type='square'; osc.frequency.setValueAtTime(100,now); osc.frequency.linearRampToValueAtTime(20,now+1.5); g.gain.setValueAtTime(0.5,now); osc.start(); osc.stop(now+1.5); }
-            if(type==='boss_appear'){ const ns=[311,293,277,261]; ns.forEach((f,i)=>{const o=audioCtx.createOscillator(); const gn=audioCtx.createGain(); o.type='square'; o.frequency.value=f; o.connect(gn); gn.connect(audioCtx.destination); gn.gain.setValueAtTime(0.2,now+i*0.15); o.start(now+i*0.15); o.stop(now+i*0.15+0.15);}); }
-            if(type==='hit'){ osc.type='square'; osc.frequency.setValueAtTime(150,now); osc.frequency.exponentialRampToValueAtTime(40,now+0.1); g.gain.setValueAtTime(0.4,now); osc.start(); osc.stop(now+0.1); } 
-            if(type==='damage'){ osc.type='sawtooth'; osc.frequency.setValueAtTime(100,now); osc.frequency.linearRampToValueAtTime(40,now+0.3); g.gain.setValueAtTime(0.6,now); osc.start(); osc.stop(now+0.3); } 
-            if(type==='heal'){ osc.type='sine'; osc.frequency.setValueAtTime(500,now); osc.frequency.setValueAtTime(1000,now+0.1); g.gain.setValueAtTime(0.3,now); osc.start(); osc.stop(now+0.3); } 
-            if(type==='parry'){ osc.type='triangle'; osc.frequency.setValueAtTime(1000,now); osc.frequency.exponentialRampToValueAtTime(2000,now+0.1); g.gain.setValueAtTime(0.6,now); osc.start(); osc.stop(now+0.2); } 
-            if(type==='gameover'){ const notes=[{f:150,t:0},{f:140,t:0.3},{f:130,t:0.6},{f:90,t:0.9}]; notes.forEach(n=>{const o=audioCtx.createOscillator(); const gn=audioCtx.createGain(); o.type='sawtooth'; o.frequency.value=n.f; o.connect(gn); gn.connect(audioCtx.destination); gn.gain.setValueAtTime(0.5,now+n.t); gn.gain.linearRampToValueAtTime(0.01,now+n.t+0.3); o.start(now+n.t); o.stop(now+n.t+0.3);}); }
+            if(!audioCtx || audioCtx.state === 'suspended') return;
+            const now = audioCtx.currentTime;
+
+            if(type === 'slash'){
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(800, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.15);
+                gain.gain.setValueAtTime(0.6, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.15);
+            }
+            if(type === 'hit'){
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.type = 'square'; osc.frequency.setValueAtTime(300, now); osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
+                gain.gain.setValueAtTime(0.8, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.15);
+            }
+            if(type === 'parry'){
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.type = 'sine'; osc.frequency.setValueAtTime(1200, now); osc.frequency.exponentialRampToValueAtTime(3000, now + 0.1);
+                gain.gain.setValueAtTime(0.9, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.2);
+            }
+            if(type === 'heal'){
+                const notes = [659.25, 880.00, 1046.50];
+                notes.forEach((freq, i) => {
+                    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                    osc.type = 'sine'; osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0, now + i*0.08); gain.gain.linearRampToValueAtTime(0.4, now + i*0.08 + 0.02); gain.gain.exponentialRampToValueAtTime(0.01, now + i*0.08 + 0.3);
+                    osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now + i*0.08); osc.stop(now + i*0.08 + 0.3);
+                });
+            }
+            if(type === 'damage'){
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, now); osc.frequency.exponentialRampToValueAtTime(30, now + 0.4);
+                gain.gain.setValueAtTime(0.9, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.4);
+            }
+            // 🌟 プレイヤー死亡時の爆発音
+            if(type === 'player_dead'){
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, now); osc.frequency.exponentialRampToValueAtTime(10, now + 1.0);
+                gain.gain.setValueAtTime(1.0, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
+                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 1.0);
+                
+                const bufferSize = audioCtx.sampleRate * 0.5;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) { data[i] = Math.random() * 2 - 1; }
+                const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
+                const noiseFilter = audioCtx.createBiquadFilter(); noiseFilter.type = 'lowpass'; noiseFilter.frequency.value = 800;
+                const noiseGain = audioCtx.createGain();
+                noiseGain.gain.setValueAtTime(1.0, now); noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                noise.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(audioCtx.destination);
+                noise.start(now);
+            }
+            if(type === 'boss_dead'){
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.type = 'square'; osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(10, now + 2.0);
+                gain.gain.setValueAtTime(0.9, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 2.0);
+                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 2.0);
+            }
+            // 🌟 ゲームオーバーメロディ（死亡音のあとに鳴らすため時間を遅らせる）
+            if(type === 'gameover'){
+                const startTime = now + 0.8; 
+                const notes = [196.00, 185.00, 174.61, 130.81];
+                notes.forEach((freq, i) => {
+                    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                    osc.type = 'triangle'; osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0, startTime + i*0.4); gain.gain.linearRampToValueAtTime(0.7, startTime + i*0.4 + 0.1); gain.gain.exponentialRampToValueAtTime(0.01, startTime + i*0.4 + 1.0);
+                    osc.connect(gain); gain.connect(audioCtx.destination); osc.start(startTime + i*0.4); osc.stop(startTime + i*0.4 + 1.0);
+                });
+            }
         }
 
-        function playTitleBgm(){ if(!soundEnabled || titleBgmInterval || !audioCtx) return; titleBgmInterval=setInterval(()=>{ const osc=audioCtx.createOscillator(); const g=audioCtx.createGain(); osc.type='square'; osc.frequency.value=[261,392,329,392][frameCount%4]; osc.connect(g); g.connect(audioCtx.destination); g.gain.setValueAtTime(0.05,audioCtx.currentTime); osc.start(); osc.stop(audioCtx.currentTime+0.1); }, 200); }
-        function stopTitleBgm(){ clearInterval(titleBgmInterval); titleBgmInterval=null; }
-        function startBgm(){ if(!soundEnabled || bgmInterval || !audioCtx) return; bgmInterval=setInterval(()=>{ const osc=audioCtx.createOscillator(); const g=audioCtx.createGain(); osc.type='square'; osc.frequency.value=[110,130,146,164][frameCount%4]; osc.connect(g); g.connect(audioCtx.destination); g.gain.setValueAtTime(0.05,audioCtx.currentTime); osc.start(); osc.stop(audioCtx.currentTime+0.1); }, 180); }
-        function stopBgm(){ clearInterval(bgmInterval); bgmInterval=null; }
+        function playTitleBgm(){ 
+            if(titleBgmInterval) clearInterval(titleBgmInterval);
+            if(!audioCtx || audioCtx.state === 'suspended') return;
+            const melody = [440.00, 523.25, 659.25, 523.25]; 
+            titleBgmInterval = setInterval(()=>{ 
+                const now = audioCtx.currentTime; const osc=audioCtx.createOscillator(); const g=audioCtx.createGain(); 
+                osc.type='square'; osc.frequency.value=melody[frameCount%4]; 
+                g.gain.setValueAtTime(0.08,now); g.gain.exponentialRampToValueAtTime(0.001,now+0.15); 
+                osc.connect(g); g.connect(audioCtx.destination); osc.start(now); osc.stop(now+0.15); 
+            }, 220); 
+        }
+        function stopTitleBgm(){ if(titleBgmInterval) clearInterval(titleBgmInterval); titleBgmInterval=null; }
+        
+        function startBgm(){ 
+            if(bgmInterval) clearInterval(bgmInterval);
+            if(!audioCtx) initAudio();
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            
+            bgmInterval = setInterval(()=>{ 
+                if(gameState !== 'PLAYING') return; 
+                const now = audioCtx.currentTime;
+                
+                let melody, bass;
+                if(currentLevel === 3) {
+                    melody = [130.81, 138.59, 146.83, 138.59]; 
+                    bass = [65.41, 69.30, 73.42, 69.30];     
+                } else {
+                    melody = [146.83, 164.81, 174.61, 196.00]; 
+                    bass = [73.42, 73.42, 87.31, 87.31];
+                }
 
-        function showMsg(t){ document.getElementById('msg-text').innerText = t; }
-        function updateUI(){ document.getElementById('val-lives').innerText = lives; document.getElementById('val-score').innerText = "SCORE: " + score; document.getElementById('val-lv').innerText = currentLevel==3?"ファイナル":currentLevel; }
+                const mOsc=audioCtx.createOscillator(); const mG=audioCtx.createGain(); 
+                mOsc.type='square'; mOsc.frequency.value=melody[frameCount%4]; 
+                mG.gain.setValueAtTime(0.1,now); mG.gain.exponentialRampToValueAtTime(0.001,now+0.15); 
+                mOsc.connect(mG); mG.connect(audioCtx.destination); mOsc.start(now); mOsc.stop(now+0.15); 
+                
+                const bOsc=audioCtx.createOscillator(); const bG=audioCtx.createGain(); 
+                bOsc.type='triangle'; bOsc.frequency.value=bass[frameCount%4]; 
+                bG.gain.setValueAtTime(0.15,now); bG.gain.exponentialRampToValueAtTime(0.001,now+0.15); 
+                bOsc.connect(bG); bG.connect(audioCtx.destination); bOsc.start(now); bOsc.stop(now+0.15); 
+            }, 180); 
+        }
+        function stopBgm(){ if(bgmInterval) clearInterval(bgmInterval); bgmInterval=null; }
+
+        function showMsg(t, blinkCursor = false) { document.getElementById('msg-text').innerText = t; document.getElementById('msg-cursor').style.display = blinkCursor ? 'inline-block' : 'none'; }
+        function toZen(num) { return num.toString().replace(/[0-9]/g, s => String.fromCharCode(s.charCodeAt(0) + 0xFEE0)); }
+        function getStageName(lv) { return lv === 1 ? "１" : (lv === 2 ? "２" : "ファイナル"); }
+
+        function drawBackground(ctx, level, frame) {
+            ctx.save(); const groundY = 280; 
+            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, GW, GH); 
+            ctx.strokeStyle = currentLevel === 3 ? '#600' : '#333'; 
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(0, groundY); ctx.lineTo(GW, groundY); ctx.stroke(); 
+            ctx.fillStyle = currentLevel === 3 ? '#100000' : '#0a0a0a'; 
+            ctx.fillRect(0, groundY, GW, GH - groundY); 
+            ctx.fillStyle = currentLevel === 3 ? '#311' : '#222';
+            for(let i=0; i<GW; i+=80) ctx.fillRect((i - frame*6)%GW, groundY+20, 30, 2);
+            for(let i=30; i<GW; i+=100) ctx.fillRect((i - frame*8)%GW, groundY+50, 40, 2);
+            ctx.restore();
+        }
 
         function resetGame(retryBoss = false) {
-            stopTitleBgm(); 
-            if(!retryBoss){ currentLevel=1; score=0; zakoKills=0; bagSpawned=false; hasBag=false; updateStat('plays'); }
+            stopBgm(); stopTitleBgm(); 
+            if(!retryBoss){ currentLevel=1; score=0; zakoKills=0; updateStat('plays'); }
             
             lives=3; enemies=[]; swordWaves=[]; projectiles=[]; boss=null; 
             attackFrame=-1; waitFrames=0; playerTintTimer=0; diedAtBoss=false;
-            document.getElementById('bag-btn').style.display = hasBag?'block':'none';
-            document.getElementById('ui').style.display='block'; updateUI(); if(soundEnabled) startBgm();
+            shake=0; flash=0; currentCooldownMax = baseCooldown;
+            attackPower = 1; powerUpTimer = 0; 
+            
+            document.getElementById('ui').style.display='block'; updateUI(); 
+            startBgm();
             
             if(retryBoss) {
-                phase='wait_boss';
-                zakoKills = (currentLevel === 3) ? 10 : 5;
+                phase='wait_boss'; 
                 showMsg("ボスとの さいせん だ！"); waitFrames = 60; waitCallback = spawnBoss;
             } else {
-                phase='zako';
-                showMsg("ぼうけん が はじまった！");
+                phase='zako'; showMsg("ぼうけん が はじまった！");
             }
         }
 
         function spawnBoss(){
-            playSound('boss_appear');
-            boss = { x:GW+200, y:310, hp:bossHP[currentLevel-1], maxHp:bossHP[currentLevel-1], w:180, h:180, timer:-90, targetX:GW-220, shake:0, attackCount:0, restTimer:0 };
+            boss = { x:GW+200, y:290, hp:bossHP[currentLevel-1], maxHp:bossHP[currentLevel-1], w:180, h:180, timer:-90, targetX:GW-150, shake:0, attackCount:0, restTimer:0, attackCooldown: 60 };
             phase = 'boss'; showMsg(currentLevel>=3?"さいしゅう ボス が あらわれた！！":"きょうりょくな ボス が あらわれた！");
         }
 
-        function checkPhaseProgress() {
-            let requiredKills = (currentLevel === 3) ? 10 : 5;
-            if (phase === 'zako' && zakoKills >= requiredKills) {
-                phase = 'wait_boss'; showMsg("・・・・・・。"); waitFrames = 120; waitCallback = spawnBoss;
-            }
+        function updateUI() {
+            document.getElementById('val-lives').innerText = toZen(lives);
+            document.getElementById('val-score').innerText = "SCORE: " + score;
+            document.getElementById('val-lv').innerText = getStageName(currentLevel);
         }
 
-        function spawnEnemy(){
-            if(phase!=='zako' || frameCount%60!==0) return;
-            if(!bagSpawned && currentLevel>=2 && Math.random()<0.05){ enemies.push({x:GW+50, y:UPPER_Y, speed:8, type:'bag', w:40, h:40}); bagSpawned=true; return; }
-            enemies.push({x:GW+50, y:Math.random()<0.5?UPPER_Y:LOWER_Y, speed:10, type:Math.random()<0.15?'heal':'normal', w:60, h:50});
-        }
-
-        function drawBackground(ctx, level, frame) {
-            ctx.save(); const groundY = 280; 
-            if (level === 1) { ctx.fillStyle = '#4cb4e6'; ctx.fillRect(0, 0, GW, groundY); ctx.fillStyle = '#ffffff'; ctx.fillRect((100 - frame*0.5)%GW, 50, 60, 20); ctx.fillRect((300 - frame*0.5)%GW, 80, 80, 25); ctx.fillRect((700 - frame*0.5)%GW, 40, 50, 15); ctx.fillStyle = '#4eb04b'; ctx.fillRect(0, groundY, GW, GH - groundY); ctx.fillStyle = '#3a8a38'; for(let i=0; i<GW; i+=40) ctx.fillRect(i, groundY+10, 10, 5); for(let i=20; i<GW; i+=50) ctx.fillRect(i, groundY+30, 15, 5); } 
-            else if (level === 2) { ctx.fillStyle = '#c77a44'; ctx.fillRect(0, 0, GW, groundY); ctx.fillStyle = '#e8a97b'; ctx.fillRect((200 - frame*0.8)%GW, 100, 100, 10); ctx.fillRect((600 - frame*0.8)%GW, 150, 150, 10); ctx.fillStyle = '#8c4b27'; ctx.fillRect(0, groundY, GW, GH - groundY); ctx.fillStyle = '#5c2d13'; for(let i=10; i<GW; i+=50) ctx.fillRect(i, groundY+20, 15, 10); for(let i=30; i<GW; i+=70) ctx.fillRect(i, groundY+50, 20, 15); } 
-            else { ctx.fillStyle = '#3d0c45'; ctx.fillRect(0, 0, GW, groundY); ctx.fillStyle = '#82133b'; ctx.fillRect((150 - frame)%GW, 80, 80, 5); ctx.fillRect((550 - frame)%GW, 120, 120, 5); ctx.fillStyle = '#1a0510'; ctx.fillRect(0, groundY, GW, GH - groundY); ctx.fillStyle = '#d91818'; for(let i=20; i<GW; i+=60) ctx.fillRect(i, groundY+30, 20, 4); for(let i=5; i<GW; i+=45) ctx.fillRect(i, groundY+60, 15, 4); }
-            ctx.restore();
-        }
-
-        function drawCrescent(x, y, shadowColor, fillColor) { ctx.save(); ctx.translate(x, y); ctx.fillStyle = fillColor; ctx.shadowBlur = 15; ctx.shadowColor = shadowColor; ctx.beginPath(); ctx.moveTo(0, -35); ctx.quadraticCurveTo(20, 0, 0, 35); ctx.quadraticCurveTo(8, 0, 0, -35); ctx.fill(); ctx.restore(); }
+        function drawCrescent(obj, shadowColor, fillColor = '#fff') { ctx.save(); ctx.translate(obj.x, obj.y); ctx.fillStyle = fillColor; ctx.shadowBlur = 15; ctx.shadowColor = shadowColor; ctx.beginPath(); ctx.moveTo(0, -35); ctx.quadraticCurveTo(20, 0, 0, 35); ctx.quadraticCurveTo(8, 0, 0, -35); ctx.fill(); ctx.restore(); }
         function drawHeart(x, y, size) { ctx.save(); ctx.translate(x, y - size/4); ctx.fillStyle = '#ff69b4'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.bezierCurveTo(-size/2, -size/2, -size, size/3, 0, size); ctx.bezierCurveTo(size, size/3, size/2, -size/2, 0, 0); ctx.fill(); ctx.restore(); }
-        function drawBag(x, y) { ctx.save(); ctx.translate(x, y); ctx.fillStyle = '#8b4513'; ctx.fillRect(-15, -15, 30, 35); ctx.fillStyle = '#d2b48c'; ctx.fillRect(-10, -25, 20, 10); ctx.fillStyle = '#ffd700'; ctx.fillRect(-5, -15, 10, 5); ctx.restore(); }
 
         function animate() {
             requestAnimationFrame(animate); 
-            if(gameState==='TITLE') return;
-            
-            drawBackground(ctx, currentLevel, frameCount);
-            ctx.imageSmoothingEnabled = false; 
+            drawBackground(ctx, currentLevel, frameCount); ctx.imageSmoothingEnabled = false; 
 
+            if (gameState !== 'PLAYING' && gameState !== 'GAMEOVER_WAIT' && gameState !== 'CLEAR') { frameCount++; return; }
             if (waitFrames > 0) { waitFrames--; if (waitFrames === 0 && waitCallback) { let cb = waitCallback; waitCallback = null; cb(); } }
+            if (shake > 0) { shake *= 0.8; if (shake < 0.5) shake = 0; } if (flash > 0) { flash *= 0.8; if (flash < 0.01) flash = 0; }
             if (playerTintTimer > 0) playerTintTimer--;
 
+            ctx.save(); if (shake > 0) ctx.translate((Math.random()-0.5)*shake, (Math.random()-0.5)*shake);
             if (attackCooldown > 0) attackCooldown--;
 
-            // --- BOSS ---
-            if(boss && (phase === 'boss' || phase === 'boss_dead')){
-                if (phase === 'boss') boss.timer++; 
-                if (boss.timer > 0 && phase === 'boss'){
-                    if(boss.x > boss.targetX) boss.x -= 3;
-                    if(boss.shake > 0) { boss.shake *= 0.8; if(boss.shake < 0.5) boss.shake = 0; }
-                    
-                    if(boss.restTimer > 0) { boss.restTimer--; } else {
-                        let shootRate = Math.max(20, 60 - (currentLevel * 10));
-                        if(currentLevel === 3 && boss.timer % 60 === 0) shootRate = 20 + Math.floor(Math.random() * 40);
+            if (powerUpTimer > 0) {
+                powerUpTimer--;
+                playerTint = `hsla(${frameCount * 15 % 360}, 100%, 50%, 0.5)`; 
+                playerTintTimer = 2; 
+                if (powerUpTimer === 0) {
+                    attackPower = 1; showMsg("こうげきりょく が もとにもどった。");
+                }
+            }
 
-                        if(boss.timer % shootRate === 0 && boss.x <= boss.targetX && gameState === 'PLAYING'){
+            // --- BOSS ---
+            if (boss && (phase === 'boss' || phase === 'boss_dead')) {
+                if (phase === 'boss') boss.timer++; 
+                if (boss.timer > 0 && phase === 'boss') {
+                    if (boss.x > boss.targetX) boss.x -= 3;
+                    if (boss.shake > 0) { boss.shake *= 0.8; if(boss.shake < 0.5) boss.shake = 0; }
+                    
+                    if (boss.restTimer > 0) { 
+                        boss.restTimer--; 
+                    } else {
+                        if (boss.attackCooldown > 0) boss.attackCooldown--;
+                        
+                        if (boss.attackCooldown <= 0 && boss.x <= boss.targetX && gameState === 'PLAYING') {
                             let isUp = Math.random() < 0.5;
-                            let isFeint = (currentLevel === 3 && Math.random() < 0.20); // フェイント20%
-                            let startY = isUp ? UPPER_Y : LOWER_Y;
+                            let isFeint = false;
+                            let pColor = 'normal';
+
+                            if (currentLevel === 3) {
+                                if (Math.random() < 0.01) {
+                                    pColor = 'rainbow';
+                                } else if ((boss.hp / boss.maxHp) < madHpRatio) {
+                                    pColor = 'green'; isFeint = Math.random() < madProb;
+                                } else {
+                                    pColor = 'blue'; isFeint = Math.random() < 0.20; 
+                                }
+                            }
+
+                            let startY = isUp ? UPPER_Y : LOWER_Y; 
                             let endY = isFeint ? (isUp ? LOWER_Y : UPPER_Y) : startY;
-                            projectiles.push({ x: boss.x, y: startY, targetY: endY, speed: currentLevel === 3 ? 12 + Math.random() * 8 : 12 + (currentLevel * 2), isParried: false });
+                            let pSpeed = currentLevel === 3 ? 16 : 12 + (currentLevel * 2);
+
+                            projectiles.push({ x: boss.x + (Math.random()-0.5)*boss.shake, y: startY, targetY: endY, speed: pSpeed, isParried: false, color: pColor });
                             
-                            boss.attackCount++; if(boss.attackCount >= 5 + Math.random() * 2) { boss.restTimer = 120; boss.attackCount = 0; }
+                            let nextRate = Math.max(30, 70 - (currentLevel * 10));
+                            if (currentLevel === 3) nextRate = baseCooldown + 25 + Math.floor(Math.random() * 30);
+                            else nextRate = Math.max(nextRate, baseCooldown + 15);
+                            boss.attackCooldown = nextRate;
+
+                            boss.attackCount++; 
+                            if (boss.attackCount >= (currentLevel === 3 ? 6 + Math.random()*4 : 4 + Math.random()*2)) { 
+                                boss.restTimer = 100; boss.attackCount = 0; 
+                            }
                         }
                     }
                 }
                 
                 let bx = boss.x + (Math.random() - 0.5) * boss.shake; let by = boss.y + (Math.random() - 0.5) * boss.shake;
                 const bossImg = imgMonsters[Math.min(currentLevel - 1, 2)];
-                if (bossImg && bossImg.complete && bossImg.naturalWidth > 0) { ctx.drawImage(bossImg, bx - boss.w/2, by - boss.h/2, boss.w, boss.h); } 
-                else { ctx.fillStyle = '#222'; ctx.fillRect(bx - boss.w/2, by - boss.h/2, boss.w, boss.h); }
+                if (bossImg && bossImg.complete && bossImg.naturalWidth > 0) { ctx.drawImage(bossImg, bx - boss.w/2, by - boss.h/2, boss.w, boss.h); } else { ctx.fillStyle = '#222'; ctx.fillRect(bx - boss.w/2, by - boss.h/2, boss.w, boss.h); }
                 
                 if(phase === 'boss') {
-                    ctx.fillStyle = '#111'; ctx.fillRect(GW/2 - 150, 15, 300, 10);
-                    ctx.fillStyle = '#ff3b30'; ctx.fillRect(GW/2 - 150, 15, 300 * (boss.hp/boss.maxHp), 10);
+                    ctx.fillStyle = '#111'; ctx.fillRect(GW/2 - 150, 15, 300, 10); ctx.fillStyle = '#ff3b30'; ctx.fillRect(GW/2 - 150, 15, 300 * (boss.hp/boss.maxHp), 10);
                     ctx.fillStyle = '#fff'; ctx.font = '16px DotGothic16'; ctx.textAlign = 'center'; ctx.fillText('BOSS', GW/2, 10); ctx.textAlign = 'left';
                 }
             }
 
-            // --- PROJECTILES (逆順ループで安全に削除) ---
+            // --- PROJECTILES ---
             for (let i = projectiles.length - 1; i >= 0; i--) {
                 let p = projectiles[i]; p.x -= p.speed; 
-                
                 if (!p.isParried && p.y !== p.targetY && p.x < GW / 2 + 100) { p.y += (p.targetY > p.y) ? 12 : -12; if (Math.abs(p.y - p.targetY) < 12) p.y = p.targetY; }
                 
-                if (p.isParried) { drawCrescent(p.x, p.y, '#ff8800', '#ffff00'); } 
-                else { ctx.fillStyle = '#ff0000'; ctx.fillRect(p.x - 10, p.y - 10, 20, 20); ctx.fillRect(p.x + 10, p.y - 6, 8, 12); ctx.fillRect(p.x + 18, p.y - 2, 6, 8); ctx.fillStyle = '#ff8800'; ctx.fillRect(p.x - 6, p.y - 6, 12, 12); ctx.fillStyle = '#ffff00'; ctx.fillRect(p.x - 2, p.y - 2, 4, 4); }
-                
-                if (p.x < PLAYER_X + 60 && !p.isParried && gameState === 'PLAYING') { projectiles.splice(i, 1); damagePlayer(); }
-                else if (p.isParried && boss && phase === 'boss' && p.x > boss.x - boss.w/2) { projectiles.splice(i, 1); boss.hp -= 5; boss.shake = 20; playSound('hit'); score += 50; updateUI(); if (boss.hp <= 0) win(); }
+                if (p.isParried) { 
+                    drawCrescent(p, '#ff8800', '#ffff00'); 
+                } else {
+                    // 🌟 炎をユーザー設定の倍率で描画
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.scale(fireScale, fireScale);
+                    if (p.color === 'rainbow') {
+                        ctx.fillStyle = `hsl(${frameCount * 15 % 360}, 100%, 50%)`; ctx.fillRect(-10, -10, 20, 20); ctx.fillStyle = '#fff'; ctx.fillRect(-6, -6, 12, 12);
+                    } else if (p.color === 'blue') {
+                        ctx.fillStyle = '#0000ff'; ctx.fillRect(-10, -10, 20, 20); ctx.fillRect(10, -6, 8, 12); ctx.fillRect(18, -2, 6, 8); 
+                        ctx.fillStyle = '#0088ff'; ctx.fillRect(-6, -6, 12, 12); ctx.fillStyle = '#00ffff'; ctx.fillRect(-2, -2, 4, 4);
+                    } else if (p.color === 'green') {
+                        ctx.fillStyle = '#008800'; ctx.fillRect(-10, -10, 20, 20); ctx.fillRect(10, -6, 8, 12); ctx.fillRect(18, -2, 6, 8); 
+                        ctx.fillStyle = '#00ff00'; ctx.fillRect(-6, -6, 12, 12); ctx.fillStyle = '#aaffaa'; ctx.fillRect(-2, -2, 4, 4);
+                    } else {
+                        ctx.fillStyle = '#ff0000'; ctx.fillRect(-10, -10, 20, 20); ctx.fillRect(10, -6, 8, 12); ctx.fillRect(18, -2, 6, 8); 
+                        ctx.fillStyle = '#ff8800'; ctx.fillRect(-6, -6, 12, 12); ctx.fillStyle = '#ffff00'; ctx.fillRect(-2, -2, 4, 4);
+                    }
+                    ctx.restore();
+                }
+
+                if (p.x < PLAYER_X + 60 && !p.isParried && gameState === 'PLAYING') { 
+                    if (p.color === 'rainbow') {
+                        projectiles.splice(i, 1); lives = 3; attackPower = 1.5; powerUpTimer = 600; 
+                        playSound('heal'); showMsg("レインボーの炎！たいりょくぜんかい！10びょうかん こうげきりょく1.5ばい！"); updateUI(); flash = 0.5;
+                    } else {
+                        projectiles.splice(i, 1); damagePlayer(); break; 
+                    }
+                }
+                else if (p.isParried && boss && phase === 'boss' && p.x > boss.x - boss.w/2) { 
+                    projectiles.splice(i, 1); boss.hp -= (5 * attackPower); boss.shake = 20; playSound('hit'); score += 50; updateUI(); 
+                    if (boss.hp <= 0) { win(); break; } 
+                }
                 else if (p.x < -100 || p.x > GW + 200) projectiles.splice(i, 1);
             }
 
-            // --- ENEMIES (逆順ループで安全に削除) ---
-            spawnEnemy();
+            // --- ENEMIES ---
+            if(phase === 'zako' && frameCount % Math.max(25, 60 - (currentLevel * 10)) === 0){
+                enemies.push({ x: GW + 50, y: Math.random() < 0.5 ? UPPER_Y : LOWER_Y, speed: 10 + (currentLevel * 2), type: Math.random() < 0.05 ? 'heal' : 'normal' });
+            }
+
             for (let i = enemies.length - 1; i >= 0; i--) {
                 let e = enemies[i]; if (gameState === 'PLAYING' && phase !== 'transition') e.x -= e.speed;
                 
                 if (e.type === 'heal') { drawHeart(e.x, e.y, 25); } 
-                else if (e.type === 'bag') { drawBag(e.x, e.y); }
-                else { 
-                    if (currentLevel === 3) { ctx.fillStyle = '#eee'; ctx.beginPath(); ctx.ellipse(e.x, e.y, e.w/2, e.h/2, 0, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#ff0055'; ctx.fillRect(e.x - 15, e.y - 5, 8, 3); } 
-                    else { ctx.fillStyle = '#111'; ctx.beginPath(); ctx.ellipse(e.x, e.y, e.w/2, e.h/2, 0, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = 'red'; ctx.fillRect(e.x - 15, e.y - 5, 8, 3); }
-                }
+                else { ctx.fillStyle = currentLevel === 3 ? '#ccc' : '#444'; ctx.beginPath(); ctx.ellipse(e.x, e.y, 30, 25, 0, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#ff0055'; ctx.fillRect(e.x - 15, e.y - 5, 8, 3); }
                 
                 if (e.x < PLAYER_X + 80 && gameState === 'PLAYING' && phase !== 'transition') {
                     if (e.type === 'heal') { 
                         if (lives < 3) lives++; showMsg("いのちのきのみ を てに入れた！ いのちが かいふくした！"); playSound('heal'); playerTint = 'rgba(0, 255, 0, 0.5)'; playerTintTimer = 15; updateUI(); 
-                    } else if (e.type === 'bag') {
-                        hasBag = true; document.getElementById('bag-btn').style.display = 'block'; showMsg("かいふくの ふくろ を てに入れた！ (右上のボタンで つかえる)"); playSound('heal'); 
                     } else { damagePlayer(); }
                     enemies.splice(i, 1); 
+                    if (gameState !== 'PLAYING') break; 
                 } else if (e.x < -100) { enemies.splice(i, 1); }
             }
 
-            // --- SWORD WAVES (逆順ループで安全に削除) ---
+            // --- SWORD WAVES ---
             for (let i = swordWaves.length - 1; i >= 0; i--) {
-                let sw = swordWaves[i]; sw.x += 10; drawCrescent(sw.x, sw.y, '#00f3ff', '#ffffff'); 
+                let sw = swordWaves[i]; sw.x += 10; drawCrescent(sw, '#00f3ff'); 
                 
                 let hitSomething = false;
                 for(let j = enemies.length - 1; j >= 0; j--) {
                     let e = enemies[j];
                     if (Math.abs(sw.x - e.x) < 80 && Math.abs(sw.y - e.y) < 30) { 
-                        if (e.type === 'bag') { playSound('hit'); showMsg("ふくろ を きってしまった... なかみ が こぼれた。"); }
-                        else if (e.type === 'heal') { playSound('hit'); } 
-                        else { playSound('hit'); score += 10; zakoKills++; updateUI(); checkPhaseProgress(); }
+                        if (e.type === 'heal') { playSound('hit'); } 
+                        else { 
+                            playSound('hit'); score += 10; zakoKills++; updateUI(); 
+                            if(phase === 'zako' && zakoKills >= (currentLevel === 3 ? boss3Zako : 5)) { 
+                                phase = 'wait_boss'; showMsg("・・・・・・。"); waitFrames = 120; waitCallback = spawnBoss; 
+                            } 
+                        }
                         enemies.splice(j, 1); hitSomething = true; break; 
                     } 
                 }
@@ -338,87 +563,148 @@
 
                 for(let j = projectiles.length - 1; j >= 0; j--) {
                     let p = projectiles[j];
-                    if (!p.isParried && Math.abs(sw.x - p.x) < 80 && Math.abs(sw.y - p.y) < 30) { 
+                    if (!p.isParried && Math.abs(sw.x - p.x) < parryWindow && Math.abs(sw.y - p.y) < 30) { 
                         hitSomething = true;
-                        if (p.x < PLAYER_X + 220) { p.isParried = true; p.speed = -40; playSound('parry'); score += 50; updateUI(); } 
-                        else { projectiles.splice(j, 1); playSound('hit'); score += 10; updateUI(); }
+                        if (p.x < PLAYER_X + 220) { p.isParried = true; p.speed = -40; playSound('parry'); score += 50; updateUI(); shake = 10; flash = 0.3; } 
+                        else { projectiles.splice(j, 1); playSound('hit'); score += 10; updateUI(); shake = 5; }
                         break;
                     } 
                 }
                 if(hitSomething){ swordWaves.splice(i, 1); continue; }
 
-                if (boss && phase === 'boss' && Math.abs(sw.x - boss.x) < boss.w/2) { boss.hp -= 1; boss.shake = 10; swordWaves.splice(i, 1); playSound('hit'); if (boss.hp <= 0) win(); }
+                if (boss && phase === 'boss' && Math.abs(sw.x - boss.x) < boss.w/2) { 
+                    boss.hp -= (1 * attackPower); boss.shake = 10; swordWaves.splice(i, 1); shake = 10; playSound('hit'); 
+                    if (boss.hp <= 0) { win(); break; } 
+                }
                 else if (sw.x > GW + 100) swordWaves.splice(i, 1);
             }
 
             // --- NOBUYUKI ---
-            let currentImg = (attackFrame >= 0) ? imgSword[0] : imgWalk[Math.floor(frameCount / 10) % 2];
+            let currentImg;
+            if (attackFrame >= 0) { const idx = Math.floor(attackFrame / 4); currentImg = imgSword[Math.min(idx, 2)]; attackFrame++; if (attackFrame >= 12) attackFrame = -1; } else { currentImg = imgWalk[Math.floor(frameCount / 10) % 2]; }
+            
             if (currentImg && currentImg.complete && currentImg.naturalWidth > 0) { 
                 const pw = CHAR_SIZE * (currentImg.naturalWidth/currentImg.naturalHeight); const py = GH - CHAR_SIZE - 20;
                 ctx.save(); ctx.drawImage(currentImg, PLAYER_X, py, pw, CHAR_SIZE); 
                 if (playerTintTimer > 0) { ctx.globalCompositeOperation = 'source-atop'; ctx.fillStyle = playerTint; ctx.fillRect(PLAYER_X, py, pw, CHAR_SIZE); }
                 ctx.restore();
             }
-            if(attackFrame >= 0) { attackFrame++; if(attackFrame > 10) attackFrame = -1; }
 
-            if (gameState === 'GAMEOVER_WAIT' || gameState === 'GAMEOVER_PROMPT') { ctx.fillStyle = 'rgba(255,0,0,0.3)'; ctx.fillRect(0, 0, GW, GH); }
+            ctx.restore();
+            if (flash > 0) { ctx.fillStyle = `rgba(255, 255, 255, ${flash})`; ctx.fillRect(0, 0, GW, GH); }
             if (gameState === 'PLAYING') frameCount++;
         }
 
+        // 🌟 プレイヤー死亡音（爆発）＋ゲームオーバー音を再生
         function damagePlayer() {
-            lives--; updateUI(); playSound('damage'); playerTint = 'rgba(255, 0, 0, 0.6)'; playerTintTimer = 15;
+            if (gameState !== 'PLAYING') return;
+            lives--; updateUI(); shake = 30; flash = 0.4; playSound('damage'); playerTint = 'rgba(255, 0, 0, 0.6)'; playerTintTimer = 15;
             if (lives <= 0) {
-                gameState = 'GAMEOVER_WAIT'; stopBgm(); playSound('gameover'); 
-                diedAtBoss = (phase === 'boss'); updateStat('deaths');
-                showMsg("あなたは しんでしまった。");
-                waitFrames = 240; waitCallback = () => { gameState = 'GAMEOVER_PROMPT'; showMsg(diedAtBoss ? "ボスから さいかい しますか？" : "もういちど たたかいますか？", true); };
+                gameState = 'GAMEOVER_WAIT'; stopBgm(); 
+                playSound('player_dead'); // 🌟 死亡時の爆発サウンド
+                playSound('gameover');    // 🌟 爆発のあとにメロディが鳴る
+                
+                diedAtBoss = (phase === 'boss' || phase === 'boss_dead'); 
+                updateStat('deaths'); showMsg("あなたは しんでしまった。");
+                
+                waitFrames = 200; 
+                waitCallback = () => { 
+                    gameState = 'GAMEOVER_PROMPT'; 
+                    document.getElementById('btn-retry').style.display = diedAtBoss ? 'block' : 'none'; 
+                    document.getElementById('gameover-screen').style.display = 'flex';
+                };
             }
         }
 
-        function win(){
-            phase = 'boss_dead'; stopBgm(); playSound('boss_dead'); showMsg("ボス を たおした！"); score += 500 * currentLevel; updateUI();
-            waitFrames = 100; // 約1.5秒待つ
+        function win() {
+            if (gameState !== 'PLAYING') return;
+            boss = null; score += 500 * currentLevel; 
+            if (lives < 3) lives++; 
+            updateUI(); flash = 0.8; playSound('boss_dead'); showMsg("ボス を たおした！ いのち が かいふくした！");
+            phase = 'boss_dead'; 
+            projectiles = []; enemies = []; swordWaves = []; 
+            waitFrames = 100; 
+            
             waitCallback = () => {
                 if (currentLevel >= 3) {
-                    gameState = 'CLEAR'; updateStat('clears'); showMsg("すべての まものを とうばつした！ ＞ タップで もどる", true);
+                    gameState = 'ENDING'; stopBgm(); updateStat('clears'); showMsg("すべての まものを とうばつした！");
+                    document.getElementById('ending-screen').style.display = 'flex';
+                    document.getElementById('ending-video').play().catch(e => console.log(e)); 
                 } else {
-                    phase = 'transition'; document.getElementById('transition-screen').style.display = 'flex';
-                    document.getElementById('transition-screen').innerText = "STAGE " + (currentLevel + 1);
+                    phase = 'transition'; 
+                    document.getElementById('transition-screen').style.display = 'flex'; 
+                    document.getElementById('transition-screen').innerText = `STAGE ${currentLevel + 1}`;
                     waitFrames = 150; 
-                    waitCallback = () => {
-                        document.getElementById('transition-screen').style.display = 'none'; currentLevel++; resetGame();
+                    waitCallback = () => { 
+                        document.getElementById('transition-screen').style.display = 'none'; 
+                        currentLevel++; phase = 'zako'; zakoKills = 0; currentCooldownMax = baseCooldown; 
+                        showMsg(`ステージ ${getStageName(currentLevel)} が はじまった。`); updateUI(); startBgm(); 
                     };
                 }
             };
         }
 
-        // 入力処理
-        document.getElementById('start-btn').onclick = () => { if(!audioCtx && soundEnabled){ audioCtx = new AudioContext(); audioCtx.resume(); } gameState='PLAYING'; document.getElementById('title-screen').style.display='none'; resetGame(); };
-        document.getElementById('open-sys').onclick = () => document.getElementById('system-screen').style.display='flex';
-        document.getElementById('close-sys').onclick = () => { bossHP = [parseInt(document.getElementById('hp-boss1').value), parseInt(document.getElementById('hp-boss2').value), parseInt(document.getElementById('hp-boss3').value)]; document.getElementById('system-screen').style.display='none'; };
-        
-        document.getElementById('bag-btn').onclick = (e) => {
-            e.stopPropagation(); 
-            if(hasBag && lives < 3 && gameState === 'PLAYING'){ lives=3; hasBag=false; document.getElementById('bag-btn').style.display='none'; updateUI(); showMsg("ひやく を のんだ！ いのち が ぜんかいふくした！"); playSound('heal'); playerTint = 'rgba(0, 255, 0, 0.5)'; playerTintTimer = 20; }
+        // 🌟 タイトルスタート
+        const startHandler = (e) => {
+            e.preventDefault();
+            initAudio(); 
+            gameState = 'PLAYING'; document.getElementById('title-screen').style.display = 'none'; resetGame();
+        };
+        document.getElementById('start-btn').addEventListener('mousedown', startHandler);
+        document.getElementById('start-btn').addEventListener('touchstart', startHandler, {passive: false});
+
+        // 🌟 システム設定
+        document.getElementById('open-sys').onclick = () => {
+            initAudio(); // 画面を触ったタイミングでBGM起動
+            let pass = prompt("パスワードを入力してください (4桁)");
+            if (pass === "1711") { document.getElementById('system-screen').style.display = 'flex'; } 
+            else if (pass !== null) { alert("パスワードが違います"); }
         };
 
-        canvas.onmousedown = (e) => {
-            if(gameState === 'PLAYING' && phase !== 'transition'){
-                if(attackCooldown > 0) return; attackFrame = 0; attackCooldown = 30; 
-                let rect = canvas.getBoundingClientRect(); let x = (e.clientX - rect.left) * (canvas.width / rect.width);
+        document.getElementById('close-sys').onclick = () => {
+            bossHP = [parseInt(document.getElementById('hp-boss1').value), parseInt(document.getElementById('hp-boss2').value), parseInt(document.getElementById('hp-boss3').value)];
+            boss3Zako = parseInt(document.getElementById('sys-zako3').value) || 15;
+            fireScale = parseFloat(document.getElementById('sys-fire-size').value) || 1.2; // 🌟 炎の大きさ保存
+            parryWindow = parseInt(document.getElementById('sys-parry').value) || 10;
+            baseCooldown = parseInt(document.getElementById('sys-cooldown').value) || 25;
+            madHpRatio = (parseInt(document.getElementById('sys-mad-hp').value) || 50) / 100;
+            madProb = (parseInt(document.getElementById('sys-mad-prob').value) || 40) / 100;
+            currentCooldownMax = baseCooldown;
+            document.getElementById('system-screen').style.display = 'none';
+        };
+        
+        document.getElementById('btn-retry').onclick = (e) => {
+            e.stopPropagation(); document.getElementById('gameover-screen').style.display = 'none'; gameState = 'PLAYING'; resetGame(true);
+        };
+        document.getElementById('btn-title').onclick = (e) => {
+            e.stopPropagation(); document.getElementById('gameover-screen').style.display = 'none';
+            gameState = 'TITLE'; document.getElementById('ui').style.display = 'none'; document.getElementById('title-screen').style.display = 'flex'; showMsg("・・・・・・。"); playTitleBgm();
+        };
+
+        document.getElementById('ending-screen').onclick = () => {
+            document.getElementById('ending-screen').style.display = 'none';
+            gameState = 'TITLE'; document.getElementById('ui').style.display = 'none'; document.getElementById('title-screen').style.display = 'flex'; showMsg("・・・・・・。"); playTitleBgm();
+        };
+
+        const canvasTap = (e) => {
+            if (gameState === 'PLAYING' && phase !== 'transition') {
+                if (attackCooldown > 0) return; 
+                attackFrame = 0; attackCooldown = currentCooldownMax; 
+                let rect = canvas.getBoundingClientRect(); 
+                let x = (e.clientX || e.touches[0].clientX) - rect.left;
+                x = x * (canvas.width / rect.width);
                 swordWaves.push({x: PLAYER_X + 110, y: x < GW/2 ? UPPER_Y : LOWER_Y}); playSound('slash');
-            } else if(gameState === 'GAMEOVER_PROMPT' || gameState === 'CLEAR'){
-                if(diedAtBoss && gameState === 'GAMEOVER_PROMPT'){
-                    if(confirm("ボスから さいかい しますか？\n\n[OK] ボス戦へ\n[キャンセル] タイトルへ")){ gameState = 'PLAYING'; resetGame(true); return; }
-                }
-                gameState = 'TITLE'; document.getElementById('ui').style.display='none'; document.getElementById('bag-btn').style.display='none'; document.getElementById('title-screen').style.display='flex'; showMsg("・・・・・・。"); playTitleBgm();
             }
         };
-        
-        // スマホ用タップ対応
-        canvas.ontouchstart = (e) => { e.preventDefault(); canvas.onmousedown({clientX: e.touches[0].clientX}); };
 
-        window.onload = init;
+        canvas.addEventListener('mousedown', canvasTap);
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); canvasTap(e); }, {passive: false});
+
+        canvas.width = GW; canvas.height = GH; 
+        
+        // 🌟 初回起動時はそのままタイトル画面を表示
+        document.getElementById('title-screen').style.display = 'flex';
+        animate();
     </script>
 </body>
 </html>

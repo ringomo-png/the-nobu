@@ -54,6 +54,23 @@
         .final-statement { color: var(--text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.2em; display: block; line-height: 2.5; margin-bottom: 40px; font-family: 'Roboto Mono', monospace; }
         .footer-logo { font-family: 'Inter', sans-serif; font-weight: 900; font-size: 18px; letter-spacing: 0.5em; color: #151515; margin-top: 80px; text-transform: uppercase; }
         footer { padding: 60px 0; text-align: center; color: #333; font-size: 10px; }
+
+        /* --- 巨大動画用の拡張クラス（コンテナ幅突破ハック） --- */
+        .video-large {
+            width: 100vw;
+            max-width: 1000px;
+            margin-left: 50%;
+            transform: translateX(-50%);
+            border-radius: 8px; /* デカいから少し丸みを強調 */
+            box-shadow: 0 0 30px rgba(52, 199, 89, 0.1); /* マトリックスグリーンのオーラを微追加 */
+        }
+        
+        /* スマホ画面で画面幅いっぱいにフィットさせる処理 */
+        @media (max-width: 1000px) {
+            .video-large {
+                border-radius: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -110,7 +127,7 @@
                     <p>自らがシステムを破る側にいたからこそ、誰よりも「匿名性の保護」を重んじていた。物理空間（遊戯場）において、不用心に財布を放置して場所取りをする者たちがいる。彼に言わせれば当人のセキュリティが脆弱すぎるゆえの自己責任だ。無防備なリソースが気付けば彼のインベントリへ移し替えられていたとしても、それは完璧なステルス性能がもたらした些細な副産物に過ぎない。</p>
                 </div>
             </div>
-            <div class="video-wrapper fade-up"><video class="item-video" muted loop playsinline autoplay><source src="secure.mp4" type="video/mp4"></video></div>
+            <div class="video-wrapper fade-up video-large"><video class="item-video" muted loop playsinline autoplay><source src="secure.mp4" type="video/mp4"></video></div>
         </section>
 
         <section class="item-section">
