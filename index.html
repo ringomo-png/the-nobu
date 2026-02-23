@@ -140,11 +140,7 @@
         .nav-link:hover { color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
         .nav-link.active { color: #fff; font-weight: 700; border-right: 2px solid #fff; padding-right: 10px; }
         
-        .nav-link.locked-link {
-            color: #2a2a2a; 
-            pointer-events: none; 
-            text-shadow: none; 
-        }
+        .nav-link.locked-link { color: #2a2a2a; pointer-events: none; text-shadow: none; }
 
         .reboot-section {
             position: absolute; top: 150vh; left: 50%; transform: translate(-50%, -50%);
@@ -182,15 +178,12 @@
         }
         #auth-overlay.hidden { opacity: 0; visibility: hidden; }
         
-        #pass-input { background: transparent; border: none; border-bottom: 1px solid #333; color: #fff; font-family: 'Roboto Mono'; font-size: 24px; text-align: center; outline: none; letter-spacing: 0.2em; width: 240px; margin-bottom: 30px; transition: opacity 0.5s ease; }
+        .auth-input { background: transparent; border: none; border-bottom: 1px solid #333; color: #fff; font-family: 'Roboto Mono'; text-align: center; outline: none; letter-spacing: 0.2em; transition: opacity 0.5s ease; }
+        #pass-input { font-size: 24px; width: 240px; margin-bottom: 30px; }
         .auth-submit { background: transparent; border: 1px solid #444; color: #fff; font-family: 'Roboto Mono'; font-size: 10px; padding: 10px 30px; letter-spacing: 0.3em; cursor: pointer; transition: opacity 0.5s ease; }
-        
-        .error-msg { 
-            color: #fff; font-size: 11px; font-family: 'Roboto Mono'; margin-top: 25px; 
-            opacity: 0; letter-spacing: 0.2em; 
-        }
+        .error-msg { color: #fff; font-size: 11px; font-family: 'Roboto Mono'; margin-top: 25px; opacity: 0; letter-spacing: 0.2em; }
 
-        /* ▼ バグ演出用文字のオーバーフロー対応（画面いっぱい用） ▼ */
+        /* ▼ バグ演出用文字 ▼ */
         #intro-sequence { position: fixed; inset: 0; background: #000; z-index: 9998; display: flex; justify-content: center; align-items: center; overflow: hidden; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         #intro-sequence.active { opacity: 1; pointer-events: auto; }
         #pre-glitch-image { position: absolute; inset: -20px; background-size: cover; background-position: center; opacity: 0; z-index: 1; }
@@ -208,10 +201,22 @@
     <audio id="bgm" preload="auto"></audio>
 
     <div id="auth-overlay">
-        <span id="auth-label" style="font-family:'Roboto Mono'; font-size:10px; color:#555; letter-spacing:0.3em; margin-bottom:30px; text-transform:uppercase; transition: opacity 0.5s ease;">System Authentication</span>
-        <input type="password" id="pass-input" placeholder="····" autocomplete="off">
-        <button class="auth-submit" id="auth-btn">ENTER</button>
-        <div id="error-txt" class="error-msg">INVALID CODE</div>
+        <div id="login-ui" style="display: flex; flex-direction: column; align-items: center; z-index: 20;">
+            <span id="auth-label" style="font-family:'Roboto Mono'; font-size:10px; color:#555; letter-spacing:0.3em; margin-bottom:30px; text-transform:uppercase; transition: opacity 0.5s ease;">System Authentication</span>
+            <input type="password" id="pass-input" class="auth-input" placeholder="····" autocomplete="off">
+            <button class="auth-submit" id="auth-btn">ENTER</button>
+            <div id="error-txt" class="error-msg">INVALID CODE</div>
+        </div>
+
+        <div id="pw-change-ui" style="display: none; flex-direction: column; align-items: center; z-index: 20;">
+            <span style="font-family:'Roboto Mono'; font-size:10px; color:#ffd700; letter-spacing:0.3em; margin-bottom:30px; text-transform:uppercase;">CHANGE PASSWORD</span>
+            <input type="password" id="old-pass" class="auth-input" placeholder="CURRENT" autocomplete="off" style="font-size: 16px; margin-bottom: 20px; width: 200px;">
+            <input type="password" id="new-pass" class="auth-input" placeholder="NEW" autocomplete="off" style="font-size: 16px; margin-bottom: 30px; width: 200px;">
+            <button class="auth-submit" id="change-btn">UPDATE</button>
+            <div id="change-msg" class="error-msg"></div>
+        </div>
+
+        <div id="secret-trigger" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 30%; z-index: 10;"></div>
     </div>
 
     <div id="intro-sequence">
@@ -238,7 +243,7 @@
                 <a href="more.html" class="nav-link">BELONG</a>
                 <a href="gallery.html" class="nav-link">GALLERY</a>
                 <a href="music.html" class="nav-link locked-link" id="nav-music">MUSIC</a>
-                <a href="otherside.html" class="nav-link">OTHER SIDE</a>
+                <a href="otherside.html" class="nav-link">GAME</a>
             </div>
         </div>
 
@@ -488,7 +493,6 @@
         window.addEventListener('resize', () => { if(camera && renderer) { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }});
         initThree(); animateThree();
 
-        // ▼ メニューの開閉状態を記憶・復元する処理 ▼
         const menuBtn = document.getElementById('menu-btn'); 
         const menuList = document.getElementById('menu-list'); 
         let menuOpen = sessionStorage.getItem('menu_open') === 'true';
@@ -537,37 +541,124 @@
         let scrambleInterval;
         tChars.forEach(el => { el.style.transform = `translate(${(Math.random()-0.5)*window.innerWidth*1.5}px, ${(Math.random()-0.5)*window.innerHeight*1.5}px)`; });
 
-        // ▼ タイピング演出を削除し、すぐに画面いっぱいのバグを発生させる ▼
+        // ▼ 「じゅわっ」と乱数が浮かび上がり、1秒待ってバグる新演出 ▼
         function playAnimationSequence(skipTyping = false) {
-            document.body.classList.add('locked'); introSequence.style.opacity = '1'; introSequence.style.display = 'flex';
-            codeBg.style.opacity = '1';
+            document.body.classList.add('locked'); 
+            introSequence.style.opacity = '1'; 
+            introSequence.style.display = 'flex';
             
+            // 画面いっぱいの乱数を生成
+            const charNeeded = Math.floor((window.innerWidth * window.innerHeight) / 30);
+            let bgText = ''; 
+            for(let i=0; i<charNeeded; i++) bgText += chars.charAt(Math.floor(Math.random()*chars.length)); 
+            codeBg.innerText = bgText;
+
+            // 初期状態：見えない＆少し奥＆ぼやけている
+            codeBg.style.transition = 'opacity 2.0s ease, transform 2.0s cubic-bezier(0.2, 0.8, 0.2, 1), filter 2.0s ease';
+            codeBg.style.opacity = '0';
+            codeBg.style.transform = 'scale(0.9)';
+            codeBg.style.filter = 'blur(10px)';
+
+            // すぐに「じゅわっ」と表示開始
             setTimeout(() => {
-                targetWord.style.opacity = '1'; let startTime = Date.now(); const parseDuration = 7000; 
-                
-                // 画面サイズに合わせて乱数の文字数を計算 (PCでも画面を埋め尽くす)
-                const charNeeded = Math.floor((window.innerWidth * window.innerHeight) / 30);
+                codeBg.style.opacity = '1';
+                codeBg.style.transform = 'scale(1)';
+                codeBg.style.filter = 'blur(0px)';
+            }, 100);
+
+            // 1.5秒後（表示完了＋少し待機）に激しいバグ開始
+            setTimeout(() => {
+                codeBg.style.transition = 'none'; // バグのためにトランジション無効化
+                targetWord.style.opacity = '1'; 
+                let startTime = Date.now(); 
+                const parseDuration = 7000; 
                 
                 scrambleInterval = setInterval(() => {
                     let progress = (Date.now() - startTime) / parseDuration; if (progress > 1) progress = 1;
                     
-                    let bgText = ''; 
-                    for(let i=0; i<charNeeded; i++) bgText += chars.charAt(Math.floor(Math.random()*chars.length)); 
-                    codeBg.innerText = bgText;
+                    let bgTextScramble = ''; 
+                    for(let i=0; i<charNeeded; i++) bgTextScramble += chars.charAt(Math.floor(Math.random()*chars.length)); 
+                    codeBg.innerText = bgTextScramble;
                     
                     if (Math.random() > (0.6 + progress * 0.4)) { codeBg.style.color = '#fff'; codeBg.style.transform = `translate(${(Math.random()-0.5)*15}px, ${(Math.random()-0.5)*15}px)`; } else { codeBg.style.color = '#111'; codeBg.style.transform = 'translate(0, 0)'; }
                     if (Math.random() < (0.1 + progress * 0.8)) { preGlitchImage.style.opacity = 0.2 + (progress * 0.5); if (Math.random() > progress) { preGlitchImage.style.transform = `translate(${(Math.random()-0.5)*50*(1-progress)}px, ${(Math.random()-0.5)*50*(1-progress)}px)`; preGlitchImage.style.mixBlendMode = 'exclusion'; preGlitchImage.style.filter = Math.random() > 0.5 ? 'invert(1) contrast(3)' : 'hue-rotate(90deg) grayscale(1)'; } else { preGlitchImage.style.transform = 'translate(0, 0)'; preGlitchImage.style.mixBlendMode = 'normal'; preGlitchImage.style.filter = 'none'; } } else { preGlitchImage.style.opacity = '0'; }
                     tChars.forEach(el => { if(!el.classList.contains('locked')) el.innerText = chars.charAt(Math.floor(Math.random()*chars.length)); });
                 }, 40);
-            }, 100); // すぐにバグ開始
+            }, 1500); 
             
-            setTimeout(() => { tChars.forEach(el => { el.innerText = el.getAttribute('data-char'); el.classList.add('locked'); el.style.transform = 'translate(0, 0)'; }); }, 7000);
-            setTimeout(() => { clearInterval(scrambleInterval); codeBg.style.opacity = '0'; preGlitchImage.style.opacity = '0.3'; preGlitchImage.style.transform = 'translate(0, 0)'; preGlitchImage.style.mixBlendMode = 'normal'; preGlitchImage.style.filter = 'none'; }, 10000);
-            setTimeout(() => { targetWord.classList.add('merged'); }, 11500);
-            setTimeout(() => { introSequence.style.opacity = '0'; document.body.classList.remove('locked'); window.scrollTo(0, 0); activateSystem(); setTimeout(() => { introSequence.style.display = 'none'; }, 1000); }, 13000);
+            setTimeout(() => { tChars.forEach(el => { el.innerText = el.getAttribute('data-char'); el.classList.add('locked'); el.style.transform = 'translate(0, 0)'; }); }, 8500);
+            setTimeout(() => { clearInterval(scrambleInterval); codeBg.style.opacity = '0'; preGlitchImage.style.opacity = '0.3'; preGlitchImage.style.transform = 'translate(0, 0)'; preGlitchImage.style.mixBlendMode = 'normal'; preGlitchImage.style.filter = 'none'; }, 11500);
+            setTimeout(() => { targetWord.classList.add('merged'); }, 13000);
+            setTimeout(() => { introSequence.style.opacity = '0'; document.body.classList.remove('locked'); window.scrollTo(0, 0); activateSystem(); setTimeout(() => { introSequence.style.display = 'none'; }, 1000); }, 14500);
         }
 
-        const input = document.getElementById('pass-input'); const submitBtn = document.getElementById('auth-btn'); const errorTxt = document.getElementById('error-txt'); let typeInterval;
+        // ▼ パスワードの管理と長押しギミック ▼
+        let systemPassword = localStorage.getItem('system_password') || '777';
+
+        const input = document.getElementById('pass-input'); 
+        const submitBtn = document.getElementById('auth-btn'); 
+        const errorTxt = document.getElementById('error-txt'); 
+        const loginUi = document.getElementById('login-ui');
+        
+        const pwChangeUi = document.getElementById('pw-change-ui');
+        const oldPassInput = document.getElementById('old-pass');
+        const newPassInput = document.getElementById('new-pass');
+        const changeBtn = document.getElementById('change-btn');
+        const changeMsg = document.getElementById('change-msg');
+        
+        let typeInterval;
+
+        // 隠しエリアの3秒長押し処理
+        const secretTrigger = document.getElementById('secret-trigger');
+        let pressTimer;
+
+        const startPress = (e) => {
+            if(pwChangeUi.style.display === 'flex') return;
+            pressTimer = setTimeout(() => {
+                if (navigator.vibrate) navigator.vibrate(50);
+                loginUi.style.display = 'none';
+                pwChangeUi.style.display = 'flex';
+                oldPassInput.focus();
+            }, 3000);
+        };
+        const cancelPress = () => { clearTimeout(pressTimer); };
+
+        secretTrigger.addEventListener('mousedown', startPress);
+        secretTrigger.addEventListener('touchstart', startPress);
+        secretTrigger.addEventListener('mouseup', cancelPress);
+        secretTrigger.addEventListener('mouseleave', cancelPress);
+        secretTrigger.addEventListener('touchend', cancelPress);
+
+        // パスワード変更処理
+        changeBtn.addEventListener('click', () => {
+            if (oldPassInput.value === systemPassword) {
+                if (newPassInput.value.length > 0) {
+                    systemPassword = newPassInput.value;
+                    localStorage.setItem('system_password', systemPassword);
+                    changeMsg.innerText = 'PASSWORD UPDATED';
+                    changeMsg.style.color = '#34c759';
+                    changeMsg.style.opacity = '1';
+                    setTimeout(() => {
+                        pwChangeUi.style.display = 'none';
+                        loginUi.style.display = 'flex';
+                        oldPassInput.value = '';
+                        newPassInput.value = '';
+                        changeMsg.style.opacity = '0';
+                    }, 2000);
+                } else {
+                    changeMsg.innerText = 'INVALID NEW PASSWORD';
+                    changeMsg.style.color = '#ff3b30';
+                    changeMsg.style.opacity = '1';
+                    setTimeout(() => changeMsg.style.opacity = '0', 2000);
+                }
+            } else {
+                changeMsg.innerText = 'INCORRECT CURRENT PASSWORD';
+                changeMsg.style.color = '#ff3b30';
+                changeMsg.style.opacity = '1';
+                setTimeout(() => changeMsg.style.opacity = '0', 2000);
+            }
+        });
+
         if (sessionStorage.getItem('is_auth_main') === 'true') { document.getElementById('auth-overlay').style.display = 'none'; if (isReboot) { playAnimationSequence(true); } else { introSequence.style.display = 'none'; document.body.classList.remove('locked'); activateSystem(); } } else { setTimeout(() => input.focus(), 100); }
         
         const attemptLogin = () => {
@@ -577,7 +668,7 @@
                 introSequence.style.display = 'none';
                 document.body.classList.remove('locked');
                 activateSystem();
-            } else if (input.value === '1711') { 
+            } else if (input.value === systemPassword) { // 動的に設定されたパスワードで判定
                 sessionStorage.setItem('is_auth_main', 'true'); 
                 
                 errorTxt.style.transition = 'none';
