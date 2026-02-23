@@ -22,7 +22,9 @@
         .back-btn { font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--text-muted); text-decoration: none; letter-spacing: 0.2em; text-transform: uppercase; transition: color 0.3s; }
         .back-btn:hover { color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
 
-        .container { position: relative; z-index: 1; padding: 60px 30px; max-width: 600px; margin: 0 auto; }
+        /* ▼ ここが 800px に書き換わってるわよ！ ▼ */
+        .container { position: relative; z-index: 1; padding: 60px 30px; max-width: 800px; margin: 0 auto; }
+        
         .page-header { height: 600px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; margin-bottom: 150px; }
         .item-section { margin-bottom: 250px; }
         .reveal-text { margin-bottom: 150px; } 
@@ -54,23 +56,6 @@
         .final-statement { color: var(--text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.2em; display: block; line-height: 2.5; margin-bottom: 40px; font-family: 'Roboto Mono', monospace; }
         .footer-logo { font-family: 'Inter', sans-serif; font-weight: 900; font-size: 18px; letter-spacing: 0.5em; color: #151515; margin-top: 80px; text-transform: uppercase; }
         footer { padding: 60px 0; text-align: center; color: #333; font-size: 10px; }
-
-        /* --- 巨大動画用の拡張クラス（コンテナ幅突破ハック） --- */
-        .video-large {
-            width: 100vw;
-            max-width: 1000px;
-            margin-left: 50%;
-            transform: translateX(-50%);
-            border-radius: 8px; /* デカいから少し丸みを強調 */
-            box-shadow: 0 0 30px rgba(52, 199, 89, 0.1); /* マトリックスグリーンのオーラを微追加 */
-        }
-        
-        /* スマホ画面で画面幅いっぱいにフィットさせる処理 */
-        @media (max-width: 1000px) {
-            .video-large {
-                border-radius: 0;
-            }
-        }
     </style>
 </head>
 <body>
@@ -127,7 +112,7 @@
                     <p>自らがシステムを破る側にいたからこそ、誰よりも「匿名性の保護」を重んじていた。物理空間（遊戯場）において、不用心に財布を放置して場所取りをする者たちがいる。彼に言わせれば当人のセキュリティが脆弱すぎるゆえの自己責任だ。無防備なリソースが気付けば彼のインベントリへ移し替えられていたとしても、それは完璧なステルス性能がもたらした些細な副産物に過ぎない。</p>
                 </div>
             </div>
-            <div class="video-wrapper fade-up video-large"><video class="item-video" muted loop playsinline autoplay><source src="secure.mp4" type="video/mp4"></video></div>
+            <div class="video-wrapper fade-up"><video class="item-video" muted loop playsinline autoplay><source src="secure.mp4" type="video/mp4"></video></div>
         </section>
 
         <section class="item-section">
@@ -136,7 +121,7 @@
                 <h2 class="item-title fade-up delay-1 decode-text" data-text="肉体の、構造的ハック。">肉体の、構造的ハック。</h2>
                 <div class="item-text fade-up delay-2">
                     <p>彼は知っている。人間の精神は脆く不完全だが、その構造体としての肉体は驚くほど精巧なハードウェアであることを。膨大な医学的知識と解剖学に基づいた彼の身体操作は、無駄を削ぎ落とした美しさを持つと同時に、致命的な脅威となり得る。</p>
-                    <p>かつて、深夜の自宅へ帰宅したまさにその瞬間。暗がりに潜んでいた強盗に遭遇し、<b>頭にのれんを叩き込まれる</b>という予測不能かつ理不尽な急襲を受けた。しかし、視界を奪われるその瞬間すら、彼は冷静だった。急所へのダメージを瞬時に演算し、その衝撃を完全に分散・無効化して生存を確定させたのだ。死の淵に立たされてなお、彼の冷徹な生存アルゴリズムは決して停止することを知らない。</p>
+                    <p>かつて、深夜の自宅へ帰宅したまさにその瞬間。暗がりに潜んでいた強盗に遭遇し、<b>頭にのれんを叩き込まれる</b>という予測不能かつ理不尽な急襲を受けた。しかし、視界を奪われるその瞬間すら、彼は冷静だった。急所へのダメージを瞬時に演算し、Scale分散・無効化して生存を確定させたのだ。死の淵に立たされてなお、彼の冷徹な生存アルゴリズムは決して停止することを知らない。</p>
                 </div>
             </div>
             <div class="video-wrapper fade-up"><video class="item-video" muted loop playsinline autoplay><source src="violence.mp4" type="video/mp4"></video></div>
@@ -266,7 +251,6 @@
             geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3)); 
             geometry.userData.velocities = velocities;
             
-            // 色をマトリックスグリーン(0x00ff41)に変更し、存在感を強調
             particles = new THREE.Points(geometry, new THREE.PointsMaterial({ color: 0x00ff41, size: 4, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending }));
             scene.add(particles);
             

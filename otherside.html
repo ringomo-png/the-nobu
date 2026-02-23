@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NOBUYUKI QUEST - 冒険の書</title>
+    <title>NOBUYUKIQUEST - 冒険の書</title>
     <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
     
     <style>
-        body { margin: 0; background-color: #000; color: #fff; font-family: 'DotGothic16', sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; overflow: hidden; user-select: none; }
-        #game-container { position: relative; display: flex; flex-direction: column; width: 1000px; max-width: 100vw; height: 100vh; background: #000; }
-        #game-area { position: relative; flex: 1; background: #000; overflow: hidden; border-bottom: 2px solid #333; border-top: 2px solid #333; }
+        /* 🌟 背景色を真っ黒から濃いグレーに変更し、目への負担を軽減 */
+        body { margin: 0; background-color: #1a1a1a; color: #fff; font-family: 'DotGothic16', sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; overflow: hidden; user-select: none; }
+        #game-container { position: relative; display: flex; flex-direction: column; width: 1000px; max-width: 100vw; height: 100vh; background: #1a1a1a; }
+        #game-area { position: relative; flex: 1; background: #1a1a1a; overflow: hidden; border-bottom: 2px solid #333; border-top: 2px solid #333; }
         
         canvas { display: block; width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
         
@@ -19,40 +20,44 @@
         .retro-hp { color: #fff; margin-top: 5px; }
         .heart-icon { color: #ff3b30; }
 
-        #message-box { height: 90px; background-color: #000; border: 2px solid #555; border-radius: 6px; margin: 10px; padding: 12px 15px; box-sizing: border-box; font-size: 18px; line-height: 1.5; color: #fff; display: flex; align-items: flex-start; }
-        .blink { animation: blinker 1s linear infinite; margin-left: auto; align-self: flex-end;}
-        @keyframes blinker { 50% { opacity: 0; } }
-
-        /* 🌟 タイトル画面を完全に中央揃えに修正 */
-        #title-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 50; box-sizing: border-box; }
+        /* メッセージボックスの背景も変更 */
+        #message-box { height: 90px; background-color: #1a1a1a; border: 2px solid #555; border-radius: 6px; margin: 10px; padding: 12px 15px; box-sizing: border-box; font-size: 18px; line-height: 1.5; color: #fff; display: flex; align-items: flex-start; }
         
-        .stats-box { border: 2px solid #555; border-radius: 8px; background: rgba(15,15,15,0.9); padding: 15px 30px; font-size: 18px; color: #ccc; text-align: center; margin: 20px 0; min-width: 250px; }
+        /* 🌟 点滅をマイルドに（完全に消えないようにする） */
+        .blink { animation: blinker 1.5s linear infinite; margin-left: auto; align-self: flex-end;}
+        @keyframes blinker { 50% { opacity: 0.4; } }
+
+        /* 🌟 タイトル画面のレイアウト調整。justify-contentを使わず、marginで視覚的な中央へ */
+        #title-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; display: flex; flex-direction: column; align-items: center; z-index: 50; box-sizing: border-box; padding-top: 5vh; }
+        
+        .stats-box { border: 2px solid #555; border-radius: 8px; background: rgba(30,30,30,0.8); padding: 15px 30px; font-size: 18px; color: #ccc; text-align: center; margin-bottom: 3vh; min-width: 250px; }
         .stat-val { color: #ff3b30; font-size: 22px; font-weight: bold; margin: 0 5px; }
         .stat-rate { color: #00f3ff; font-size: 22px; font-weight: bold; margin: 0 5px; }
 
+        /* ボタンのマージンを調整して視覚的な中央へ配置 */
         .start-prompt { 
             font-size: clamp(24px, 5vw, 40px); 
-            color: #fff; margin: 20px 0; cursor: pointer; padding: 15px 6vw; 
-            border: 3px solid #fff; border-radius: 10px; background: #111; 
+            color: #fff; margin: 2vh 0 4vh 0; cursor: pointer; padding: 15px 6vw; 
+            border: 3px solid #fff; border-radius: 10px; background: #222; 
             transition: 0.2s; pointer-events: auto; font-weight: bold; 
             white-space: nowrap; max-width: 90%; text-align: center; box-sizing: border-box;
         }
         .start-prompt:active { background: #fff; color: #000; }
         
-        .sys-btn-title { font-size: 16px; color: #888; cursor: pointer; pointer-events: auto; text-decoration: underline; margin-top: 15px; }
+        .sys-btn-title { font-size: 16px; color: #888; cursor: pointer; pointer-events: auto; text-decoration: underline; margin-top: auto; margin-bottom: 20px; }
         .sys-btn-title:hover { color: #fff; }
 
-        #system-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 200; overflow-y: auto; }
-        .sys-box { border: 2px solid #555; padding: 25px; background: #000; text-align: center; font-size: 16px; }
+        #system-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20,20,20,0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 200; overflow-y: auto; }
+        .sys-box { border: 2px solid #555; padding: 25px; background: #1a1a1a; text-align: center; font-size: 16px; }
         .sys-box-inner { text-align: right; margin-bottom: 20px; line-height: 1.8; }
-        .sys-box input { width: 50px; font-size: 16px; margin-left: 10px; background: #111; color: #fff; border: 1px solid #555; text-align: center; font-family: 'DotGothic16'; }
+        .sys-box input { width: 50px; font-size: 16px; margin-left: 10px; background: #222; color: #fff; border: 1px solid #555; text-align: center; font-family: 'DotGothic16'; }
 
-        #gameover-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
+        #gameover-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20,20,20,0.8); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
         .gameover-text { color: #ff3b30; font-size: 32px; margin-bottom: 40px; font-weight: bold; letter-spacing: 2px; }
-        .go-btn { font-size: 24px; color: #fff; margin: 10px; cursor: pointer; padding: 10px 30px; border: 2px solid #fff; transition: 0.2s; background: #111; pointer-events: auto; }
+        .go-btn { font-size: 24px; color: #fff; margin: 10px; cursor: pointer; padding: 10px 30px; border: 2px solid #fff; transition: 0.2s; background: #222; pointer-events: auto; }
         .go-btn:active { background: #fff; color: #000; }
 
-        #transition-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; justify-content: center; align-items: center; z-index: 300; font-size: 40px; letter-spacing: 4px; }
+        #transition-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; display: none; justify-content: center; align-items: center; z-index: 300; font-size: 40px; letter-spacing: 4px; }
 
         #ending-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; justify-content: center; align-items: center; z-index: 400; overflow: hidden; cursor: pointer; }
         #ending-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.4; pointer-events: none; }
@@ -67,9 +72,9 @@
     <div id="game-container">
         
         <div id="title-screen">
-            <svg width="800" height="200" viewBox="0 0 900 250" style="max-width: 90vw;">
-                <path id="title-curve" d="M 50,180 Q 450,-40 850,180" fill="transparent" />
-                <text font-family="'DotGothic16', sans-serif" font-size="96" fill="#fff" font-weight="bold" filter="drop-shadow(6px 6px 0 #555)">
+            <svg width="800" height="180" viewBox="0 0 900 200" style="max-width: 90vw; margin-bottom: 2vh;">
+                <path id="title-curve" d="M 50,150 Q 450,-20 850,150" fill="transparent" />
+                <text font-family="'DotGothic16', sans-serif" font-size="90" fill="#fff" font-weight="bold" filter="drop-shadow(5px 5px 0 #444)">
                     <textPath href="#title-curve" startOffset="50%" text-anchor="middle">NOBUYUKI QUEST</textPath>
                 </text>
             </svg>
@@ -197,14 +202,13 @@
         const GW = 1000, GH = 400; const PLAYER_X = 50; const CHAR_SIZE = 180;
         const UPPER_Y = 280, LOWER_Y = 340; 
 
-        // 🌟 システム設定変数
         let bossHP = [30, 50, 100];
         let parryWindow = 10;
         let baseCooldown = 25;
         let madHpRatio = 0.5; 
         let madProb = 0.4;    
         let boss3Zako = 15; 
-        let fireScale = 1.2; // 🌟 炎の大きさの倍率（デフォルト1.2倍）
+        let fireScale = 1.2; 
 
         let gameState = 'TITLE', currentLevel = 1, score = 0, frameCount = 0, lives = 3;
         let phase = 'zako', zakoKills = 0, enemies = [], swordWaves = [], projectiles = [], boss = null;
@@ -269,7 +273,6 @@
                 gain.gain.setValueAtTime(0.9, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
                 osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.4);
             }
-            // 🌟 プレイヤー死亡時の爆発音
             if(type === 'player_dead'){
                 const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                 osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, now); osc.frequency.exponentialRampToValueAtTime(10, now + 1.0);
@@ -293,7 +296,6 @@
                 gain.gain.setValueAtTime(0.9, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 2.0);
                 osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 2.0);
             }
-            // 🌟 ゲームオーバーメロディ（死亡音のあとに鳴らすため時間を遅らせる）
             if(type === 'gameover'){
                 const startTime = now + 0.8; 
                 const notes = [196.00, 185.00, 174.61, 130.81];
@@ -356,13 +358,14 @@
 
         function drawBackground(ctx, level, frame) {
             ctx.save(); const groundY = 280; 
-            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, GW, GH); 
+            /* 🌟 背景色を濃いグレーに変更 */
+            ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0, 0, GW, GH); 
             ctx.strokeStyle = currentLevel === 3 ? '#600' : '#333'; 
             ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(0, groundY); ctx.lineTo(GW, groundY); ctx.stroke(); 
-            ctx.fillStyle = currentLevel === 3 ? '#100000' : '#0a0a0a'; 
-            ctx.fillRect(0, groundY, GW, GH - groundY); 
             ctx.fillStyle = currentLevel === 3 ? '#311' : '#222';
+            ctx.fillRect(0, groundY, GW, GH - groundY); 
+            ctx.fillStyle = currentLevel === 3 ? '#422' : '#333';
             for(let i=0; i<GW; i+=80) ctx.fillRect((i - frame*6)%GW, groundY+20, 30, 2);
             for(let i=30; i<GW; i+=100) ctx.fillRect((i - frame*8)%GW, groundY+50, 40, 2);
             ctx.restore();
@@ -487,7 +490,6 @@
                 if (p.isParried) { 
                     drawCrescent(p, '#ff8800', '#ffff00'); 
                 } else {
-                    // 🌟 炎をユーザー設定の倍率で描画
                     ctx.save();
                     ctx.translate(p.x, p.y);
                     ctx.scale(fireScale, fireScale);
@@ -591,11 +593,11 @@
             }
 
             ctx.restore();
-            if (flash > 0) { ctx.fillStyle = `rgba(255, 255, 255, ${flash})`; ctx.fillRect(0, 0, GW, GH); }
+            /* 🌟 フラッシュの強さを半分以下に軽減 */
+            if (flash > 0) { ctx.fillStyle = `rgba(255, 255, 255, ${flash*0.5})`; ctx.fillRect(0, 0, GW, GH); }
             if (gameState === 'PLAYING') frameCount++;
         }
 
-        // 🌟 プレイヤー死亡音（爆発）＋ゲームオーバー音を再生
         function damagePlayer() {
             if (gameState !== 'PLAYING') return;
             lives--; updateUI(); shake = 30; flash = 0.4; playSound('damage'); playerTint = 'rgba(255, 0, 0, 0.6)'; playerTintTimer = 15;
