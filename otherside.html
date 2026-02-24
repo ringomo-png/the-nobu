@@ -7,8 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
     
     <style>
-        /* 🌟 Safariのメニューバー対策として height: 100dvh に変更 */
-        body { margin: 0; background-color: #1a1a1a; color: #fff; font-family: 'DotGothic16', sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100dvh; overflow: hidden; user-select: none; }
+        body { margin: 0; background-color: #1a1a1a; color: #fff; font-family: 'DotGothic16', sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100dvh; overflow: hidden; user-select: none; touch-action: none; -webkit-touch-callout: none; }
         #game-container { position: relative; display: flex; flex-direction: column; width: 1000px; max-width: 100vw; height: 100dvh; background: #1a1a1a; }
         #game-area { position: relative; flex: 1; background: #1a1a1a; overflow: hidden; border-bottom: 2px solid #333; border-top: 2px solid #333; }
         
@@ -20,37 +19,50 @@
         .retro-hp { color: #fff; margin-top: 5px; }
         .heart-icon { color: #ff3b30; }
 
-        /* 🌟 メッセージボックスが下すぎないようにマージンを調整 */
         #message-box { height: 90px; background-color: #1a1a1a; border: 2px solid #555; border-radius: 6px; margin: 10px 10px 20px 10px; padding: 12px 15px; box-sizing: border-box; font-size: 18px; line-height: 1.5; color: #fff; display: flex; align-items: flex-start; }
         
         .blink { animation: blinker 1.5s linear infinite; }
         #message-box .blink { margin-left: auto; align-self: flex-end; }
         @keyframes blinker { 50% { opacity: 0.4; } }
 
-        #title-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; display: flex; flex-direction: column; align-items: center; z-index: 50; box-sizing: border-box; padding-top: 3vh; overflow-y: auto; padding-bottom: 20px; }
+        #title-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; display: flex; flex-direction: column; align-items: center; z-index: 50; box-sizing: border-box; padding-top: 2vh; overflow-y: auto; padding-bottom: 20px; }
         
         .stats-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; width: 90%; max-width: 600px; margin-bottom: 2vh; }
         .stats-box { border: 2px dashed #555; border-radius: 8px; background: rgba(30,30,30,0.8); padding: 15px; font-size: 16px; color: #ccc; text-align: center; flex: 1; min-width: 200px; }
         .stat-val { color: #ff3b30; font-size: 20px; font-weight: bold; margin: 0 5px; }
         .stat-rate { color: #00f3ff; font-size: 20px; font-weight: bold; margin: 0 5px; }
         
-        .leaderboard-list { list-style: none; padding: 0; margin: 0; text-align: left; font-size: 14px; }
-        .leaderboard-list li { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding: 4px 0; }
+        .leaderboard-list { list-style: none; padding: 0; margin: 0; text-align: left; font-size: 14px; max-height: 80px; overflow-y: auto; }
+        .leaderboard-list::-webkit-scrollbar { width: 4px; }
+        .leaderboard-list::-webkit-scrollbar-thumb { background: #666; border-radius: 2px; }
+        .leaderboard-list li { display: flex; justify-content: space-between; border-bottom: 1px dashed #333; padding: 4px 5px; }
         .rank-1 { color: #ffd700; font-weight: bold; } .rank-2 { color: #c0c0c0; font-weight: bold; } .rank-3 { color: #cd7f32; font-weight: bold; }
 
         .start-prompt { 
-            font-size: clamp(24px, 5vw, 40px); 
-            color: #fff; margin: 2vh auto; cursor: pointer; padding: 15px 4vw; 
-            border: 3px solid #fff; border-radius: 10px; background: #222; 
-            transition: 0.2s; pointer-events: auto; font-weight: bold; 
+            font-size: clamp(24px, 5vw, 40px); color: #fff; margin: 2vh auto; cursor: pointer; padding: 15px 4vw; 
+            border: 3px solid #fff; border-radius: 10px; background: #222; transition: 0.2s; pointer-events: auto; font-weight: bold; 
             white-space: nowrap; text-align: center; box-sizing: border-box; display: inline-block;
         }
         .start-prompt:active { background: #fff; color: #000; }
         
-        /* 🌟 システムとおんがくボタンを横並びにするコンテナ */
-        .bottom-menu { display: flex; gap: 30px; align-items: center; margin-top: auto; margin-bottom: 20px; }
-        .sys-btn-title { font-size: 18px; color: #888; cursor: pointer; pointer-events: auto; text-decoration: underline; transition: 0.2s; }
+        .bottom-menu { display: flex; gap: 30px; align-items: center; justify-content: center; margin-top: auto; margin-bottom: 15px; }
+        .sys-btn-title { font-size: 18px; color: #aaa; cursor: pointer; pointer-events: auto; text-decoration: underline; transition: 0.2s; }
         .sys-btn-title:hover { color: #fff; }
+
+        #user-setting-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20,20,20,0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 200; }
+        
+        #virtual-pad { position: absolute; bottom: 5%; right: 5%; display: none; z-index: 30; pointer-events: none; }
+        .v-btn { 
+            position: absolute; border-radius: 50%; 
+            background: rgba(0, 0, 0, 0.6); border: 6px double #ccc; color: #fff; 
+            font-family: 'DotGothic16', sans-serif; 
+            display: flex; justify-content: center; align-items: center; 
+            pointer-events: auto; cursor: pointer; transition: 0.1s; 
+            box-sizing: border-box; 
+        }
+        .v-btn:active { background: rgba(255, 255, 255, 0.5); color: #000; border-color: #fff; }
+        #v-btn-a { top: 0; right: 0; }
+        #v-btn-b { bottom: 0; left: 0; }
 
         #cutin-container { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none; justify-content: center; align-items: center; overflow: hidden; background: rgba(0,0,0,0.3); }
         #cutin-img { width: 100%; height: 100%; object-fit: contain; opacity: 0; transform: scale(1.5); filter: brightness(1.2); }
@@ -68,7 +80,7 @@
         .sys-box input, .sys-box select { width: 60px; font-size: 16px; margin-left: 10px; background: #222; color: #fff; border: 1px solid #555; text-align: center; font-family: 'DotGothic16'; }
 
         #gameover-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20,20,20,0.8); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
-        .gameover-text { color: #ff3b30; font-size: 32px; margin-bottom: 40px; font-weight: bold; letter-spacing: 2px; }
+        .gameover-text { color: #cc0000; font-size: 60px; margin-bottom: 40px; font-weight: bold; letter-spacing: 5px; font-family: 'DotGothic16', sans-serif; text-shadow: 4px 4px 0 #000; }
         .go-btn { font-size: 24px; color: #fff; margin: 10px; cursor: pointer; padding: 10px 30px; border: 2px solid #fff; transition: 0.2s; background: #222; pointer-events: auto; }
         .go-btn:active { background: #fff; color: #000; }
 
@@ -86,6 +98,8 @@
 
     <div id="game-container">
         
+        <video id="title-bgm-video" src="game.MOV" playsinline loop style="display:none;"></video>
+
         <div id="title-screen">
             <svg width="800" height="150" viewBox="0 0 900 200" style="max-width: 90vw; margin-bottom: 2vh;">
                 <path id="title-curve" d="M 50,150 Q 450,-20 850,150" fill="transparent" />
@@ -102,7 +116,7 @@
                 </div>
                 
                 <div class="stats-box">
-                    <div style="color:#ffd700; margin-bottom:10px;">【 えいゆうの きろく 】</div>
+                    <div style="color:#ffd700; margin-bottom:5px;">【 えいゆうの きろく 】</div>
                     <ul class="leaderboard-list" id="leaderboard-list">
                         <li>よみこみちゅう...</li>
                     </ul>
@@ -112,8 +126,31 @@
             <div class="start-prompt blink" id="start-btn">＞ ぼうけん に でる ＜</div>
             
             <div class="bottom-menu">
-                <div class="sys-btn-title" id="open-sys">⚙️ システム設定</div>
+                <div class="sys-btn-title" id="open-user-setting">せってい</div>
                 <div class="sys-btn-title" id="music-btn">おんがく OFF</div>
+            </div>
+            <div class="sys-btn-title" id="open-sys" style="color:#888; margin-bottom:10px;">システム設定</div>
+        </div>
+
+        <div id="user-setting-screen">
+            <div class="sys-box">
+                <div style="color:#ffd700; margin-bottom:15px; font-size:22px;">【 せってい 】</div>
+                <div class="sys-box-inner" style="text-align: left;">
+                    BGM: <select id="set-bgm-onoff"><option value="on">ON</option><option value="off">OFF</option></select><br><br>
+                    音量: <input type="range" id="set-volume" min="0" max="1" step="0.1" value="0.5" style="vertical-align: middle;"><br><br>
+                    操作方法:<br>
+                    <select id="set-controls" style="width: auto;">
+                        <option value="1">パターン1 (画面の左右をタップ)</option>
+                        <option value="2">パターン2 (A・B ボタン)</option>
+                    </select><br><br>
+                    <div style="font-size:14px; color:#aaa; margin-bottom: 5px;">※A・Bボタンの大きさ</div>
+                    サイズ: 
+                    <select id="set-btn-size" style="width: auto;">
+                        <option value="55">小</option>
+                        <option value="75">大</option>
+                    </select>
+                </div>
+                <button id="close-user-setting" style="cursor:pointer; font-family:'DotGothic16'; font-size:18px; color:#fff; background:#222; border:2px solid #fff; padding:8px 30px;">けってい</button>
             </div>
         </div>
 
@@ -150,7 +187,7 @@
                 <br><br><br><br>
                 NOBUYUKIQUEST<br><br><br>
                 すべての まものを とうばつした！<br><br><br>
-                DIRECTOR / NOBUYUKI<br><br>
+                DIRECTOR / Satoshi<br><br>
                 PROGRAM / AI<br><br><br><br>
                 THANK YOU FOR PLAYING<br><br><br><br><br>
                 <span style="font-size:16px;">＞ タップで タイトルへ ＜</span>
@@ -162,9 +199,14 @@
                 <div>ステージ：<span id="val-lv">１</span></div>
                 <div class="retro-hp">いのち：<span class="heart-icon">♥</span> × <span id="val-lives">3</span> <span id="val-score">SCORE: 0</span></div>
             </div>
+
+            <div id="virtual-pad">
+                <div class="v-btn" id="v-btn-a">A</div>
+                <div class="v-btn" id="v-btn-b">B</div>
+            </div>
             
             <div id="gameover-screen">
-                <div class="gameover-text">あなたは しんでしまった</div>
+                <div class="gameover-text">YOU DIED</div>
                 <div class="go-btn" id="btn-retry">＞ ボスから リトライ</div>
                 <div class="go-btn" id="btn-title">＞ タイトルへ もどる</div>
             </div>
@@ -222,6 +264,18 @@
         let sysMadProb = 0.40;     
         let sysCutinEnabled = true;
 
+        let masterVolume = parseFloat(localStorage.getItem('nq_vol')) || 0.5;
+        let isBgmOn = localStorage.getItem('nq_bgm') !== 'false'; 
+        let controlPattern = parseInt(localStorage.getItem('nq_ctrl')) || 1; 
+        let btnSize = parseInt(localStorage.getItem('nq_btnSize')) || 75; 
+        let btnGap = 10; 
+        let localDeathCount = 0; 
+
+        document.getElementById('set-volume').value = masterVolume;
+        document.getElementById('set-bgm-onoff').value = isBgmOn ? "on" : "off";
+        document.getElementById('set-controls').value = controlPattern;
+        document.getElementById('set-btn-size').value = btnSize;
+
         async function loadConfig() {
             if(!db) return;
             try {
@@ -259,7 +313,7 @@
                     
                     currentCooldownMax = baseCooldown;
                 }
-            } catch(e) { console.error("Config Load Error", e); }
+            } catch(e) {}
         }
 
         async function saveConfig() {
@@ -311,7 +365,7 @@
         async function loadLeaderboard() {
             if(!db) return;
             try {
-                const q = query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(5));
+                const q = query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(15));
                 const querySnapshot = await getDocs(q);
                 const list = document.getElementById('leaderboard-list');
                 list.innerHTML = '';
@@ -350,8 +404,7 @@
         const imgSword = [document.getElementById('sword1'), document.getElementById('sword2'), document.getElementById('sword3')];
         const imgMonsters = [document.getElementById('monster1'), document.getElementById('monster2'), document.getElementById('monster3')];
 
-        // 🌟 おんがくボタン（動画Audio）の制御
-        let audioCtx, audioInitialized = false, bgmInterval;
+        let audioCtx, audioInitialized = false, bgmInterval, endingBgmInterval;
         const titleBgmAudio = new Audio('game.MOV');
         titleBgmAudio.loop = true;
         
@@ -367,7 +420,8 @@
         musicBtn.onclick = (e) => {
             e.stopPropagation();
             if(titleBgmAudio.paused) {
-                titleBgmAudio.play().catch(err => console.log("再生エラー(ブラウザ制限)"));
+                titleBgmAudio.volume = masterVolume;
+                titleBgmAudio.play().catch(err => console.log(err));
                 musicBtn.innerText = "おんがく ON";
             } else {
                 titleBgmAudio.pause();
@@ -375,35 +429,30 @@
             }
         };
 
-        function stopTitleBgm() {
-            titleBgmAudio.pause();
-            titleBgmAudio.currentTime = 0;
-            musicBtn.innerText = "おんがく OFF";
-        }
-
         window.addEventListener('mousedown', initAudio, { once: true });
         window.addEventListener('touchstart', initAudio, { once: true });
 
         function playSound(type) {
             if(!audioCtx || audioCtx.state !== 'running') return;
             const now = audioCtx.currentTime;
+            const v = masterVolume; 
 
             if(type === 'slash'){
                 const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                 osc.type = 'triangle'; osc.frequency.setValueAtTime(800, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.15);
-                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.6, now + 0.02); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.6 * v, now + 0.02); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
                 osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.15);
             }
             if(type === 'hit'){
                 const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                 osc.type = 'square'; osc.frequency.setValueAtTime(300, now); osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
-                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.8, now + 0.02); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.8 * v, now + 0.02); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
                 osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.15);
             }
             if(type === 'parry'){
                 const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                 osc.type = 'sine'; osc.frequency.setValueAtTime(1200, now); osc.frequency.exponentialRampToValueAtTime(3000, now + 0.1);
-                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.9, now + 0.02); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.9 * v, now + 0.02); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
                 osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.2);
             }
             if(type === 'heal'){
@@ -411,22 +460,42 @@
                 notes.forEach((freq, i) => {
                     const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                     osc.type = 'sine'; osc.frequency.value = freq;
-                    gain.gain.setValueAtTime(0, now + i*0.08); gain.gain.linearRampToValueAtTime(0.4, now + i*0.08 + 0.02); gain.gain.exponentialRampToValueAtTime(0.01, now + i*0.08 + 0.3);
+                    gain.gain.setValueAtTime(0, now + i*0.08); gain.gain.linearRampToValueAtTime(0.4 * v, now + i*0.08 + 0.02); gain.gain.exponentialRampToValueAtTime(0.01, now + i*0.08 + 0.3);
                     osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now + i*0.08); osc.stop(now + i*0.08 + 0.3);
+                });
+            }
+            // 🌟 レベルアップ音の実装
+            if(type === 'levelup'){
+                const notes = [
+                    {f: 392.00, t: 0, d: 0.1},    
+                    {f: 392.00, t: 0.15, d: 0.1}, 
+                    {f: 392.00, t: 0.30, d: 0.1}, 
+                    {f: 392.00, t: 0.45, d: 0.3}, 
+                    {f: 329.63, t: 0.75, d: 0.3}, 
+                    {f: 440.00, t: 1.05, d: 0.3}, 
+                    {f: 523.25, t: 1.35, d: 0.6}  
+                ];
+                notes.forEach(n => {
+                    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                    osc.type = 'square'; osc.frequency.value = n.f;
+                    gain.gain.setValueAtTime(0, now + n.t); 
+                    gain.gain.linearRampToValueAtTime(0.3 * v, now + n.t + 0.02); 
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + n.t + n.d);
+                    osc.connect(gain); gain.connect(audioCtx.destination); 
+                    osc.start(now + n.t); osc.stop(now + n.t + n.d);
                 });
             }
             if(type === 'damage'){
                 const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                 osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, now); osc.frequency.exponentialRampToValueAtTime(30, now + 0.4);
-                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.9, now + 0.02); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.9 * v, now + 0.02); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
                 osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.4);
             }
-            // 🌟 重厚なボスの登場音に変更
             if(type === 'boss_appear'){
                 [55, 65.41, 73.42].forEach(freq => {
                     const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                     osc.type = 'sawtooth'; osc.frequency.setValueAtTime(freq, now); osc.frequency.exponentialRampToValueAtTime(freq * 0.8, now + 2.0);
-                    gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.5, now + 0.1); gain.gain.exponentialRampToValueAtTime(0.01, now + 2.0);
+                    gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.5 * v, now + 0.1); gain.gain.exponentialRampToValueAtTime(0.01, now + 2.0);
                     osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 2.0);
                 });
                 const bufferSize = audioCtx.sampleRate * 1.0;
@@ -436,14 +505,14 @@
                 const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
                 const noiseFilter = audioCtx.createBiquadFilter(); noiseFilter.type = 'lowpass'; noiseFilter.frequency.value = 400;
                 const noiseGain = audioCtx.createGain();
-                noiseGain.gain.setValueAtTime(0, now); noiseGain.gain.linearRampToValueAtTime(1.0, now + 0.1); noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
+                noiseGain.gain.setValueAtTime(0, now); noiseGain.gain.linearRampToValueAtTime(1.0 * v, now + 0.1); noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
                 noise.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(audioCtx.destination);
                 noise.start(now);
             }
             if(type === 'player_dead'){
                 const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                 osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, now); osc.frequency.exponentialRampToValueAtTime(10, now + 1.0);
-                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(1.0, now + 0.05); gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
+                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(1.0 * v, now + 0.05); gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
                 osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 1.0);
                 
                 const bufferSize = audioCtx.sampleRate * 0.5;
@@ -453,20 +522,20 @@
                 const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
                 const noiseFilter = audioCtx.createBiquadFilter(); noiseFilter.type = 'lowpass'; noiseFilter.frequency.value = 800;
                 const noiseGain = audioCtx.createGain();
-                noiseGain.gain.setValueAtTime(0, now); noiseGain.gain.linearRampToValueAtTime(1.0, now + 0.05); noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                noiseGain.gain.setValueAtTime(0, now); noiseGain.gain.linearRampToValueAtTime(1.0 * v, now + 0.05); noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
                 noise.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(audioCtx.destination);
                 noise.start(now);
             }
             if(type === 'boss_dead'){
                 const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                 osc.type = 'square'; osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(10, now + 2.0);
-                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.9, now + 0.05); gain.gain.exponentialRampToValueAtTime(0.01, now + 2.0);
+                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.9 * v, now + 0.05); gain.gain.exponentialRampToValueAtTime(0.01, now + 2.0);
                 osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 2.0);
             }
             if(type === 'cutin'){
                 const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                 osc.type = 'square'; osc.frequency.setValueAtTime(800, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.5);
-                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.5, now + 0.02); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.5 * v, now + 0.02); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
                 osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.5);
             }
             if(type === 'gameover'){
@@ -475,7 +544,7 @@
                 notes.forEach((freq, i) => {
                     const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                     osc.type = 'triangle'; osc.frequency.value = freq;
-                    gain.gain.setValueAtTime(0, startTime + i*0.4); gain.gain.linearRampToValueAtTime(0.7, startTime + i*0.4 + 0.05); gain.gain.exponentialRampToValueAtTime(0.01, startTime + i*0.4 + 1.0);
+                    gain.gain.setValueAtTime(0, startTime + i*0.4); gain.gain.linearRampToValueAtTime(0.7 * v, startTime + i*0.4 + 0.05); gain.gain.exponentialRampToValueAtTime(0.01, startTime + i*0.4 + 1.0);
                     osc.connect(gain); gain.connect(audioCtx.destination); osc.start(startTime + i*0.4); osc.stop(startTime + i*0.4 + 1.0);
                 });
             }
@@ -483,6 +552,7 @@
         
         function startBgm(){ 
             if(bgmInterval) clearInterval(bgmInterval);
+            if(!isBgmOn) return; 
             if(!audioCtx) initAudio();
             if(audioCtx.state === 'suspended') audioCtx.resume();
             
@@ -492,6 +562,7 @@
                 if(audioCtx.state !== 'running') return;
                 
                 const now = audioCtx.currentTime;
+                const v = masterVolume;
                 
                 let melody, bass;
                 if(currentLevel === 3) {
@@ -504,18 +575,60 @@
 
                 const mOsc=audioCtx.createOscillator(); const mG=audioCtx.createGain(); 
                 mOsc.type='square'; mOsc.frequency.value=melody[frameCount%4]; 
-                mG.gain.setValueAtTime(0,now); mG.gain.linearRampToValueAtTime(0.1,now+0.02); mG.gain.exponentialRampToValueAtTime(0.001,now+0.15); 
+                mG.gain.setValueAtTime(0,now); mG.gain.linearRampToValueAtTime(0.1 * v,now+0.02); mG.gain.exponentialRampToValueAtTime(0.001,now+0.15); 
                 mOsc.connect(mG); mG.connect(audioCtx.destination); mOsc.start(now); mOsc.stop(now+0.15); 
                 
                 const bOsc=audioCtx.createOscillator(); const bG=audioCtx.createGain(); 
                 bOsc.type='triangle'; bOsc.frequency.value=bass[frameCount%4]; 
-                bG.gain.setValueAtTime(0,now); bG.gain.linearRampToValueAtTime(0.15,now+0.02); bG.gain.exponentialRampToValueAtTime(0.001,now+0.15); 
+                bG.gain.setValueAtTime(0,now); bG.gain.linearRampToValueAtTime(0.15 * v,now+0.02); bG.gain.exponentialRampToValueAtTime(0.001,now+0.15); 
                 bOsc.connect(bG); bG.connect(audioCtx.destination); bOsc.start(now); bOsc.stop(now+0.15); 
             }, 180); 
         }
-        function stopBgm(){ if(bgmInterval) clearInterval(bgmInterval); bgmInterval=null; }
 
-        function showMsg(t, blinkCursor = false) { document.getElementById('msg-text').innerText = t; document.getElementById('msg-cursor').style.display = blinkCursor ? 'inline-block' : 'none'; }
+        // 🌟 初代ドラクエ風 3和音エンディングBGM
+        function playEndingBgm() {
+            if(endingBgmInterval) clearInterval(endingBgmInterval);
+            if(!isBgmOn || !audioCtx || audioCtx.state !== 'running') return;
+            
+            const melody = [523.25, 587.33, 659.25, 783.99,  523.25, 659.25, 783.99, 1046.50];
+            const accomp = [261.63, 329.63, 392.00, 523.25,  261.63, 329.63, 392.00, 523.25];
+            const bass   = [130.81, 130.81, 130.81, 130.81,  130.81, 130.81, 130.81, 130.81];
+            
+            let step = 0;
+            endingBgmInterval = setInterval(() => {
+                const now = audioCtx.currentTime;
+                const v = masterVolume;
+                
+                const mOsc = audioCtx.createOscillator(); const mG = audioCtx.createGain();
+                mOsc.type = 'square'; mOsc.frequency.value = melody[step % melody.length];
+                mG.gain.setValueAtTime(0, now); mG.gain.linearRampToValueAtTime(0.08 * v, now + 0.02); mG.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                mOsc.connect(mG); mG.connect(audioCtx.destination); mOsc.start(now); mOsc.stop(now + 0.3);
+
+                const aOsc = audioCtx.createOscillator(); const aG = audioCtx.createGain();
+                aOsc.type = 'square'; aOsc.frequency.value = accomp[(step + 2) % accomp.length];
+                aG.gain.setValueAtTime(0, now); aG.gain.linearRampToValueAtTime(0.06 * v, now + 0.02); aG.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                aOsc.connect(aG); aG.connect(audioCtx.destination); aOsc.start(now); aOsc.stop(now + 0.3);
+
+                const bOsc = audioCtx.createOscillator(); const bG = audioCtx.createGain();
+                bOsc.type = 'triangle'; bOsc.frequency.value = bass[Math.floor(step / 4) % bass.length]; 
+                bG.gain.setValueAtTime(0, now); bG.gain.linearRampToValueAtTime(0.12 * v, now + 0.02); bG.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                bOsc.connect(bG); bG.connect(audioCtx.destination); bOsc.start(now); bOsc.stop(now + 0.3);
+                
+                step++;
+            }, 250); 
+        }
+
+        function stopBgm(){ 
+            if(bgmInterval) clearInterval(bgmInterval); bgmInterval=null; 
+            if(endingBgmInterval) clearInterval(endingBgmInterval); endingBgmInterval=null;
+        }
+
+        function showMsg(t, blinkCursor = false, color = '#fff') { 
+            const m = document.getElementById('msg-text');
+            m.innerText = t; 
+            m.style.color = color; 
+            document.getElementById('msg-cursor').style.display = blinkCursor ? 'inline-block' : 'none'; 
+        }
         function toZen(num) { return num.toString().replace(/[0-9]/g, s => String.fromCharCode(s.charCodeAt(0) + 0xFEE0)); }
         function getStageName(lv) { return lv === 1 ? "１" : (lv === 2 ? "２" : "ファイナル"); }
 
@@ -533,12 +646,31 @@
             ctx.restore();
         }
 
+        const vPad = document.getElementById('virtual-pad');
+        const btnA = document.getElementById('v-btn-a');
+        const btnB = document.getElementById('v-btn-b');
+        
+        function updatePadLayout() {
+            const padSize = btnSize * 2 + btnGap;
+            vPad.style.width = padSize + 'px';
+            vPad.style.height = padSize + 'px';
+            
+            btnA.style.width = btnSize + 'px';
+            btnA.style.height = btnSize + 'px';
+            btnA.style.fontSize = Math.floor(btnSize * 0.5) + 'px';
+            
+            btnB.style.width = btnSize + 'px';
+            btnB.style.height = btnSize + 'px';
+            btnB.style.fontSize = Math.floor(btnSize * 0.5) + 'px';
+        }
+
         function resetGame(retryBoss = false) {
-            stopBgm(); stopTitleBgm(); 
+            stopBgm(); titleBgmAudio.pause(); musicBtn.innerText = "おんがく OFF";
+            
             if(!retryBoss){ 
                 currentLevel=1; score=0; zakoKills=0; updateStat('plays'); 
             } else {
-                score = 0; 
+                score = Math.max(0, score - 800); // 🌟 リトライ時800マイナス（最低0）
             }
             
             lives=3; enemies=[]; swordWaves=[]; projectiles=[]; boss=null; 
@@ -548,11 +680,20 @@
             zakoTimer = 60;
             
             document.getElementById('ui').style.display='block'; updateUI(); 
+            
+            if (controlPattern === 2) {
+                document.getElementById('virtual-pad').style.display = 'block';
+            } else {
+                document.getElementById('virtual-pad').style.display = 'none';
+            }
+
             startBgm();
             
-            if(retryBoss) {
+            if (localDeathCount >= 10 && retryBoss) {
+                showMsg("れいんぼー は ちゃんす", false, "#ffd700");
+            } else if(retryBoss) {
                 phase='wait_boss'; 
-                showMsg("ボスとの さいせん だ！(スコア 0 から)"); waitFrames = 60; waitCallback = spawnBoss;
+                showMsg("ボスとの さいせん だ！(スコア-800)"); waitFrames = 60; waitCallback = spawnBoss;
             } else {
                 phase='zako'; showMsg("ぼうけん が はじまった！");
             }
@@ -579,10 +720,36 @@
         function updateUI() {
             document.getElementById('val-lives').innerText = toZen(lives);
             document.getElementById('val-score').innerText = "SCORE: " + score;
+            
+            if(phase === 'boss' && boss) {
+                let hpRatio = Math.max(0, boss.hp / boss.maxHp);
+                ctx.save();
+                ctx.fillStyle = '#111'; ctx.fillRect(GW/2 - 150, 15, 300, 10);
+                ctx.fillStyle = '#ff3b30'; ctx.fillRect(GW/2 - 150, 15, 300 * hpRatio, 10);
+                ctx.fillStyle = '#fff'; ctx.font = '16px DotGothic16'; ctx.textAlign = 'center'; ctx.fillText('BOSS', GW/2, 10);
+                ctx.restore();
+            }
+            
             document.getElementById('val-lv').innerText = getStageName(currentLevel);
         }
 
         function drawCrescent(obj, shadowColor, fillColor = '#fff') { ctx.save(); ctx.translate(obj.x, obj.y); ctx.fillStyle = fillColor; ctx.shadowBlur = 15; ctx.shadowColor = shadowColor; ctx.beginPath(); ctx.moveTo(0, -35); ctx.quadraticCurveTo(20, 0, 0, 35); ctx.quadraticCurveTo(8, 0, 0, -35); ctx.fill(); ctx.restore(); }
+        
+        function drawZakoEnemy(x, y) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.fillStyle = currentLevel === 3 ? '#ccc' : '#444'; 
+            ctx.beginPath(); ctx.ellipse(0, 0, 30, 25, 0, 0, Math.PI*2); ctx.fill(); 
+            
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(-20, -8, 8, 8); 
+            ctx.fillRect(-4, -8, 8, 8);  
+            ctx.fillStyle = '#ff0055';
+            ctx.fillRect(-18, -6, 4, 4); 
+            ctx.fillRect(-2, -6, 4, 4);  
+            ctx.restore();
+        }
+
         function drawHeart(x, y, size) { ctx.save(); ctx.translate(x, y - size/4); ctx.fillStyle = '#ff69b4'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.bezierCurveTo(-size/2, -size/2, -size, size/3, 0, size); ctx.bezierCurveTo(size, size/3, size/2, -size/2, 0, 0); ctx.fill(); ctx.restore(); }
 
         function animate() {
@@ -605,7 +772,7 @@
                 if (attackCooldown > 0) attackCooldown--;
                 if (powerUpTimer > 0) {
                     powerUpTimer--;
-                    if(invincibleTimer <= 0) { playerTint = `hsla(0, 100%, 50%, 0.3)`; playerTintTimer = 2; }
+                    if(invincibleTimer <= 0) { playerTint = `rgba(255, 255, 0, 0.5)`; playerTintTimer = 2; } 
                     if (powerUpTimer === 0) { attackPower = 1; showMsg("こうげきりょく が もとにもどった。"); }
                 }
                 if (invincibleTimer > 0) {
@@ -676,34 +843,38 @@
                         if (p.color === 'rainbow') {
                             projectiles.splice(i, 1); 
                             playSound('heal'); flash = 0.5;
+                            score += 200; // 🌟 レインボーで200点アップ
                             let r = Math.floor(Math.random() * 3);
                             if (r === 0) {
                                 attackPower = 1.5; powerUpTimer = 300; 
-                                showMsg("レインボー炎！ 5びょうかん こうげきりょくアップ！");
+                                showMsg("レインボー炎！ 5びょうかん こうげきりょくアップ！", false, "yellow");
                             } else if (r === 1) {
                                 if(lives < 3) lives++;
-                                showMsg("レインボー炎！ いのち が かいふくした！");
+                                showMsg("レインボー炎！ いのち が かいふくした！", false, "#00ff00");
                             } else {
                                 invincibleTimer = 180; 
-                                showMsg("レインボー炎！ 3びょうかん むてき！");
+                                showMsg("レインボー炎！ 3びょうかん むてき！", false, "#00ffff");
                             }
                             updateUI(); 
                         } else {
-                            projectiles.splice(i, 1); damagePlayer(); break; 
+                            projectiles.splice(i, 1); damagePlayer(); 
+                            if(gameState !== 'PLAYING') break; // 🌟 相打ち防止（死亡したら抜ける）
                         }
                     }
                     else if (p.isParried && boss && phase === 'boss' && p.x > boss.x - boss.w/2) { 
                         projectiles.splice(i, 1); boss.hp -= (parryDamage * attackPower); boss.shake = 20; playSound('hit'); score += 50; updateUI(); 
                         
-                        if (currentLevel === 3 && boss.hp > 0 && boss.hp <= boss.maxHp * 0.1 && !boss.cutinDone) {
+                        if (currentLevel === 3 && boss.hp > 0 && (boss.hp / boss.maxHp) <= 0.1 && !boss.cutinDone) {
                             boss.cutinDone = true; 
                             if(sysCutinEnabled) { cutinTimer = 72; showCutin(); }
                         }
 
-                        if (boss.hp <= 0) { win(); break; } 
+                        if (boss.hp <= 0 && gameState === 'PLAYING') { win(); break; } // 🌟 相打ち防止
                     }
                     else if (p.x < -100 || p.x > GW + 200) projectiles.splice(i, 1);
                 }
+
+                if (gameState !== 'PLAYING') return; // 以降の処理をスキップ
 
                 // --- ENEMIES UPDATE ---
                 if(phase === 'zako') {
@@ -725,12 +896,13 @@
                     
                     if (e.x < PLAYER_X + 80 && gameState === 'PLAYING' && phase !== 'transition') {
                         if (e.type === 'heal') { 
-                            if (lives < 3) lives++; showMsg("いのちのきのみ を てに入れた！ いのちが かいふくした！"); playSound('heal'); playerTint = 'rgba(0, 255, 0, 0.5)'; playerTintTimer = 15; updateUI(); 
+                            if (lives < 3) lives++; showMsg("いのちのきのみ を てに入れた！", false, "#00ff00"); playSound('heal'); playerTint = 'rgba(0, 255, 0, 0.5)'; playerTintTimer = 15; updateUI(); 
                         } else { damagePlayer(); }
                         enemies.splice(i, 1); 
                         if (gameState !== 'PLAYING') break; 
                     } else if (e.x < -100) { enemies.splice(i, 1); }
                 }
+                if (gameState !== 'PLAYING') return;
 
                 // --- SWORD WAVES UPDATE ---
                 for (let i = swordWaves.length - 1; i >= 0; i--) {
@@ -743,7 +915,7 @@
                             if (e.type === 'heal') { playSound('hit'); } 
                             else { 
                                 playSound('hit'); score += 10; zakoKills++; updateUI(); 
-                                if(phase === 'zako' && zakoKills >= (currentLevel === 3 ? boss3Zako : 5)) { 
+                                if(gameState === 'PLAYING' && phase === 'zako' && zakoKills >= (currentLevel === 3 ? boss3Zako : 5)) { 
                                     phase = 'wait_boss'; showMsg("・・・・・・。"); waitFrames = 120; waitCallback = spawnBoss; 
                                 } 
                             }
@@ -766,17 +938,16 @@
                     if (boss && phase === 'boss' && Math.abs(sw.x - boss.x) < boss.w/2) { 
                         boss.hp -= (1 * attackPower); boss.shake = 10; swordWaves.splice(i, 1); shake = 10; playSound('hit'); 
                         
-                        if (currentLevel === 3 && boss.hp > 0 && boss.hp <= boss.maxHp * 0.1 && !boss.cutinDone) {
+                        if (currentLevel === 3 && boss.hp > 0 && (boss.hp / boss.maxHp) <= 0.1 && !boss.cutinDone) {
                             boss.cutinDone = true; 
                             if(sysCutinEnabled) { cutinTimer = 72; showCutin(); }
                         }
 
-                        if (boss.hp <= 0) { win(); break; } 
+                        if (boss.hp <= 0 && gameState === 'PLAYING') { win(); break; } 
                     }
                     else if (sw.x > GW + 100) swordWaves.splice(i, 1);
                 }
 
-                // --- PLAYER UPDATE ---
                 if (attackFrame >= 0) { attackFrame++; if (attackFrame >= 12) attackFrame = -1; }
             } // ======== 更新処理ここまで ========
 
@@ -785,7 +956,12 @@
             if (boss && (phase === 'boss' || phase === 'boss_dead')) {
                 let bx = boss.x + (Math.random() - 0.5) * boss.shake; let by = boss.y + (Math.random() - 0.5) * boss.shake;
                 const bossImg = imgMonsters[Math.min(currentLevel - 1, 2)];
-                if (bossImg && bossImg.complete && bossImg.naturalWidth > 0) { ctx.drawImage(bossImg, bx - boss.w/2, by - boss.h/2, boss.w, boss.h); } else { ctx.fillStyle = '#222'; ctx.fillRect(bx - boss.w/2, by - boss.h/2, boss.w, boss.h); }
+                
+                if (bossImg && bossImg.complete && bossImg.naturalWidth > 0) { 
+                    ctx.drawImage(bossImg, bx - boss.w/2, by - boss.h/2, boss.w, boss.h); 
+                } else { 
+                    ctx.fillStyle = '#222'; ctx.fillRect(bx - boss.w/2, by - boss.h/2, boss.w, boss.h); 
+                }
                 
                 if(phase === 'boss') {
                     ctx.fillStyle = '#111'; ctx.fillRect(GW/2 - 150, 15, 300, 10); ctx.fillStyle = '#ff3b30'; ctx.fillRect(GW/2 - 150, 15, 300 * (boss.hp/boss.maxHp), 10);
@@ -821,7 +997,7 @@
             for (let i = 0; i < enemies.length; i++) {
                 let e = enemies[i];
                 if (e.type === 'heal') { drawHeart(e.x, e.y, 25); } 
-                else { ctx.fillStyle = currentLevel === 3 ? '#ccc' : '#444'; ctx.beginPath(); ctx.ellipse(e.x, e.y, 30, 25, 0, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#ff0055'; ctx.fillRect(e.x - 15, e.y - 5, 8, 3); }
+                else { drawZakoEnemy(e.x, e.y); } 
             }
 
             for (let i = 0; i < swordWaves.length; i++) { drawCrescent(swordWaves[i], '#00f3ff'); }
@@ -837,7 +1013,18 @@
             }
 
             ctx.restore();
-            if (flash > 0) { ctx.fillStyle = `rgba(255, 255, 255, ${flash*0.5})`; ctx.fillRect(0, 0, GW, GH); }
+            
+            if (flash > 0) { 
+                ctx.save();
+                const grad = ctx.createRadialGradient(PLAYER_X + CHAR_SIZE/2, GH - CHAR_SIZE/2, 10, PLAYER_X + CHAR_SIZE/2, GH - CHAR_SIZE/2, 400);
+                grad.addColorStop(0, `rgba(255, 255, 255, ${flash*0.6})`);
+                grad.addColorStop(1, `rgba(255, 255, 255, 0)`);
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, GW, GH);
+                ctx.restore();
+            }
+            
+            updateUI(); 
             
             if (gameState === 'PLAYING' && cutinTimer <= 0) frameCount++;
         }
@@ -847,17 +1034,21 @@
             if (invincibleTimer > 0) return; 
             
             lives--; updateUI(); shake = 30; flash = 0.4; playSound('damage'); playerTint = 'rgba(255, 0, 0, 0.6)'; playerTintTimer = 15;
+            
             if (lives <= 0) {
                 gameState = 'GAMEOVER_WAIT'; stopBgm(); 
                 playSound('player_dead'); 
                 playSound('gameover');    
                 
                 diedAtBoss = (phase === 'boss' || phase === 'boss_dead'); 
-                updateStat('deaths'); showMsg("あなたは しんでしまった。");
+                updateStat('deaths'); showMsg("");
+                localDeathCount++; 
                 
                 waitFrames = 200; 
                 waitCallback = () => { 
-                    gameState = 'GAMEOVER_PROMPT'; document.getElementById('btn-retry').style.display = diedAtBoss ? 'block' : 'none'; 
+                    gameState = 'GAMEOVER_PROMPT'; 
+                    document.getElementById('virtual-pad').style.display = 'none'; 
+                    document.getElementById('btn-retry').style.display = diedAtBoss ? 'block' : 'none'; 
                     document.getElementById('gameover-screen').style.display = 'flex';
                 };
             }
@@ -875,17 +1066,27 @@
             waitCallback = () => {
                 if (currentLevel >= 3) {
                     gameState = 'ENDING'; stopBgm(); updateStat('clears'); showMsg("すべての まものを とうばつした！");
+                    document.getElementById('virtual-pad').style.display = 'none'; 
+                    
+                    playSound('levelup'); // 🌟 レベルアップ音
                     
                     setTimeout(async () => {
                         let playerName = prompt("クリアおめでとうございます！\nえいゆうのきろく に 名前をのこそう！(8文字まで)", "ゆうしゃ");
+                        
+                        // プロンプト後に確実におんがく再開
+                        if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+                        playEndingBgm(); // 🌟 エンディングBGM開始
+                        
                         if (playerName) {
                             try {
                                 await addDoc(collection(db, "leaderboard"), { name: playerName || "ななし", score: score, timestamp: Date.now() });
                                 loadLeaderboard(); 
                             } catch(e) {}
                         }
-                        document.getElementById('ending-screen').style.display = 'flex'; document.getElementById('ending-video').play().catch(e => console.log(e)); 
-                    }, 500);
+                        document.getElementById('ending-screen').style.display = 'flex'; 
+                        document.getElementById('ending-video').volume = masterVolume;
+                        document.getElementById('ending-video').play().catch(e => console.log(e)); 
+                    }, 2500); // 🌟 レベルアップ音が鳴り終わってからプロンプト
 
                 } else {
                     phase = 'transition'; document.getElementById('transition-screen').style.display = 'flex'; document.getElementById('transition-screen').innerText = `STAGE ${currentLevel + 1}`;
@@ -905,6 +1106,48 @@
         };
         document.getElementById('start-btn').addEventListener('mousedown', startHandler);
         document.getElementById('start-btn').addEventListener('touchstart', startHandler, {passive: false});
+
+        document.getElementById('open-user-setting').onclick = () => {
+            initAudio(); 
+            document.getElementById('set-btn-size').value = btnSize;
+            document.getElementById('user-setting-screen').style.display = 'flex';
+            
+            if(document.getElementById('set-controls').value === "2") {
+                updatePadLayout(); 
+                vPad.style.display = 'block';
+                vPad.style.zIndex = 250; 
+            }
+        };
+
+        document.getElementById('set-controls').onchange = (e) => {
+            if(e.target.value === "2") { updatePadLayout(); vPad.style.display = 'block'; vPad.style.zIndex = 250; }
+            else { vPad.style.display = 'none'; }
+        };
+
+        document.getElementById('set-btn-size').onchange = (e) => { 
+            btnSize = parseInt(e.target.value); 
+            updatePadLayout(); 
+        };
+
+        document.getElementById('close-user-setting').onclick = () => {
+            isBgmOn = document.getElementById('set-bgm-onoff').value === "on";
+            masterVolume = parseFloat(document.getElementById('set-volume').value);
+            controlPattern = parseInt(document.getElementById('set-controls').value);
+            btnSize = parseInt(document.getElementById('set-btn-size').value);
+            
+            localStorage.setItem('nq_vol', masterVolume);
+            localStorage.setItem('nq_bgm', isBgmOn);
+            localStorage.setItem('nq_ctrl', controlPattern);
+            localStorage.setItem('nq_btnSize', btnSize);
+
+            titleBgmAudio.volume = masterVolume;
+            
+            vPad.style.zIndex = 30; 
+            if (controlPattern !== 2) vPad.style.display = 'none';
+            else updatePadLayout();
+            
+            document.getElementById('user-setting-screen').style.display = 'none';
+        };
 
         document.getElementById('open-sys').onclick = () => {
             initAudio(); 
@@ -928,25 +1171,42 @@
 
         document.getElementById('ending-screen').onclick = () => {
             document.getElementById('ending-screen').style.display = 'none';
+            document.getElementById('ending-video').pause();
+            if(endingBgmInterval) clearInterval(endingBgmInterval);
             gameState = 'TITLE'; document.getElementById('ui').style.display = 'none'; document.getElementById('title-screen').style.display = 'flex'; showMsg("・・・・・・。"); 
+            playTitleBgm();
         };
 
-        const canvasTap = (e) => {
+        const executeAttack = (isUpper) => {
             if (gameState === 'PLAYING' && phase !== 'transition' && cutinTimer <= 0) {
                 if (attackCooldown > 0) return; 
                 attackFrame = 0; attackCooldown = currentCooldownMax; 
-                let rect = canvas.getBoundingClientRect(); 
-                let x = (e.clientX || e.touches[0].clientX) - rect.left;
-                x = x * (canvas.width / rect.width);
-                swordWaves.push({x: PLAYER_X + 110, y: x < GW/2 ? UPPER_Y : LOWER_Y}); playSound('slash');
+                swordWaves.push({x: PLAYER_X + 110, y: isUpper ? UPPER_Y : LOWER_Y}); playSound('slash');
             }
         };
 
+        const canvasTap = (e) => {
+            if (gameState === 'CLEAR') {
+                gameState = 'TITLE'; document.getElementById('ui').style.display = 'none'; document.getElementById('title-screen').style.display = 'flex'; showMsg("・・・・・・。"); 
+            } else if (controlPattern === 1) {
+                let rect = canvas.getBoundingClientRect(); 
+                let x = (e.clientX || e.touches[0].clientX) - rect.left;
+                x = x * (canvas.width / rect.width);
+                executeAttack(x < GW/2);
+            }
+        };
         canvas.addEventListener('mousedown', canvasTap);
-        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); canvasTap(e); }, {passive: false});
+        canvas.addEventListener('touchstart', (e) => { if(e.target === canvas) { e.preventDefault(); canvasTap(e); } }, {passive: false});
+
+        const tapA = (e) => { e.preventDefault(); executeAttack(true); };
+        const tapB = (e) => { e.preventDefault(); executeAttack(false); };
+        btnA.addEventListener('mousedown', tapA); btnA.addEventListener('touchstart', tapA, {passive: false});
+        btnB.addEventListener('mousedown', tapB); btnB.addEventListener('touchstart', tapB, {passive: false});
+
+        // 初回ロード時にパッドレイアウトを計算しておく
+        updatePadLayout();
 
         canvas.width = GW; canvas.height = GH; 
-        
         document.getElementById('title-screen').style.display = 'flex';
         animate();
     </script>
