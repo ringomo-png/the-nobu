@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>NOBUYUKIQUEST - 冒険の書</title>
     <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
         body { margin: 0; background-color: #1a1a1a; color: #fff; font-family: 'DotGothic16', sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100dvh; overflow: hidden; user-select: none; touch-action: none; -webkit-touch-callout: none; }
@@ -84,12 +85,16 @@
         .go-btn { font-size: 24px; color: #fff; margin: 10px; cursor: pointer; padding: 10px 30px; border: 2px solid #fff; transition: 0.2s; background: #222; pointer-events: auto; }
         .go-btn:active { background: #fff; color: #000; }
 
-        #transition-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; display: none; justify-content: center; align-items: center; z-index: 300; font-size: 40px; letter-spacing: 4px; }
+                #transition-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; display: none; justify-content: center; align-items: center; z-index: 300; font-size: 40px; letter-spacing: 4px; }
 
-        #ending-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; justify-content: center; align-items: center; z-index: 400; overflow: hidden; cursor: pointer; }
-        #ending-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.4; pointer-events: none; }
-        #credits { position: absolute; width: 100%; text-align: center; color: #fff; font-size: 24px; line-height: 2; z-index: 401; animation: scrollUp 15s linear forwards; pointer-events: none; }
-        @keyframes scrollUp { 0% { transform: translateY(100dvh); } 100% { transform: translateY(-100dvh); } }
+        /* === ここから エンディング画面のCSS変更 === */
+        #ending-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 400; overflow: hidden; }
+        .end-seq-text { opacity: 0; transition: opacity 2s ease; font-family: 'DotGothic16', sans-serif; text-align: center; line-height: 1.5; margin-bottom: 10px; color: #fff; font-size: 16px; }
+        .end-seq-green { color: #34c759; text-shadow: 0 0 5px rgba(52, 199, 89, 0.5); font-family: 'DotGothic16', monospace; font-size: 16px; letter-spacing: 2px; }
+        #ending-terminal, #ending-credits, #ending-the-end { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
+        #ending-tap { font-size: 16px; margin-top: 40px; cursor: pointer; pointer-events: auto; }
+        #ending-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 3s ease; pointer-events: none; z-index: -1; }
+        /* === ここまで === */
 
         .assets { display: none; }
 
@@ -206,24 +211,31 @@
                 <button id="close-sys" style="cursor:pointer; font-family:'DotGothic16'; font-size:18px; color:#fff; background:#222; border:2px solid #fff; padding:8px 30px;">ほぞんして もどる</button>
             </div>
         </div>
-
         <div id="transition-screen">STAGE 2</div>
 
         <div id="ending-screen">
-            <video id="ending-video" src="game2.MOV" playsinline muted loop></video>
-            <div id="credits">
-                <br><br><br><br>
-                NOBUYUKIQUEST<br><br><br>
-                すべての まものを とうばつした！<br><br><br>
-                DIRECTOR / SATOSHI<br><br>
-                PROGRAM / AI<br><br><br><br>
-                THANK YOU FOR PLAYING<br><br><br><br><br>
-                <span style="font-size:16px;">＞ タップで タイトルへ ＜</span>
+            <video id="ending-video" src="game2.MOV" playsinline muted></video>
+            
+            <div id="ending-terminal">
+                <div id="end-msg-1" class="end-seq-text">おめでとう！</div>
+                <div id="end-msg-2" class="end-seq-text">よつかいどう に へいわ が おとずれた</div>
+                <div id="end-msg-3" class="end-seq-text">かれの ぼうけん は まだまだ つづく</div>
+            </div>
+            
+            <div id="ending-credits">
+                <div id="end-cred-1" class="end-seq-text end-seq-green">DIRECTOR / CREATOR : Satoshi Mori</div>
+                <div id="end-cred-2" class="end-seq-text end-seq-green">MUSIC : AI</div>
+                <div id="end-cred-3" class="end-seq-text end-seq-green">COOPERATION : Nobuyuki Kurosaki</div>
+            </div>
+            
+            <div id="ending-the-end">
+                <div id="end-final-text" class="end-seq-text" style="font-size: 60px; font-family: 'DotGothic16', sans-serif; text-shadow: 4px 4px 0 #000; letter-spacing: 5px;">THE END</div>
+                <div id="ending-tap" class="end-seq-text blink">＞ TAP ＜</div>
             </div>
         </div>
-
         <div id="game-area">
-            <div id="ui">
+
+                    <div id="ui">
                 <div>ステージ：<span id="val-lv">１</span></div>
                 <div class="retro-hp">いのち：<span class="heart-icon">♥</span> × <span id="val-lives">3</span> <span id="val-score">SCORE: 0</span></div>
             </div>
@@ -280,7 +292,7 @@
             loadConfig(); 
         } catch(e) {}
 
-        // スクロール位置のリセット（画面が開いた時に上にいっちゃう対策）
+        // 画面初期表示時のスクロール位置リセット処理
         window.addEventListener('DOMContentLoaded', () => {
             window.scrollTo(0, 0); 
             
@@ -462,14 +474,13 @@
         let waitFrames = 0, waitCallback = null, shake = 0, flash = 0; 
         
         let attackPower = 1; 
-let powerUpTimer = 0;
-let invincibleTimer = 0; 
-let cutinTimer = 0; 
-let zakoTimer = 0;       
-let checkpointScore = 0; // 追加: ボス到達時のスコアを保持する変数
+        let powerUpTimer = 0;
+        let invincibleTimer = 0; 
+        let cutinTimer = 0; 
+        let zakoTimer = 0;       
+        let checkpointScore = 0; 
 
-const imgWalk = [document.getElementById('walk1'), document.getElementById('walk2')];
-
+        const imgWalk = [document.getElementById('walk1'), document.getElementById('walk2')];
         const imgSword = [document.getElementById('sword1'), document.getElementById('sword2'), document.getElementById('sword3')];
         const imgMonsters = [document.getElementById('monster1'), document.getElementById('monster2'), document.getElementById('monster3')];
 
@@ -500,6 +511,98 @@ const imgWalk = [document.getElementById('walk1'), document.getElementById('walk
 
         window.addEventListener('mousedown', initAudio, { once: true });
         window.addEventListener('touchstart', initAudio, { once: true });
+
+        // ----------------------------------------------------
+        // 追加: 非同期処理による待機関数
+        // ----------------------------------------------------
+        const waitMs = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+        // ----------------------------------------------------
+        // 追加: エンディングのシーケンス制御
+        // ----------------------------------------------------
+        async function playEndingSequence() {
+            const screen = document.getElementById('ending-screen');
+            const term = document.getElementById('ending-terminal');
+            const creds = document.getElementById('ending-credits');
+            const theEnd = document.getElementById('ending-the-end');
+            const tapBtn = document.getElementById('ending-tap');
+            const vid = document.getElementById('ending-video');
+            
+            // UIの初期化
+            screen.style.display = 'flex';
+            term.style.display = 'flex';
+            creds.style.display = 'none';
+            theEnd.style.display = 'none';
+            vid.style.opacity = '0';
+            
+            document.querySelectorAll('.end-seq-text').forEach(el => el.style.opacity = '0');
+            
+            // 1. 冒険の結末テキスト表示
+            await waitMs(1000);
+            document.getElementById('end-msg-1').style.opacity = '1';
+            await waitMs(2000);
+            document.getElementById('end-msg-2').style.opacity = '1';
+            await waitMs(2000);
+            document.getElementById('end-msg-3').style.opacity = '1';
+            
+            await waitMs(3500);
+            term.style.display = 'none';
+            
+            // 2. クレジット表示（メインサイト風のグリーンテキスト）
+            creds.style.display = 'flex';
+            await waitMs(500);
+            document.getElementById('end-cred-1').style.opacity = '1';
+            await waitMs(2000);
+            document.getElementById('end-cred-2').style.opacity = '1';
+            await waitMs(2000);
+            document.getElementById('end-cred-3').style.opacity = '1';
+            
+            await waitMs(4000);
+            creds.style.display = 'none';
+            
+            // 3. THE END 表示
+            theEnd.style.display = 'flex';
+            await waitMs(1000);
+            document.getElementById('end-final-text').style.opacity = '1';
+            
+            // 4. フェイクの TAP ボタン表示
+            await waitMs(3000);
+            tapBtn.style.opacity = '1';
+            
+            // タップ時のイベントを登録（1回のみ実行）
+            const tapHandler = () => {
+                tapBtn.removeEventListener('click', tapHandler);
+                tapBtn.removeEventListener('touchstart', tapHandler);
+                
+                // テキストを消去し、裏に隠していた動画を再生＆フェードイン
+                theEnd.style.display = 'none';
+                vid.style.display = 'block';
+                vid.play().catch(e => console.log(e));
+                
+                setTimeout(() => { vid.style.opacity = '0.4'; }, 100);
+                
+                // 動画表示後、画面のどこかをタップでタイトルへ戻る処理を再登録
+                setTimeout(() => {
+                    const returnTitle = () => {
+                        screen.removeEventListener('click', returnTitle);
+                        screen.removeEventListener('touchstart', returnTitle);
+                        
+                        screen.style.display = 'none';
+                        titleBgmAudio.pause();
+                        vid.pause();
+                        gameState = 'TITLE'; 
+                        document.getElementById('ui').style.display = 'none'; 
+                        document.getElementById('title-screen').style.display = 'flex'; 
+                        showMsg("・・・・・・。"); 
+                    };
+                    screen.addEventListener('click', returnTitle);
+                    screen.addEventListener('touchstart', returnTitle, {passive: false});
+                }, 2000); // 誤タップ防止で2秒待機
+            };
+            
+            tapBtn.addEventListener('click', tapHandler);
+            tapBtn.addEventListener('touchstart', tapHandler, {passive: false});
+        }
 
         function playSound(type) {
             if(!audioCtx || audioCtx.state !== 'running') return;
@@ -699,23 +802,20 @@ const imgWalk = [document.getElementById('walk1'), document.getElementById('walk
         }
 
         function resetGame(retryBoss = false) {
-    window.scrollTo(0, 0); 
-    stopBgm(); titleBgmAudio.pause(); musicBtn.innerText = "おんがく OFF";
-    
-    if(!retryBoss){ 
-        currentLevel = 1; score = 0; zakoKills = 0; updateStat('plays'); 
-        checkpointScore = 0; 
-    } else {
-        // 変更: 現在のスコアではなく、記憶したチェックポイントから500を引く
-        score = Math.max(0, checkpointScore - 500); 
-        updateStat('plays'); // 追加: リトライ時にもプレイ回数を加算し、クリア率を正しく計算させる
-    }
-    
-    lives=3; enemies=[]; swordWaves=[]; projectiles=[]; boss=null; 
-
-
-            attackFrame=-1; waitFrames=0; playerTintTimer=0; diedAtBoss=false;
-            shake=0; flash=0; currentCooldownMax = baseCooldown;
+            window.scrollTo(0, 0); 
+            stopBgm(); titleBgmAudio.pause(); musicBtn.innerText = "おんがく OFF";
+            
+            if(!retryBoss){ 
+                currentLevel = 1; score = 0; zakoKills = 0; updateStat('plays'); 
+                checkpointScore = 0; 
+            } else {
+                score = Math.max(0, checkpointScore - 500); 
+                updateStat('plays'); // 変更: リトライ時にもプレイ回数を加算し、クリア率を正しく計算させる
+            }
+            
+            lives = 3; enemies = []; swordWaves = []; projectiles = []; boss = null; 
+            attackFrame = -1; waitFrames = 0; playerTintTimer = 0; diedAtBoss = false;
+            shake = 0; flash = 0; currentCooldownMax = baseCooldown;
             attackPower = 1; powerUpTimer = 0; cutinTimer = 0; invincibleTimer = 0;
             zakoTimer = 60;
             
@@ -731,19 +831,28 @@ const imgWalk = [document.getElementById('walk1'), document.getElementById('walk
             startBgm();
             
             if (localDeathCount > 0 && localDeathCount % 10 === 0 && retryBoss) {
+                phase = 'wait_boss'; 
                 showMsg("れいんぼー は ちゃんす", false, "#ffd700");
+                waitFrames = 60; 
+                waitCallback = spawnBoss;
             } else if(retryBoss) {
-                phase='wait_boss'; 
-                showMsg("ボスとの さいせん だ！(スコア-800)"); waitFrames = 60; waitCallback = spawnBoss;
+                phase = 'wait_boss'; 
+                showMsg("ボスとの さいせん だ！(スコア没収＆-500)"); 
+                waitFrames = 60; 
+                waitCallback = spawnBoss;
             } else {
-                phase='zako'; showMsg("ぼうけん が はじまった！");
+                phase = 'zako'; 
+                showMsg("ぼうけん が はじまった！");
             }
         }
 
         function spawnBoss(){
             playSound('boss_appear');
-            boss = { x:GW+200, y:290, hp:bossHP[currentLevel-1], maxHp:bossHP[currentLevel-1], w:180, h:180, timer:-90, targetX:GW-120, shake:0, attackCount:0, restTimer:0, attackCooldown: 60, cutinDone: false };
-            phase = 'boss'; showMsg(currentLevel>=3?"さいしゅう ボス が あらわれた！！":"きょうりょくな ボス が あらわれた！");
+            boss = { x:GW+200, y:290, hp:bossHP[currentLevel-1], maxHp:bossHP[currentLevel-1], w:180, h:180, timer:-90, targetX:GW-150, shake:0, attackCount:0, restTimer:0, attackCooldown: 60, cutinDone: false };
+            phase = 'boss'; 
+            showMsg(currentLevel>=3?"さいしゅう ボス が あらわれた！！":"きょうりょくな ボス が あらわれた！");
+            
+            checkpointScore = score;
         }
 
         function showCutin() {
@@ -913,7 +1022,6 @@ const imgWalk = [document.getElementById('walk1'), document.getElementById('walk
                     else if (p.x < -100 || p.x > GW + 200) projectiles.splice(i, 1);
                 }
 
-                // 修正：バグ（残像・道崩れ）の原因だった早期returnを廃止し、ifブロックで囲む
                 if (gameState === 'PLAYING') { 
 
                     if(phase === 'zako') {
@@ -988,7 +1096,7 @@ const imgWalk = [document.getElementById('walk1'), document.getElementById('walk
 
                         if (attackFrame >= 0) { attackFrame++; if (attackFrame >= 12) attackFrame = -1; }
                     }
-                } // end of if(gameState === 'PLAYING')
+                }
             } 
             
             if (boss && (phase === 'boss' || phase === 'boss_dead')) {
@@ -1051,13 +1159,11 @@ const imgWalk = [document.getElementById('walk1'), document.getElementById('walk
                 ctx.restore();
             }
 
-            // ★ここで確実にrestoreされる（残像や道崩れのバグが消滅する）
             ctx.restore();
             
-            // 修正：レインボーのフラッシュ範囲を限定して見やすくした
             if (flash > 0) { 
                 ctx.save();
-                const r = 200; // 半径を縮小
+                const r = 200;
                 const grad = ctx.createRadialGradient(PLAYER_X + CHAR_SIZE/2, GH - CHAR_SIZE/2, 10, PLAYER_X + CHAR_SIZE/2, GH - CHAR_SIZE/2, r);
                 grad.addColorStop(0, `rgba(255, 255, 255, ${flash*0.5})`);
                 grad.addColorStop(1, `rgba(255, 255, 255, 0)`);
@@ -1130,8 +1236,10 @@ const imgWalk = [document.getElementById('walk1'), document.getElementById('walk
                                 loadLeaderboard(); 
                             } catch(e) {}
                         }
-                        document.getElementById('ending-screen').style.display = 'flex'; 
-                        document.getElementById('ending-video').play().catch(e => console.log(e));
+                        
+                        // 変更: 新しいエンディングシーケンス関数を呼び出す
+                        playEndingSequence();
+                        
                     }, 2500); 
 
                 } else {
@@ -1212,13 +1320,6 @@ const imgWalk = [document.getElementById('walk1'), document.getElementById('walk
         };
         document.getElementById('btn-title').onclick = (e) => {
             e.stopPropagation(); document.getElementById('gameover-screen').style.display = 'none';
-            gameState = 'TITLE'; document.getElementById('ui').style.display = 'none'; document.getElementById('title-screen').style.display = 'flex'; showMsg("・・・・・・。"); 
-        };
-
-        document.getElementById('ending-screen').onclick = () => {
-            document.getElementById('ending-screen').style.display = 'none';
-            titleBgmAudio.pause();
-            document.getElementById('ending-video').pause();
             gameState = 'TITLE'; document.getElementById('ui').style.display = 'none'; document.getElementById('title-screen').style.display = 'flex'; showMsg("・・・・・・。"); 
         };
 
