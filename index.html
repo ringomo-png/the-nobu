@@ -171,7 +171,7 @@
             font-size: 10px; color: #444; letter-spacing: 0.2em; font-family: 'Roboto Mono';
         }
 
-        /* ▼ ログイン画面 ▼ */
+        /* Authentication Overlay */
         #auth-overlay {
             position: fixed; inset: 0; background: #000; z-index: 9999;
             display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease;
@@ -183,7 +183,7 @@
         .auth-submit { background: transparent; border: 1px solid #444; color: #fff; font-family: 'Roboto Mono'; font-size: 10px; padding: 10px 30px; letter-spacing: 0.3em; cursor: pointer; transition: opacity 0.5s ease; }
         .error-msg { color: #fff; font-size: 11px; font-family: 'Roboto Mono'; margin-top: 25px; opacity: 0; letter-spacing: 0.2em; }
 
-        /* ▼ バグ演出用文字 ▼ */
+        /* Glitch Intro Sequence */
         #intro-sequence { position: fixed; inset: 0; background: #000; z-index: 9998; display: flex; justify-content: center; align-items: center; overflow: hidden; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         #intro-sequence.active { opacity: 1; pointer-events: auto; }
         #pre-glitch-image { position: absolute; inset: -20px; background-size: cover; background-position: center; opacity: 0; z-index: 1; }
@@ -286,7 +286,63 @@
         <footer class="site-footer">© THE NOBLE. ALL RIGHTS RESERVED.</footer>
     </div>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, increment } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDrDTNLFOC93bBsjzcBrdLt4miPgrat2zY",
+            authDomain: "nobuyukiquest.firebaseapp.com",
+            projectId: "nobuyukiquest",
+            storageBucket: "nobuyukiquest.firebasestorage.app",
+            messagingSenderId: "504992212070",
+            appId: "1:504992212070:web:79f0ccca4e1d136bd639a7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.trackSystemEvent = async (eventName) => {
+            try {
+                const statsRef = doc(db, "analytics", "website_stats");
+                await setDoc(statsRef, { [eventName]: increment(1) }, { merge: true });
+                console.log(`[Analytics] ${eventName} recorded.`);
+            } catch (e) {
+                console.error("Analytics Initialization Error:", e);
+            }
+        };
+
+        // Navigation Tracking
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (link.classList.contains('locked-link')) return;
+                e.preventDefault();
+                const targetUrl = link.getAttribute('href');
+                const menuName = link.innerText.trim();
+                window.trackSystemEvent(`menu_click_${menuName}`);
+                setTimeout(() => { window.location.href = targetUrl; }, 200);
+            });
+        });
+
+        // BGM Playback Tracking
+        const bgm = document.getElementById('bgm');
+        if (bgm) {
+            bgm.addEventListener('play', () => {
+                window.trackSystemEvent('music_played');
+            }, { once: true });
+        }
+
+        // Session Page View Tracking
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('is_auth_main') === 'true' && !sessionStorage.getItem('tracked_main')) {
+                window.trackSystemEvent('page_view_main');
+                sessionStorage.setItem('tracked_main', 'true');
+            }
+        });
+    </script>
+
     <script>
+        // System State Management
         if (sessionStorage.getItem('current_image') === 'image_hiphop.png' || sessionStorage.getItem('is_reboot_action') === 'true') {
             sessionStorage.setItem('has_rebooted_ever', 'true');
         }
@@ -332,6 +388,7 @@
         document.getElementById('main-bg').style.backgroundImage = `url('${currentImage}')`;
         document.getElementById('pre-glitch-image').style.backgroundImage = `url('${currentImage}')`;
 
+        // Audio Context & Visualization
         let audioCtx, analyser, dataArray;
         const playBtn = document.getElementById('play-btn');
         const playIcon = document.getElementById('play-icon');
@@ -372,7 +429,7 @@
             if (isPlaying) {
                 playIcon.innerHTML = pauseSvg; titleDot.classList.add('playing');
                 if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-                bgm.play().catch(e => console.log('Autoplay blocked', e));
+                bgm.play().catch(e => console.log('Playback initialization required', e));
             } else {
                 playIcon.innerHTML = playSvg; titleDot.classList.remove('playing');
                 bgm.pause();
@@ -439,6 +496,7 @@
             sessionStorage.setItem('bgm_time', bgm.currentTime);
         });
 
+        // 3D Environment Initialization
         let scene, camera, renderer, particles0, particles1;
         const threeContainer = document.getElementById('three-container');
         
@@ -493,6 +551,7 @@
         window.addEventListener('resize', () => { if(camera && renderer) { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }});
         initThree(); animateThree();
 
+        // UI Interactions
         const menuBtn = document.getElementById('menu-btn'); 
         const menuList = document.getElementById('menu-list'); 
         let menuOpen = sessionStorage.getItem('menu_open') === 'true';
@@ -515,6 +574,9 @@
         });
 
         document.getElementById('reboot-btn').addEventListener('click', function() {
+            // REBOOTイベントのトラッキング送信
+            if (window.trackSystemEvent) window.trackSystemEvent('reboot_clicked');
+
             if (navigator.vibrate) navigator.vibrate(40);
             this.classList.add('activating');
             document.getElementById('main-bg').classList.add('fatal-error');
@@ -541,34 +603,30 @@
         let scrambleInterval;
         tChars.forEach(el => { el.style.transform = `translate(${(Math.random()-0.5)*window.innerWidth*1.5}px, ${(Math.random()-0.5)*window.innerHeight*1.5}px)`; });
 
-        // ▼ 「じゅわっ」と乱数が浮かび上がり、1秒待ってバグる新演出 ▼
+        // Glitch Sequence Controller
         function playAnimationSequence(skipTyping = false) {
             document.body.classList.add('locked'); 
             introSequence.style.opacity = '1'; 
             introSequence.style.display = 'flex';
             
-            // 画面いっぱいの乱数を生成
             const charNeeded = Math.floor((window.innerWidth * window.innerHeight) / 30);
             let bgText = ''; 
             for(let i=0; i<charNeeded; i++) bgText += chars.charAt(Math.floor(Math.random()*chars.length)); 
             codeBg.innerText = bgText;
 
-            // 初期状態：見えない＆少し奥＆ぼやけている
             codeBg.style.transition = 'opacity 2.0s ease, transform 2.0s cubic-bezier(0.2, 0.8, 0.2, 1), filter 2.0s ease';
             codeBg.style.opacity = '0';
             codeBg.style.transform = 'scale(0.9)';
             codeBg.style.filter = 'blur(10px)';
 
-            // すぐに「じゅわっ」と表示開始
             setTimeout(() => {
                 codeBg.style.opacity = '1';
                 codeBg.style.transform = 'scale(1)';
                 codeBg.style.filter = 'blur(0px)';
             }, 100);
 
-            // 1.5秒後（表示完了＋少し待機）に激しいバグ開始
             setTimeout(() => {
-                codeBg.style.transition = 'none'; // バグのためにトランジション無効化
+                codeBg.style.transition = 'none';
                 targetWord.style.opacity = '1'; 
                 let startTime = Date.now(); 
                 const parseDuration = 7000; 
@@ -592,8 +650,8 @@
             setTimeout(() => { introSequence.style.opacity = '0'; document.body.classList.remove('locked'); window.scrollTo(0, 0); activateSystem(); setTimeout(() => { introSequence.style.display = 'none'; }, 1000); }, 14500);
         }
 
-        // ▼ パスワードの管理と長押しギミック ▼
-        let systemPassword = localStorage.getItem('system_password') || '0711';
+        // Authentication & Security Override
+        let systemPassword = localStorage.getItem('system_password') || '777';
 
         const input = document.getElementById('pass-input'); 
         const submitBtn = document.getElementById('auth-btn'); 
@@ -608,7 +666,6 @@
         
         let typeInterval;
 
-        // 隠しエリアの3秒長押し処理
         const secretTrigger = document.getElementById('secret-trigger');
         let pressTimer;
 
@@ -629,7 +686,6 @@
         secretTrigger.addEventListener('mouseleave', cancelPress);
         secretTrigger.addEventListener('touchend', cancelPress);
 
-        // パスワード変更処理
         changeBtn.addEventListener('click', () => {
             if (oldPassInput.value === systemPassword) {
                 if (newPassInput.value.length > 0) {
@@ -659,17 +715,30 @@
             }
         });
 
-        if (sessionStorage.getItem('is_auth_main') === 'true') { document.getElementById('auth-overlay').style.display = 'none'; if (isReboot) { playAnimationSequence(true); } else { introSequence.style.display = 'none'; document.body.classList.remove('locked'); activateSystem(); } } else { setTimeout(() => input.focus(), 100); }
+        if (sessionStorage.getItem('is_auth_main') === 'true') { 
+            document.getElementById('auth-overlay').style.display = 'none'; 
+            if (isReboot) { 
+                playAnimationSequence(true); 
+            } else { 
+                introSequence.style.display = 'none'; 
+                document.body.classList.remove('locked'); 
+                activateSystem(); 
+            } 
+        } else { 
+            setTimeout(() => input.focus(), 100); 
+        }
         
         const attemptLogin = () => {
             if (input.value === '1989') {
                 sessionStorage.setItem('is_auth_main', 'true');
+                if (window.trackSystemEvent) window.trackSystemEvent('page_view_main');
                 document.getElementById('auth-overlay').style.display = 'none';
                 introSequence.style.display = 'none';
                 document.body.classList.remove('locked');
                 activateSystem();
-            } else if (input.value === systemPassword) { // 動的に設定されたパスワードで判定
+            } else if (input.value === systemPassword) { 
                 sessionStorage.setItem('is_auth_main', 'true'); 
+                if (window.trackSystemEvent) window.trackSystemEvent('page_view_main');
                 
                 errorTxt.style.transition = 'none';
                 errorTxt.style.opacity = '1';
