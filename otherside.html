@@ -85,16 +85,14 @@
         .go-btn { font-size: 24px; color: #fff; margin: 10px; cursor: pointer; padding: 10px 30px; border: 2px solid #fff; transition: 0.2s; background: #222; pointer-events: auto; }
         .go-btn:active { background: #fff; color: #000; }
 
-                #transition-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; display: none; justify-content: center; align-items: center; z-index: 300; font-size: 40px; letter-spacing: 4px; }
+        #transition-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; display: none; justify-content: center; align-items: center; z-index: 300; font-size: 40px; letter-spacing: 4px; }
 
-        /* === ここから エンディング画面のCSS変更 === */
         #ending-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 400; overflow: hidden; }
         .end-seq-text { opacity: 0; transition: opacity 2s ease; font-family: 'DotGothic16', sans-serif; text-align: center; line-height: 1.5; margin-bottom: 10px; color: #fff; font-size: 16px; }
         .end-seq-green { color: #34c759; text-shadow: 0 0 5px rgba(52, 199, 89, 0.5); font-family: 'DotGothic16', monospace; font-size: 16px; letter-spacing: 2px; }
         #ending-terminal, #ending-credits, #ending-the-end { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
         #ending-tap { font-size: 16px; margin-top: 40px; cursor: pointer; pointer-events: auto; }
         #ending-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 3s ease; pointer-events: none; z-index: -1; }
-        /* === ここまで === */
 
         .assets { display: none; }
 
@@ -211,21 +209,24 @@
                 <button id="close-sys" style="cursor:pointer; font-family:'DotGothic16'; font-size:18px; color:#fff; background:#222; border:2px solid #fff; padding:8px 30px;">ほぞんして もどる</button>
             </div>
         </div>
+
         <div id="transition-screen">STAGE 2</div>
 
         <div id="ending-screen">
             <video id="ending-video" src="game2.MOV" playsinline muted></video>
             
             <div id="ending-terminal">
-                <div id="end-msg-1" class="end-seq-text">おめでとう！</div>
-                <div id="end-msg-2" class="end-seq-text">よつかいどう に へいわ が おとずれた</div>
-                <div id="end-msg-3" class="end-seq-text">かれの ぼうけん は まだまだ つづく</div>
+                <div id="end-msg-1" class="end-seq-text">システムの初期化に成功……魔獣は駆逐された</div>
+                <div id="end-msg-2" class="end-seq-text">郷愁の街「よつかいどう」に、かりそめの平和が訪れる</div>
+                <div id="end-msg-3" class="end-seq-text">だが、彼の肉体に宿るバグとの戦いは、終わらない――</div>
             </div>
             
             <div id="ending-credits">
-                <div id="end-cred-1" class="end-seq-text end-seq-green">DIRECTOR / CREATOR : Satoshi Mori</div>
-                <div id="end-cred-2" class="end-seq-text end-seq-green">MUSIC : AI</div>
-                <div id="end-cred-3" class="end-seq-text end-seq-green">COOPERATION : Nobuyuki Kurosaki</div>
+                <div id="end-cred-1" class="end-seq-text end-seq-green">PRODUCTION : bori's</div>
+                <div id="end-cred-2" class="end-seq-text end-seq-green">DIRECTOR / CREATOR : Satoshi Mori</div>
+                <div id="end-cred-3" class="end-seq-text end-seq-green">MUSIC : AI</div>
+                <div id="end-cred-4" class="end-seq-text end-seq-green">COOPERATION : Nobuyuki Kurosaki</div>
+                <div id="end-cred-5" class="end-seq-text end-seq-green">IDEA : Uesugi Kazushi / AI PARTNER : Kairi Nakamura</div>
             </div>
             
             <div id="ending-the-end">
@@ -233,9 +234,9 @@
                 <div id="ending-tap" class="end-seq-text blink">＞ TAP ＜</div>
             </div>
         </div>
-        <div id="game-area">
 
-                    <div id="ui">
+        <div id="game-area">
+            <div id="ui">
                 <div>ステージ：<span id="val-lv">１</span></div>
                 <div class="retro-hp">いのち：<span class="heart-icon">♥</span> × <span id="val-lives">3</span> <span id="val-score">SCORE: 0</span></div>
             </div>
@@ -301,34 +302,31 @@
             const titleSvg = document.getElementById('title-svg');
             const titleUiWrap = document.getElementById('title-ui-wrap');
 
-            if(sessionStorage.getItem('game_intro_done') === 'true') {
-                introDiv.style.display = 'none';
-                titleSvg.style.opacity = '1';
-                titleUiWrap.style.opacity = '1';
-            } else {
-                setTimeout(() => storyText.style.opacity = '1', 500); 
+            setTimeout(() => storyText.style.opacity = '1', 500); 
 
-                const advanceIntro = (e) => {
-                    e.preventDefault();
-                    introDiv.removeEventListener('click', advanceIntro);
-                    introDiv.removeEventListener('touchstart', advanceIntro);
-                    
-                    storyText.style.opacity = '0'; 
+            const advanceIntro = (e) => {
+                e.preventDefault();
+                
+                // Safariでの音声再生制限を解除するためにAudioを初期化します
+                initAudio();
+                
+                introDiv.removeEventListener('click', advanceIntro);
+                introDiv.removeEventListener('touchstart', advanceIntro);
+                
+                storyText.style.opacity = '0'; 
+                
+                setTimeout(() => {
+                    introDiv.style.display = 'none'; 
+                    titleSvg.style.opacity = '1';    
                     
                     setTimeout(() => {
-                        introDiv.style.display = 'none'; 
-                        titleSvg.style.opacity = '1';    
-                        
-                        setTimeout(() => {
-                            titleUiWrap.style.opacity = '1'; 
-                            sessionStorage.setItem('game_intro_done', 'true'); 
-                        }, 1000);
-                    }, 1000); 
-                };
+                        titleUiWrap.style.opacity = '1'; 
+                    }, 1000);
+                }, 1000); 
+            };
 
-                introDiv.addEventListener('click', advanceIntro);
-                introDiv.addEventListener('touchstart', advanceIntro, {passive: false});
-            }
+            introDiv.addEventListener('click', advanceIntro);
+            introDiv.addEventListener('touchstart', advanceIntro, {passive: false});
         });
 
         let bossHP = [30, 50, 100];
@@ -512,15 +510,19 @@
         window.addEventListener('mousedown', initAudio, { once: true });
         window.addEventListener('touchstart', initAudio, { once: true });
 
-        // ----------------------------------------------------
-        // 追加: 非同期処理による待機関数
-        // ----------------------------------------------------
+        // 非同期処理による待機関数
         const waitMs = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-        // ----------------------------------------------------
-        // 追加: エンディングのシーケンス制御
-        // ----------------------------------------------------
+        // エンディングのシーケンス制御
         async function playEndingSequence() {
+            initAudio();
+
+            if (isBgmOn) {
+                titleBgmAudio.volume = masterVolume;
+                titleBgmAudio.currentTime = 0;
+                titleBgmAudio.play().catch(e => console.log('BGM playback failed:', e));
+            }
+
             const screen = document.getElementById('ending-screen');
             const term = document.getElementById('ending-terminal');
             const creds = document.getElementById('ending-credits');
@@ -528,7 +530,7 @@
             const tapBtn = document.getElementById('ending-tap');
             const vid = document.getElementById('ending-video');
             
-            // UIの初期化
+            // UIの初期設定
             screen.style.display = 'flex';
             term.style.display = 'flex';
             creds.style.display = 'none';
@@ -537,51 +539,58 @@
             
             document.querySelectorAll('.end-seq-text').forEach(el => el.style.opacity = '0');
             
-            // 1. 冒険の結末テキスト表示
+            // 冒険の結末テキスト表示
             await waitMs(1000);
             document.getElementById('end-msg-1').style.opacity = '1';
-            await waitMs(2000);
+            await waitMs(2500);
             document.getElementById('end-msg-2').style.opacity = '1';
-            await waitMs(2000);
+            await waitMs(2500);
             document.getElementById('end-msg-3').style.opacity = '1';
             
             await waitMs(3500);
             term.style.display = 'none';
             
-            // 2. クレジット表示（メインサイト風のグリーンテキスト）
+            // クレジット表示
             creds.style.display = 'flex';
             await waitMs(500);
             document.getElementById('end-cred-1').style.opacity = '1';
-            await waitMs(2000);
+            await waitMs(1200);
             document.getElementById('end-cred-2').style.opacity = '1';
-            await waitMs(2000);
+            await waitMs(1200);
             document.getElementById('end-cred-3').style.opacity = '1';
+            await waitMs(1200);
+            document.getElementById('end-cred-4').style.opacity = '1';
+            await waitMs(1200);
+            document.getElementById('end-cred-5').style.opacity = '1';
             
-            await waitMs(4000);
+            await waitMs(4500);
             creds.style.display = 'none';
             
-            // 3. THE END 表示
+            // THE END 表示
             theEnd.style.display = 'flex';
             await waitMs(1000);
             document.getElementById('end-final-text').style.opacity = '1';
             
-            // 4. フェイクの TAP ボタン表示
+            // フェイクの TAP ボタン表示
             await waitMs(3000);
             tapBtn.style.opacity = '1';
             
-            // タップ時のイベントを登録（1回のみ実行）
+            // タップ時のイベントを登録
             const tapHandler = () => {
                 tapBtn.removeEventListener('click', tapHandler);
                 tapBtn.removeEventListener('touchstart', tapHandler);
                 
-                // テキストを消去し、裏に隠していた動画を再生＆フェードイン
+                initAudio();
+                titleBgmAudio.pause(); 
+                
                 theEnd.style.display = 'none';
                 vid.style.display = 'block';
-                vid.play().catch(e => console.log(e));
+                vid.muted = false; 
+                vid.currentTime = 0;
+                vid.play().catch(e => console.log('Video playback failed:', e));
                 
                 setTimeout(() => { vid.style.opacity = '0.4'; }, 100);
                 
-                // 動画表示後、画面のどこかをタップでタイトルへ戻る処理を再登録
                 setTimeout(() => {
                     const returnTitle = () => {
                         screen.removeEventListener('click', returnTitle);
@@ -597,7 +606,7 @@
                     };
                     screen.addEventListener('click', returnTitle);
                     screen.addEventListener('touchstart', returnTitle, {passive: false});
-                }, 2000); // 誤タップ防止で2秒待機
+                }, 2000); 
             };
             
             tapBtn.addEventListener('click', tapHandler);
@@ -810,7 +819,7 @@
                 checkpointScore = 0; 
             } else {
                 score = Math.max(0, checkpointScore - 500); 
-                updateStat('plays'); // 変更: リトライ時にもプレイ回数を加算し、クリア率を正しく計算させる
+                updateStat('plays');
             }
             
             lives = 3; enemies = []; swordWaves = []; projectiles = []; boss = null; 
@@ -1223,13 +1232,6 @@
                         
                         if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
                         
-                        if (isBgmOn) {
-                            titleBgmAudio.volume = masterVolume;
-                            titleBgmAudio.currentTime = 0;
-                            titleBgmAudio.play().catch(e => console.log(e));
-                            musicBtn.innerText = "おんがく ON";
-                        }
-                        
                         if (playerName) {
                             try {
                                 await addDoc(collection(db, "leaderboard"), { name: playerName || "ななし", score: score, timestamp: Date.now() });
@@ -1237,7 +1239,6 @@
                             } catch(e) {}
                         }
                         
-                        // 変更: 新しいエンディングシーケンス関数を呼び出す
                         playEndingSequence();
                         
                     }, 2500); 
