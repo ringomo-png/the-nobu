@@ -7,8 +7,9 @@
     <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
     
     <style>
-        body { margin: 0; background-color: #1a1a1a; color: #fff; font-family: 'DotGothic16', sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; overflow: hidden; user-select: none; }
-        #game-container { position: relative; display: flex; flex-direction: column; width: 1000px; max-width: 100vw; height: 100vh; background: #1a1a1a; }
+        /* 🌟 Safariのメニューバー対策として height: 100dvh に変更 */
+        body { margin: 0; background-color: #1a1a1a; color: #fff; font-family: 'DotGothic16', sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100dvh; overflow: hidden; user-select: none; }
+        #game-container { position: relative; display: flex; flex-direction: column; width: 1000px; max-width: 100vw; height: 100dvh; background: #1a1a1a; }
         #game-area { position: relative; flex: 1; background: #1a1a1a; overflow: hidden; border-bottom: 2px solid #333; border-top: 2px solid #333; }
         
         canvas { display: block; width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; position: relative; z-index: 2; }
@@ -19,13 +20,14 @@
         .retro-hp { color: #fff; margin-top: 5px; }
         .heart-icon { color: #ff3b30; }
 
-        #message-box { height: 90px; background-color: #1a1a1a; border: 2px solid #555; border-radius: 6px; margin: 10px; padding: 12px 15px; box-sizing: border-box; font-size: 18px; line-height: 1.5; color: #fff; display: flex; align-items: flex-start; }
+        /* 🌟 メッセージボックスが下すぎないようにマージンを調整 */
+        #message-box { height: 90px; background-color: #1a1a1a; border: 2px solid #555; border-radius: 6px; margin: 10px 10px 20px 10px; padding: 12px 15px; box-sizing: border-box; font-size: 18px; line-height: 1.5; color: #fff; display: flex; align-items: flex-start; }
         
         .blink { animation: blinker 1.5s linear infinite; }
         #message-box .blink { margin-left: auto; align-self: flex-end; }
         @keyframes blinker { 50% { opacity: 0.4; } }
 
-        #title-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; display: flex; flex-direction: column; align-items: center; z-index: 50; box-sizing: border-box; padding-top: 3vh; overflow-y: auto; }
+        #title-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; display: flex; flex-direction: column; align-items: center; z-index: 50; box-sizing: border-box; padding-top: 3vh; overflow-y: auto; padding-bottom: 20px; }
         
         .stats-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; width: 90%; max-width: 600px; margin-bottom: 2vh; }
         .stats-box { border: 2px dashed #555; border-radius: 8px; background: rgba(30,30,30,0.8); padding: 15px; font-size: 16px; color: #ccc; text-align: center; flex: 1; min-width: 200px; }
@@ -45,10 +47,11 @@
         }
         .start-prompt:active { background: #fff; color: #000; }
         
-        .sys-btn-title { font-size: 16px; color: #888; cursor: pointer; pointer-events: auto; text-decoration: underline; margin-bottom: 20px; margin-top: auto; }
+        /* 🌟 システムとおんがくボタンを横並びにするコンテナ */
+        .bottom-menu { display: flex; gap: 30px; align-items: center; margin-top: auto; margin-bottom: 20px; }
+        .sys-btn-title { font-size: 18px; color: #888; cursor: pointer; pointer-events: auto; text-decoration: underline; transition: 0.2s; }
         .sys-btn-title:hover { color: #fff; }
 
-        /* パチンコ風カットイン */
         #cutin-container { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none; justify-content: center; align-items: center; overflow: hidden; background: rgba(0,0,0,0.3); }
         #cutin-img { width: 100%; height: 100%; object-fit: contain; opacity: 0; transform: scale(1.5); filter: brightness(1.2); }
         @keyframes pachinkoCutin {
@@ -60,7 +63,7 @@
         .animate-cutin { animation: pachinkoCutin 1.2s cubic-bezier(0.1, 0.8, 0.2, 1) forwards; }
 
         #system-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20,20,20,0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 200; }
-        .sys-box { border: 2px solid #555; padding: 25px; background: #1a1a1a; text-align: center; font-size: 16px; max-height: 85vh; overflow-y: auto; border-radius: 8px; }
+        .sys-box { border: 2px solid #555; padding: 25px; background: #1a1a1a; text-align: center; font-size: 16px; max-height: 85dvh; overflow-y: auto; border-radius: 8px; }
         .sys-box-inner { text-align: right; margin-bottom: 20px; line-height: 1.8; }
         .sys-box input, .sys-box select { width: 60px; font-size: 16px; margin-left: 10px; background: #222; color: #fff; border: 1px solid #555; text-align: center; font-family: 'DotGothic16'; }
 
@@ -74,7 +77,7 @@
         #ending-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; justify-content: center; align-items: center; z-index: 400; overflow: hidden; cursor: pointer; }
         #ending-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.4; pointer-events: none; }
         #credits { position: absolute; width: 100%; text-align: center; color: #fff; font-size: 24px; line-height: 2; z-index: 401; animation: scrollUp 15s linear forwards; pointer-events: none; }
-        @keyframes scrollUp { 0% { transform: translateY(100vh); } 100% { transform: translateY(-100vh); } }
+        @keyframes scrollUp { 0% { transform: translateY(100dvh); } 100% { transform: translateY(-100dvh); } }
 
         .assets { display: none; }
     </style>
@@ -108,7 +111,10 @@
 
             <div class="start-prompt blink" id="start-btn">＞ ぼうけん に でる ＜</div>
             
-            <div class="sys-btn-title" id="open-sys" style="color:#ffd700;">⚙️ クラウド システム設定</div>
+            <div class="bottom-menu">
+                <div class="sys-btn-title" id="open-sys">⚙️ システム設定</div>
+                <div class="sys-btn-title" id="music-btn">おんがく OFF</div>
+            </div>
         </div>
 
         <div id="system-screen">
@@ -204,7 +210,6 @@
             loadConfig(); 
         } catch(e) { console.log("Firebase Error", e); }
 
-        // 🌟 クラウドのシステム設定変数の定義
         let bossHP = [30, 50, 100];
         let boss3Zako = 15; 
         let fireScale = 1.2; 
@@ -213,8 +218,8 @@
         let baseCooldown = 25;
         let sysRainbowProb = 0.10; 
         let sysCurveProb = 0.20;   
-        let sysMadHpRatio = 0.50;  // 発狂突入HP
-        let sysMadProb = 0.40;     // 発狂時曲がる確率
+        let sysMadHpRatio = 0.50;  
+        let sysMadProb = 0.40;     
         let sysCutinEnabled = true;
 
         async function loadConfig() {
@@ -277,7 +282,7 @@
                 });
                 await loadConfig(); 
                 alert("クラウドにバランス設定を保存しました！");
-            } catch(e) { console.error("Config Save Error", e); }
+            } catch(e) {}
         }
 
         async function loadGlobalStats() {
@@ -345,39 +350,60 @@
         const imgSword = [document.getElementById('sword1'), document.getElementById('sword2'), document.getElementById('sword3')];
         const imgMonsters = [document.getElementById('monster1'), document.getElementById('monster2'), document.getElementById('monster3')];
 
-        let audioCtx, audioInitialized = false, bgmInterval, titleBgmInterval;
+        // 🌟 おんがくボタン（動画Audio）の制御
+        let audioCtx, audioInitialized = false, bgmInterval;
+        const titleBgmAudio = new Audio('game.MOV');
+        titleBgmAudio.loop = true;
         
         function initAudio() {
             if (!audioInitialized || audioCtx.state === 'suspended') {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 if (audioCtx.state === 'suspended') audioCtx.resume();
                 audioInitialized = true;
-                if(gameState === 'TITLE' && !titleBgmInterval) playTitleBgm();
             }
         }
+
+        const musicBtn = document.getElementById('music-btn');
+        musicBtn.onclick = (e) => {
+            e.stopPropagation();
+            if(titleBgmAudio.paused) {
+                titleBgmAudio.play().catch(err => console.log("再生エラー(ブラウザ制限)"));
+                musicBtn.innerText = "おんがく ON";
+            } else {
+                titleBgmAudio.pause();
+                musicBtn.innerText = "おんがく OFF";
+            }
+        };
+
+        function stopTitleBgm() {
+            titleBgmAudio.pause();
+            titleBgmAudio.currentTime = 0;
+            musicBtn.innerText = "おんがく OFF";
+        }
+
         window.addEventListener('mousedown', initAudio, { once: true });
         window.addEventListener('touchstart', initAudio, { once: true });
 
         function playSound(type) {
-            if(!audioCtx || audioCtx.state === 'suspended') return;
+            if(!audioCtx || audioCtx.state !== 'running') return;
             const now = audioCtx.currentTime;
 
             if(type === 'slash'){
                 const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                 osc.type = 'triangle'; osc.frequency.setValueAtTime(800, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.15);
-                gain.gain.setValueAtTime(0.6, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.6, now + 0.02); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
                 osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.15);
             }
             if(type === 'hit'){
                 const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                 osc.type = 'square'; osc.frequency.setValueAtTime(300, now); osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
-                gain.gain.setValueAtTime(0.8, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.8, now + 0.02); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
                 osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.15);
             }
             if(type === 'parry'){
                 const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                 osc.type = 'sine'; osc.frequency.setValueAtTime(1200, now); osc.frequency.exponentialRampToValueAtTime(3000, now + 0.1);
-                gain.gain.setValueAtTime(0.9, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.9, now + 0.02); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
                 osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.2);
             }
             if(type === 'heal'){
@@ -392,13 +418,32 @@
             if(type === 'damage'){
                 const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                 osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, now); osc.frequency.exponentialRampToValueAtTime(30, now + 0.4);
-                gain.gain.setValueAtTime(0.9, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.9, now + 0.02); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
                 osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.4);
+            }
+            // 🌟 重厚なボスの登場音に変更
+            if(type === 'boss_appear'){
+                [55, 65.41, 73.42].forEach(freq => {
+                    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(freq, now); osc.frequency.exponentialRampToValueAtTime(freq * 0.8, now + 2.0);
+                    gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.5, now + 0.1); gain.gain.exponentialRampToValueAtTime(0.01, now + 2.0);
+                    osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 2.0);
+                });
+                const bufferSize = audioCtx.sampleRate * 1.0;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) { data[i] = Math.random() * 2 - 1; }
+                const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
+                const noiseFilter = audioCtx.createBiquadFilter(); noiseFilter.type = 'lowpass'; noiseFilter.frequency.value = 400;
+                const noiseGain = audioCtx.createGain();
+                noiseGain.gain.setValueAtTime(0, now); noiseGain.gain.linearRampToValueAtTime(1.0, now + 0.1); noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
+                noise.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(audioCtx.destination);
+                noise.start(now);
             }
             if(type === 'player_dead'){
                 const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                 osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, now); osc.frequency.exponentialRampToValueAtTime(10, now + 1.0);
-                gain.gain.setValueAtTime(1.0, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
+                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(1.0, now + 0.05); gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
                 osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 1.0);
                 
                 const bufferSize = audioCtx.sampleRate * 0.5;
@@ -408,46 +453,33 @@
                 const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
                 const noiseFilter = audioCtx.createBiquadFilter(); noiseFilter.type = 'lowpass'; noiseFilter.frequency.value = 800;
                 const noiseGain = audioCtx.createGain();
-                noiseGain.gain.setValueAtTime(1.0, now); noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                noiseGain.gain.setValueAtTime(0, now); noiseGain.gain.linearRampToValueAtTime(1.0, now + 0.05); noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
                 noise.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(audioCtx.destination);
                 noise.start(now);
             }
             if(type === 'boss_dead'){
                 const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                 osc.type = 'square'; osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(10, now + 2.0);
-                gain.gain.setValueAtTime(0.9, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 2.0);
+                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.9, now + 0.05); gain.gain.exponentialRampToValueAtTime(0.01, now + 2.0);
                 osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 2.0);
             }
             if(type === 'cutin'){
                 const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                 osc.type = 'square'; osc.frequency.setValueAtTime(800, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.5);
-                gain.gain.setValueAtTime(0.5, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.5, now + 0.02); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
                 osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.5);
             }
             if(type === 'gameover'){
-                const startTime = now + 0.8; 
+                const startTime = now + 1.0; 
                 const notes = [196.00, 185.00, 174.61, 130.81];
                 notes.forEach((freq, i) => {
                     const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                     osc.type = 'triangle'; osc.frequency.value = freq;
-                    gain.gain.setValueAtTime(0, startTime + i*0.4); gain.gain.linearRampToValueAtTime(0.7, startTime + i*0.4 + 0.1); gain.gain.exponentialRampToValueAtTime(0.01, startTime + i*0.4 + 1.0);
+                    gain.gain.setValueAtTime(0, startTime + i*0.4); gain.gain.linearRampToValueAtTime(0.7, startTime + i*0.4 + 0.05); gain.gain.exponentialRampToValueAtTime(0.01, startTime + i*0.4 + 1.0);
                     osc.connect(gain); gain.connect(audioCtx.destination); osc.start(startTime + i*0.4); osc.stop(startTime + i*0.4 + 1.0);
                 });
             }
         }
-
-        function playTitleBgm(){ 
-            if(titleBgmInterval) clearInterval(titleBgmInterval);
-            if(!audioCtx || audioCtx.state === 'suspended') return;
-            const melody = [440.00, 523.25, 659.25, 523.25]; 
-            titleBgmInterval = setInterval(()=>{ 
-                const now = audioCtx.currentTime; const osc=audioCtx.createOscillator(); const g=audioCtx.createGain(); 
-                osc.type='square'; osc.frequency.value=melody[frameCount%4]; 
-                g.gain.setValueAtTime(0.08,now); g.gain.exponentialRampToValueAtTime(0.001,now+0.15); 
-                osc.connect(g); g.connect(audioCtx.destination); osc.start(now); osc.stop(now+0.15); 
-            }, 220); 
-        }
-        function stopTitleBgm(){ if(titleBgmInterval) clearInterval(titleBgmInterval); titleBgmInterval=null; }
         
         function startBgm(){ 
             if(bgmInterval) clearInterval(bgmInterval);
@@ -457,6 +489,7 @@
             bgmInterval = setInterval(()=>{ 
                 if(gameState !== 'PLAYING') return; 
                 if(cutinTimer > 0) return; 
+                if(audioCtx.state !== 'running') return;
                 
                 const now = audioCtx.currentTime;
                 
@@ -471,12 +504,12 @@
 
                 const mOsc=audioCtx.createOscillator(); const mG=audioCtx.createGain(); 
                 mOsc.type='square'; mOsc.frequency.value=melody[frameCount%4]; 
-                mG.gain.setValueAtTime(0.1,now); mG.gain.exponentialRampToValueAtTime(0.001,now+0.15); 
+                mG.gain.setValueAtTime(0,now); mG.gain.linearRampToValueAtTime(0.1,now+0.02); mG.gain.exponentialRampToValueAtTime(0.001,now+0.15); 
                 mOsc.connect(mG); mG.connect(audioCtx.destination); mOsc.start(now); mOsc.stop(now+0.15); 
                 
                 const bOsc=audioCtx.createOscillator(); const bG=audioCtx.createGain(); 
                 bOsc.type='triangle'; bOsc.frequency.value=bass[frameCount%4]; 
-                bG.gain.setValueAtTime(0.15,now); bG.gain.exponentialRampToValueAtTime(0.001,now+0.15); 
+                bG.gain.setValueAtTime(0,now); bG.gain.linearRampToValueAtTime(0.15,now+0.02); bG.gain.exponentialRampToValueAtTime(0.001,now+0.15); 
                 bOsc.connect(bG); bG.connect(audioCtx.destination); bOsc.start(now); bOsc.stop(now+0.15); 
             }, 180); 
         }
@@ -526,6 +559,7 @@
         }
 
         function spawnBoss(){
+            playSound('boss_appear');
             boss = { x:GW+200, y:290, hp:bossHP[currentLevel-1], maxHp:bossHP[currentLevel-1], w:180, h:180, timer:-90, targetX:GW-150, shake:0, attackCount:0, restTimer:0, attackCooldown: 60, cutinDone: false };
             phase = 'boss'; showMsg(currentLevel>=3?"さいしゅう ボス が あらわれた！！":"きょうりょくな ボス が あらわれた！");
         }
@@ -595,23 +629,20 @@
                                 let isFeint = false;
                                 let pColor = 'normal';
 
-                                // 🌟 最終ボスの攻撃パターン（発狂・通常）
                                 if (currentLevel === 3) {
                                     if (Math.random() < sysRainbowProb) {
                                         pColor = 'rainbow';
                                         isFeint = false;
                                     } else if ((boss.hp / boss.maxHp) < sysMadHpRatio) {
-                                        // 🌟 発狂モード：赤黒い炎、ランダムで曲がる
-                                        pColor = 'redblack';
+                                        pColor = 'purple';
                                         isFeint = Math.random() < sysMadProb; 
                                     } else {
-                                        // 🌟 通常モード
                                         if (Math.random() < sysCurveProb) {
                                             pColor = 'green';
-                                            isFeint = true;  // 緑は必ず曲がる
+                                            isFeint = true; 
                                         } else {
                                             pColor = 'blue';
-                                            isFeint = false; // 青は絶対に曲がらない
+                                            isFeint = false; 
                                         }
                                     }
                                 }
@@ -645,16 +676,15 @@
                         if (p.color === 'rainbow') {
                             projectiles.splice(i, 1); 
                             playSound('heal'); flash = 0.5;
-                            // 🌟 レインボールーレット（3択）
                             let r = Math.floor(Math.random() * 3);
                             if (r === 0) {
-                                attackPower = 1.5; powerUpTimer = 300; // 🌟 5秒間
+                                attackPower = 1.5; powerUpTimer = 300; 
                                 showMsg("レインボー炎！ 5びょうかん こうげきりょくアップ！");
                             } else if (r === 1) {
                                 if(lives < 3) lives++;
                                 showMsg("レインボー炎！ いのち が かいふくした！");
                             } else {
-                                invincibleTimer = 180; // 3秒無敵
+                                invincibleTimer = 180; 
                                 showMsg("レインボー炎！ 3びょうかん むてき！");
                             }
                             updateUI(); 
@@ -681,10 +711,9 @@
                     if (zakoTimer <= 0) {
                         enemies.push({ x: GW + 50, y: Math.random() < 0.5 ? UPPER_Y : LOWER_Y, speed: 10 + (currentLevel * 2), type: Math.random() < 0.05 ? 'heal' : 'normal' });
                         
-                        // 🌟 剣の硬直時間＋5の「絶対に安全だが超狭いマージン」
-                        let minWait = currentCooldownMax + 5; 
+                        let minWait = currentCooldownMax + 10; 
                         if (currentLevel === 3) {
-                            zakoTimer = minWait + Math.floor(Math.random() * 15); // +0～14フレームのみ（かなり狭い！）
+                            zakoTimer = minWait + Math.floor(Math.random() * 15); 
                         } else {
                             zakoTimer = Math.max(minWait, 60 - (currentLevel * 10)); 
                         }
@@ -772,11 +801,9 @@
                     ctx.save(); ctx.translate(p.x, p.y); ctx.scale(fireScale, fireScale);
                     if (p.color === 'rainbow') {
                         ctx.fillStyle = `hsl(${frameCount * 15 % 360}, 100%, 50%)`; ctx.fillRect(-10, -10, 20, 20); ctx.fillStyle = '#fff'; ctx.fillRect(-6, -6, 12, 12);
-                    } else if (p.color === 'redblack') {
-                        // 🌟 赤黒い炎（発狂モード）
-                        ctx.fillStyle = '#111'; ctx.fillRect(-10, -10, 20, 20); ctx.fillRect(10, -6, 8, 12); ctx.fillRect(18, -2, 6, 8); 
-                        ctx.fillStyle = '#a00'; ctx.fillRect(-6, -6, 12, 12); 
-                        ctx.fillStyle = '#000'; ctx.fillRect(-2, -2, 4, 4);
+                    } else if (p.color === 'purple') {
+                        ctx.fillStyle = '#800080'; ctx.fillRect(-10, -10, 20, 20); ctx.fillRect(10, -6, 8, 12); ctx.fillRect(18, -2, 6, 8); 
+                        ctx.fillStyle = '#da70d6'; ctx.fillRect(-6, -6, 12, 12); ctx.fillStyle = '#ee82ee'; ctx.fillRect(-2, -2, 4, 4);
                     } else if (p.color === 'blue') {
                         ctx.fillStyle = '#0000ff'; ctx.fillRect(-10, -10, 20, 20); ctx.fillRect(10, -6, 8, 12); ctx.fillRect(18, -2, 6, 8); 
                         ctx.fillStyle = '#0088ff'; ctx.fillRect(-6, -6, 12, 12); ctx.fillStyle = '#00ffff'; ctx.fillRect(-2, -2, 4, 4);
@@ -817,11 +844,14 @@
 
         function damagePlayer() {
             if (gameState !== 'PLAYING') return;
-            if (invincibleTimer > 0) return; // 無敵中はノーダメージ
+            if (invincibleTimer > 0) return; 
             
             lives--; updateUI(); shake = 30; flash = 0.4; playSound('damage'); playerTint = 'rgba(255, 0, 0, 0.6)'; playerTintTimer = 15;
             if (lives <= 0) {
-                gameState = 'GAMEOVER_WAIT'; stopBgm(); playSound('player_dead'); playSound('gameover');    
+                gameState = 'GAMEOVER_WAIT'; stopBgm(); 
+                playSound('player_dead'); 
+                playSound('gameover');    
+                
                 diedAtBoss = (phase === 'boss' || phase === 'boss_dead'); 
                 updateStat('deaths'); showMsg("あなたは しんでしまった。");
                 
@@ -893,12 +923,12 @@
         };
         document.getElementById('btn-title').onclick = (e) => {
             e.stopPropagation(); document.getElementById('gameover-screen').style.display = 'none';
-            gameState = 'TITLE'; document.getElementById('ui').style.display = 'none'; document.getElementById('title-screen').style.display = 'flex'; showMsg("・・・・・・。"); playTitleBgm();
+            gameState = 'TITLE'; document.getElementById('ui').style.display = 'none'; document.getElementById('title-screen').style.display = 'flex'; showMsg("・・・・・・。"); 
         };
 
         document.getElementById('ending-screen').onclick = () => {
             document.getElementById('ending-screen').style.display = 'none';
-            gameState = 'TITLE'; document.getElementById('ui').style.display = 'none'; document.getElementById('title-screen').style.display = 'flex'; showMsg("・・・・・・。"); playTitleBgm();
+            gameState = 'TITLE'; document.getElementById('ui').style.display = 'none'; document.getElementById('title-screen').style.display = 'flex'; showMsg("・・・・・・。"); 
         };
 
         const canvasTap = (e) => {
