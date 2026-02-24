@@ -704,13 +704,15 @@ const imgWalk = [document.getElementById('walk1'), document.getElementById('walk
     
     if(!retryBoss){ 
         currentLevel = 1; score = 0; zakoKills = 0; updateStat('plays'); 
-        checkpointScore = 0; // 追加: 完全初期化
+        checkpointScore = 0; 
     } else {
         // 変更: 現在のスコアではなく、記憶したチェックポイントから500を引く
         score = Math.max(0, checkpointScore - 500); 
+        updateStat('plays'); // 追加: リトライ時にもプレイ回数を加算し、クリア率を正しく計算させる
     }
     
     lives=3; enemies=[]; swordWaves=[]; projectiles=[]; boss=null; 
+
 
             attackFrame=-1; waitFrames=0; playerTintTimer=0; diedAtBoss=false;
             shake=0; flash=0; currentCooldownMax = baseCooldown;
