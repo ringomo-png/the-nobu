@@ -22,23 +22,45 @@
         }
         body.locked { overflow: hidden; height: 100vh; }
 
-        /* ▼ メイン画面の背景画像たち ▼ */
         .bg-layer {
             position: fixed; inset: 0;
             width: 100vw; height: 100vh;
             background-size: cover; background-position: center center;
-            filter: grayscale(100%) contrast(110%) brightness(0.25);
+            filter: grayscale(100%) contrast(100%) brightness(0.6);
             z-index: -2; opacity: 0; 
-            will-change: opacity; backface-visibility: hidden;
+            will-change: opacity, transform; pointer-events: none;
             transition: opacity 3.0s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scale(1.05); 
         }
-        .bg-layer.system-active { opacity: 0.3; } 
+        .bg-layer.system-active { opacity: 0.6; }
 
-        .bg-1 { background-image: url('image_top.png'); }
-        .bg-2 { background-image: url('image_logic.png'); }
-        .bg-3 { background-image: url('image_local.png'); }
-        .bg-4 { background-image: url('image_human.png'); }
-        .bg-5 { background-image: url('image_anomaly.png'); }
+        @keyframes bgVibrate {
+            0% { transform: scale(1.05) translate(0, 0); filter: grayscale(100%) contrast(100%) brightness(0.6); }
+            20% { transform: scale(1.05) translate(-4px, 4px); filter: grayscale(100%) contrast(150%) brightness(0.9); }
+            40% { transform: scale(1.05) translate(4px, -4px); filter: grayscale(100%) contrast(100%) brightness(0.6); }
+            60% { transform: scale(1.05) translate(-4px, -4px); filter: grayscale(100%) contrast(150%) brightness(0.9); }
+            80% { transform: scale(1.05) translate(4px, 4px); filter: grayscale(100%) contrast(100%) brightness(0.6); }
+            100% { transform: scale(1.05) translate(0, 0); filter: grayscale(100%) contrast(100%) brightness(0.6); }
+        }
+        .vibrate-active { animation: bgVibrate 0.25s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+
+        @keyframes fatalShake {
+            0% { transform: scale(1.02) translate(0, 0); }
+            10% { transform: scale(1.02) translate(-3px, 3px) rotate(-0.5deg); }
+            20% { transform: scale(1.02) translate(3px, -3px) rotate(0.5deg); }
+            30% { transform: scale(1.02) translate(-3px, -3px) rotate(-0.5deg); }
+            40% { transform: scale(1.02) translate(3px, 3px) rotate(0.5deg); }
+            50% { transform: scale(1.02) translate(-2px, 2px); }
+            60% { transform: scale(1.02) translate(2px, -2px); }
+            70% { transform: scale(1.02) translate(-4px, 0); }
+            80% { transform: scale(1.02) translate(4px, 0); }
+            90% { transform: scale(1.02) translate(0, -4px); }
+            100% { transform: scale(1.02) translate(0, 0); }
+        }
+        .fatal-error {
+            animation: fatalShake 0.15s infinite !important;
+            filter: grayscale(100%) contrast(180%) brightness(0.8) hue-rotate(90deg) invert(0.1) !important;
+        }
 
         #three-container {
             position: fixed; inset: 0; z-index: -1; pointer-events: none;
@@ -46,103 +68,127 @@
         }
         #three-container.system-active { opacity: 1; }
 
-        .container { 
-            position: relative; z-index: 1; padding: 0 30px; max-width: 600px; margin: 0 auto; 
+        .scroll-container {
+            position: relative; z-index: 1; 
+            width: 100%; height: 200vh; 
             opacity: 0; transform: translateY(30px);
             transition: opacity 3.5s cubic-bezier(0.2, 0.8, 0.2, 1), transform 3.5s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-        .container.system-active { opacity: 1; transform: translateY(0); }
-        
-        .hero-spacer { height: 100vh; display: flex; flex-direction: column; justify-content: center; padding-bottom: 20vh; }
-        
+        .scroll-container.system-active { opacity: 1; transform: translateY(0); }
+
+        .top-header { position: absolute; top: 40px; left: 40px; }
         .hero-title {
-            font-size: 60px; font-weight: 900; letter-spacing: 0.05em; line-height: 1;
-            color: var(--noble-white); margin-bottom: 10px;
+            font-size: clamp(65px, 14vw, 120px); font-weight: 900; letter-spacing: 0.02em; 
+            line-height: 0.85; color: var(--noble-white); margin: 0;
             text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
         }
+        .title-dot {
+            color: #ff3b30; text-shadow: 0 0 10px rgba(255, 59, 48, 0.8);
+            transition: color 0.5s ease, text-shadow 0.5s ease;
+        }
+        .title-dot.playing { color: #34c759; text-shadow: 0 0 12px rgba(52, 199, 89, 0.9); }
+
+        .audio-player {
+            position: absolute; top: 80vh; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; justify-content: center; gap: 20px;
+            z-index: 100; opacity: 0; pointer-events: none;
+            transition: opacity 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) 1s;
+        }
+        .audio-player.system-active { opacity: 1; pointer-events: auto; }
+        .track-btn {
+            background: transparent; border: none; color: rgba(255,255,255,0.5);
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; transition: all 0.2s; padding: 10px;
+        }
+        .track-btn:hover { color: #fff; transform: scale(1.1); filter: drop-shadow(0 0 5px rgba(255,255,255,0.4)); }
+        .track-btn:active { transform: scale(0.9); }
+        .track-btn.active { color: #fff; filter: drop-shadow(0 0 5px rgba(255,255,255,0.8)); }
+        .ctrl-icon { width: 18px; height: 18px; display: block; }
         
-        .profile-specs {
-            font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--noble-white);
-            letter-spacing: 0.15em; text-transform: uppercase; line-height: 2.2;
-            margin-top: 25px; border-left: 1px solid var(--noble-white); padding-left: 15px;
-            opacity: 0.8;
-        }
+        .repeat-one-text { font-family: sans-serif; font-size: 7px; font-weight: bold; }
 
-        .fade-up {
-            opacity: 0; transform: translateY(60px); 
-            transition: opacity 2.0s cubic-bezier(0.2, 0.8, 0.2, 1), transform 2.0s cubic-bezier(0.2, 0.8, 0.2, 1);
-            will-change: opacity, transform;
+        .play-btn {
+            width: 52px; height: 52px; border-radius: 50%; background: #ffffff; border: none; color: #000000; 
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); padding: 0;
         }
-        .fade-up.active { opacity: 1; transform: translateY(0); }
+        .play-btn:hover { transform: scale(1.08); box-shadow: 0 0 25px rgba(255, 255, 255, 0.5); }
+        .play-btn:active { transform: scale(0.92); }
+        .play-icon { display: flex; justify-content: center; align-items: center; }
 
-        .content-section { padding: 250px 0; min-height: 500px; }
-        .section-label { color: #fff; font-family: 'Roboto Mono'; font-size: 11px; letter-spacing: 0.2em; margin-bottom: 20px; display: block; border-bottom: 1px solid rgba(255,255,255,0.5); padding-bottom: 5px; width: max-content; }
-        .title { font-size: 28px; font-weight: 700; margin-bottom: 30px; line-height: 1.4; }
-        .body-text { font-size: 17px; color: var(--text-muted); line-height: 1.9; }
-        .body-text b { color: #fff; font-weight: 700; }
-
-        .link-area { padding: 150px 0 250px; text-align: center; }
-        .more-btn {
-            display: inline-block; text-decoration: none; color: #fff; border: 1px solid #fff;
-            padding: 14px 45px; border-radius: 2px; font-size: 14px; letter-spacing: 0.4em;
-            text-transform: uppercase; transition: all 0.4s ease; cursor: pointer;
-            font-weight: 700;
+        .menu-container {
+            position: absolute; top: 35vh; right: 40px; z-index: 50;
+            display: flex; flex-direction: column; align-items: flex-end;
         }
-        .more-btn:hover { background-color: #fff; color: #000; }
+        .menu-trigger {
+            font-family: 'Roboto Mono', monospace; font-size: 11px; color: #fff;
+            letter-spacing: 0.2em; cursor: pointer; padding: 10px 0; transition: opacity 0.3s;
+        }
+        .menu-trigger:hover { opacity: 0.7; }
+        .menu-list {
+            display: flex; flex-direction: column; gap: 15px; margin-top: 15px;
+            opacity: 0; transform: translateY(-10px); pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .menu-list.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .nav-link {
+            font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--text-muted);
+            text-decoration: none; letter-spacing: 0.15em; text-transform: uppercase; text-align: right;
+            transition: color 0.3s, text-shadow 0.3s;
+        }
+        .nav-link:hover { color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+        .nav-link.active { color: #fff; font-weight: 700; border-right: 2px solid #fff; padding-right: 10px; }
         
-        footer { text-align: center; font-size: 10px; color: var(--text-muted); letter-spacing: 0.2em; font-family: 'Roboto Mono'; margin-bottom: 50px; }
+        .nav-link.locked-link { color: #2a2a2a; pointer-events: none; text-shadow: none; }
 
-        /* ▼ ログイン画面 ▼ */
+        .reboot-section {
+            position: absolute; top: 150vh; left: 50%; transform: translate(-50%, -50%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .reboot-btn {
+            background: transparent; border: none; color: var(--text-muted);
+            display: flex; flex-direction: column; align-items: center; gap: 12px; 
+            cursor: pointer; transition: all 0.4s ease; padding: 20px;
+        }
+        .reboot-icon-svg { width: 30px; height: 30px; opacity: 0.7; transition: all 0.4s ease; }
+        .reboot-text { font-family: 'Roboto Mono', monospace; font-size: 11px; letter-spacing: 0.25em; transition: all 0.3s ease; }
+        .reboot-btn:hover .reboot-icon-svg { opacity: 1; color: #fff; transform: rotate(45deg) scale(1.1); }
+        .reboot-btn:hover .reboot-text { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        .reboot-btn.activating { transform: scale(0.85); pointer-events: none; }
+        .reboot-btn.activating .reboot-icon-svg { animation: spinSlow 2.0s linear infinite; color: #fff; opacity: 0.8; }
+        .reboot-btn.activating .reboot-text { color: #555; text-shadow: none; }
+        @keyframes spinSlow { 100% { transform: rotate(360deg) scale(1.1); } }
+
+        #flash-overlay {
+            position: fixed; inset: 0; background: #000; z-index: 10000;
+            opacity: 0; pointer-events: none; transition: opacity 0.5s cubic-bezier(0.8, 0, 0.2, 1);
+        }
+        #flash-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .site-footer {
+            position: absolute; bottom: 30px; width: 100%; text-align: center;
+            font-size: 10px; color: #444; letter-spacing: 0.2em; font-family: 'Roboto Mono';
+        }
+
+        /* Authentication Overlay */
         #auth-overlay {
             position: fixed; inset: 0; background: #000; z-index: 9999;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.8s ease;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease;
         }
         #auth-overlay.hidden { opacity: 0; visibility: hidden; }
         
-        #pass-input {
-            background: transparent; border: none; border-bottom: 1px solid #333;
-            color: #fff; font-family: 'Roboto Mono'; font-size: 24px; text-align: center;
-            outline: none; letter-spacing: 0.2em; width: 240px; margin-bottom: 30px;
-        }
-        .auth-submit {
-            background: transparent; border: 1px solid #444; color: #fff;
-            font-family: 'Roboto Mono'; font-size: 10px; padding: 10px 30px;
-            letter-spacing: 0.3em; cursor: pointer;
-        }
-        .error-msg { color: #ff3b30; font-size: 10px; font-family: 'Roboto Mono'; margin-top: 15px; opacity: 0; transition: 0.5s ease; }
-        .access-granted { color: #fff !important; letter-spacing: 0.3em !important; opacity: 1 !important; text-shadow: 0 0 15px #fff; }
+        .auth-input { background: transparent; border: none; border-bottom: 1px solid #333; color: #fff; font-family: 'Roboto Mono'; text-align: center; outline: none; letter-spacing: 0.2em; transition: opacity 0.5s ease; }
+        #pass-input { font-size: 24px; width: 240px; margin-bottom: 30px; }
+        .auth-submit { background: transparent; border: 1px solid #444; color: #fff; font-family: 'Roboto Mono'; font-size: 10px; padding: 10px 30px; letter-spacing: 0.3em; cursor: pointer; transition: opacity 0.5s ease; }
+        .error-msg { color: #fff; font-size: 11px; font-family: 'Roboto Mono'; margin-top: 25px; opacity: 0; letter-spacing: 0.2em; }
 
-        /* ▼ オープニング演出用スタイル ▼ */
-        #intro-sequence {
-            position: fixed; inset: 0; background: #000; z-index: 9998;
-            display: flex; justify-content: center; align-items: center;
-            overflow: hidden; opacity: 0; pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
+        /* Glitch Intro Sequence */
+        #intro-sequence { position: fixed; inset: 0; background: #000; z-index: 9998; display: flex; justify-content: center; align-items: center; overflow: hidden; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         #intro-sequence.active { opacity: 1; pointer-events: auto; }
-        
-        #pre-glitch-image {
-            position: absolute; inset: -20px;
-            background-image: url('image_top.png');
-            background-size: cover; background-position: center;
-            opacity: 0; z-index: 1;
-        }
-
-        #code-bg {
-            position: absolute; inset: -20px; padding: 30px;
-            font-family: 'Roboto Mono', monospace; font-size: 14px; color: #fff; 
-            line-height: 1.1; word-break: break-all; text-align: left; 
-            opacity: 0; z-index: 2; transition: opacity 0.5s ease;
-        }
-        
-        #target-word {
-            position: relative; z-index: 3;
-            font-family: 'Roboto Mono', monospace; font-size: 32px; font-weight: 700;
-            display: flex; gap: 12px; opacity: 0; 
-            transition: gap 0.8s cubic-bezier(0.8, 0, 0.2, 1), transform 0.6s ease, opacity 0.1s;
-        }
-        
+        #pre-glitch-image { position: absolute; inset: -20px; background-size: cover; background-position: center; opacity: 0; z-index: 1; }
+        #code-bg { position: absolute; inset: -20px; padding: 30px; font-family: 'Roboto Mono', monospace; font-size: 14px; color: #fff; line-height: 1.1; word-break: break-all; text-align: left; opacity: 0; z-index: 2; overflow: hidden; }
+        #target-word { position: relative; z-index: 3; font-family: 'Roboto Mono', monospace; font-size: 32px; font-weight: 700; display: flex; gap: 12px; opacity: 0; transition: gap 0.8s cubic-bezier(0.8, 0, 0.2, 1), transform 0.6s ease, opacity 0.1s; }
         .t-char { display: inline-block; width: 32px; text-align: center; color: #111; transition: color 0.1s, text-shadow 0.1s, transform 3.0s cubic-bezier(0.2, 0.8, 0.2, 1); }
         .t-char.locked { color: #fff; text-shadow: 0 0 10px #fff, 0 0 25px rgba(255, 255, 255, 0.8); }
         #target-word.merged { gap: -32px; transform: scale(1.1); }
@@ -151,11 +197,16 @@
 </head>
 <body class="locked">
     
+    <div id="flash-overlay"></div>
+    <audio id="bgm" preload="auto"></audio>
+
     <div id="auth-overlay">
-        <span id="auth-label" style="font-family:'Roboto Mono'; font-size:10px; color:#555; letter-spacing:0.3em; margin-bottom:30px; text-transform:uppercase;">System Authentication</span>
-        <input type="password" id="pass-input" placeholder="····" autocomplete="off">
-        <button class="auth-submit" id="auth-btn">ENTER</button>
-        <div id="error-txt" class="error-msg">INVALID CODE</div>
+        <div id="login-ui" style="display: flex; flex-direction: column; align-items: center; z-index: 20;">
+            <span id="auth-label" style="font-family:'Roboto Mono'; font-size:10px; color:#555; letter-spacing:0.3em; margin-bottom:30px; text-transform:uppercase; transition: opacity 0.5s ease;">System Authentication</span>
+            <input type="password" id="pass-input" class="auth-input" placeholder="····" autocomplete="off">
+            <button class="auth-submit" id="auth-btn">ENTER</button>
+            <div id="error-txt" class="error-msg">INVALID CODE</div>
+        </div>
     </div>
 
     <div id="intro-sequence">
@@ -167,64 +218,298 @@
     </div>
 
     <div id="three-container"></div>
+    <div class="bg-layer" id="main-bg"></div>
 
-    <div class="bg-layer bg-1" id="bg1"></div>
-    <div class="bg-layer bg-2" id="bg2"></div>
-    <div class="bg-layer bg-3" id="bg3"></div>
-    <div class="bg-layer bg-4" id="bg4"></div>
-    <div class="bg-layer bg-5" id="bg5"></div>
+    <div class="scroll-container">
+        <header class="top-header">
+            <h1 class="hero-title">THE<br>NOBLE<span id="title-dot" class="title-dot">.</span></h1>
+        </header>
 
-    <div class="container">
-        <div class="hero-spacer">
-            <h1 class="hero-title">THE NOBLE</h1>
-            <div class="profile-specs">
-                <div><b>UID</b> NOBUYUKI_777</div>
-                <div><b>ROLE</b> SYSTEM_ARCHITECT</div>
-                <div><b>STATUS</b> LOGIC_RECONSTRUCTED</div>
+        <div class="menu-container">
+            <div class="menu-trigger" id="menu-btn">[ + MENU ]</div>
+            <div class="menu-list" id="menu-list">
+                <a href="index.html" class="nav-link active">HOME</a>
+                <a href="about.html" class="nav-link">ABOUT</a>
+                <a href="more.html" class="nav-link">BELONG</a>
+                <a href="gallery.html" class="nav-link">GALLERY</a>
+                <a href="music.html" class="nav-link" id="nav-music">MUSIC</a>
+                <a href="otherside.html" class="nav-link">GAME</a>
             </div>
         </div>
 
-        <section class="content-section" id="sec-1"><span class="section-label fade-up">01. System Disruption</span><h2 class="title fade-up">搾取の盤面を、<br>知性でハックする。</h2><div class="body-text fade-up"><p>世界は巨大な変数の集合体に過ぎない。彼が卒業論文でターゲットにしたのは、公認という名の免罪符を得た搾取システム、すなわち<b>競馬</b>を筆頭とする公営競技の解析だった。</p><p>大衆の情熱を餌に富を吸い上げるその絶対的な構造。彼はその盤面に潜む脆弱性を特定し、独自のアルゴリズムによってシステムの優位性を完全に無効化した。それは知性によるシステムの再定義であり、無自覚に搾取される人々を論理的に開放するための、静かな宣戦布告だった。</p></div></section>
-        <section class="content-section" id="sec-2"><span class="section-label fade-up">02. Global Connectivity</span><h2 class="title fade-up">ネットワークの末端から、<br>世界の核へと直結させる。</h2><div class="body-text fade-up"><p>大学卒業後、彼は自身のルーツである千葉・四街道へと視点を向ける。インフラから切り離されたその静寂を、彼は深く愛していた。既存の構造に従属することを拒み、彼はローカルな<b>宿泊システム</b>のネットワークを根底から再構築（リビルド）した。</p><p>中間搾取を排除した単独のバイパスを組み上げ、地方の滞在空間を直接世界とつなぐ新たな回路を確立。インバウンドの潮流が到達する前に、辺境の価値を世界中からアクセス可能な状態へと書き換えたのだ。その偉業を見届けると同時に、彼の視座は次なるフェーズへと移っていく。</p></div></section>
-        <section class="content-section" id="sec-3"><span class="section-label fade-up">03. Void Processing</span><h2 class="title fade-up">ゼロへと回帰し、<br>空白から再定義する。</h2><div class="body-text fade-up"><p>完璧なロジックを維持するためには、時にシステムそのもののリビルドが必要になる。彼は自らの社会的なインフラをすべて破棄し、完全なゼロへと収束させる道を選んだ。</p><p>過去の履歴や既存の信用を消去し、一枚のデビットカードだけを唯一の生存インターフェースにする。それは不純物を取り除き、本質だけを抽出するための強制的デバッグだった。何も持たないがゆえに研ぎ澄まされる感覚が、彼のロジックに血の通った圧倒的な力強さを宿らせていく。</p></div></section>
-        <section class="content-section" id="sec-4"><span class="section-label fade-up">04. Irrational Anomaly</span><h2 class="title fade-up">非論理的な干渉と、<br>致命的なペナルティ。</h2><div class="body-text fade-up"><p>新たな最適化フェーズへと進む過程で、彼は解析不能な一人の女性と遭遇する。自身のシステムを崩壊させかねない危険な接触。</p><p>彼は周囲の警告を無視し、自らを「暴走機関車」へと書き換え同期（結婚）を強行した。過去を抹消した秘匿事象は、後に<b>重大なペナルティ</b>を招く致命的なバグとなったが——</p><p>現在、システムからは「子供」という新たな自律変数が生成されている。かつては予測不能だったその存在を、彼は今、自身のアーキテクチャにおける「最も美しく、不可解な最適解」として静かに観測している。</p></div></section>
-        <div class="link-area fade-up"><p class="next-teaser">Unlisted Records / Accessing...</p><a href="more.html" class="more-btn">BELONG</a></div>
-        <footer>© THE NOBLE. ALL RIGHTS RESERVED.</footer>
+        <div class="audio-player" id="audio-player">
+            <button class="track-btn" id="shuffle-btn" title="Shuffle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ctrl-icon"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+            </button>
+            <button class="track-btn" id="prev-btn" title="Previous">
+                <svg viewBox="0 0 24 24" fill="currentColor" class="ctrl-icon"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+            </button>
+            <button class="play-btn" id="play-btn">
+                <span class="play-icon" id="play-icon">
+                    <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px; height:20px; margin-left: 1px;"><path d="M8 5v14l11-7z"/></svg>
+                </span>
+            </button>
+            <button class="track-btn" id="next-btn" title="Next">
+                <svg viewBox="0 0 24 24" fill="currentColor" class="ctrl-icon"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+            </button>
+            
+            <button class="track-btn" id="repeat-btn" title="Repeat Mode">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ctrl-icon" id="repeat-icon">
+                    <polyline points="17 1 21 5 17 9"></polyline>
+                    <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                    <polyline points="7 23 3 19 7 15"></polyline>
+                    <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div class="reboot-section" id="reboot-section">
+            <button class="reboot-btn" id="reboot-btn">
+                <svg class="reboot-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path>
+                    <path d="M21 3v5h-5"></path>
+                </svg>
+                <span class="reboot-text">REBOOT</span>
+            </button>
+        </div>
+
+        <footer class="site-footer">© THE NOBLE. ALL RIGHTS RESERVED.</footer>
     </div>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, increment } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDrDTNLFOC93bBsjzcBrdLt4miPgrat2zY",
+            authDomain: "nobuyukiquest.firebaseapp.com",
+            projectId: "nobuyukiquest",
+            storageBucket: "nobuyukiquest.firebasestorage.app",
+            messagingSenderId: "504992212070",
+            appId: "1:504992212070:web:79f0ccca4e1d136bd639a7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.trackSystemEvent = async (eventName) => {
+            try {
+                const statsRef = doc(db, "analytics", "website_stats");
+                await setDoc(statsRef, { [eventName]: increment(1) }, { merge: true });
+                console.log(`[Analytics] ${eventName} recorded.`);
+            } catch (e) {
+                console.error("Analytics Error:", e);
+            }
+        };
+
+        // Navigation Tracking
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (link.classList.contains('locked-link')) return;
+                e.preventDefault();
+                const targetUrl = link.getAttribute('href');
+                const menuName = link.innerText.trim();
+                window.trackSystemEvent(`menu_click_${menuName}`);
+                setTimeout(() => { window.location.href = targetUrl; }, 200);
+            });
+        });
+
+        // BGM Playback Tracking
+        const bgm = document.getElementById('bgm');
+        if (bgm) {
+            bgm.addEventListener('play', () => {
+                window.trackSystemEvent('music_played');
+            }, { once: true });
+        }
+
+        // Session Page View Tracking
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('is_auth_main') === 'true' && !sessionStorage.getItem('tracked_main')) {
+                window.trackSystemEvent('page_view_main');
+                sessionStorage.setItem('tracked_main', 'true');
+            }
+        });
+    </script>
+
     <script>
-        // === 1. 白基調の0と1のパーティクル ===
+        // System State Management
+        if (sessionStorage.getItem('current_image') === 'image_hiphop.png' || sessionStorage.getItem('is_reboot_action') === 'true') {
+            sessionStorage.setItem('has_rebooted_ever', 'true');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const musicLink = document.getElementById('nav-music');
+            if (sessionStorage.getItem('has_rebooted_ever') === 'true') {
+                if(musicLink) musicLink.classList.remove('locked-link');
+            }
+        });
+
+        const topAudioFiles = ['main1.sound.MOV', 'main2.sound.MOV', 'main3.sound.MOV'];
+        const hiphopAudioFiles = ['hiphop1.sound.MOV', 'hiphop2.sound.MOV', 'hiphop3.sound.MOV', 'hiphop4.sound.MOV', 'hiphop5.sound.MOV'];
+        
+        let currentImage = sessionStorage.getItem('current_image');
+        if (currentImage !== 'image_top.png' && currentImage !== 'image_hiphop.png') {
+            currentImage = 'image_top.png';
+        }
+
+        const isReboot = sessionStorage.getItem('is_reboot_action') === 'true';
+
+        if (isReboot) {
+            currentImage = currentImage === 'image_top.png' ? 'image_hiphop.png' : 'image_top.png';
+            sessionStorage.setItem('current_image', currentImage);
+            sessionStorage.removeItem('is_reboot_action');
+            sessionStorage.setItem('current_track_idx', '0');
+        } else {
+            sessionStorage.setItem('current_image', currentImage);
+        }
+
+        let currentPlaylist = currentImage === 'image_top.png' ? topAudioFiles : hiphopAudioFiles;
+        let currentTrackIdx = parseInt(sessionStorage.getItem('current_track_idx') || '0', 10);
+        if (currentTrackIdx >= currentPlaylist.length) currentTrackIdx = 0; 
+
+        const bgm = document.getElementById('bgm');
+        bgm.src = currentPlaylist[currentTrackIdx];
+
+        const savedTime = parseFloat(sessionStorage.getItem('bgm_time') || '0');
+        if (savedTime > 0) {
+            bgm.currentTime = savedTime;
+        }
+
+        document.getElementById('main-bg').style.backgroundImage = `url('${currentImage}')`;
+        document.getElementById('pre-glitch-image').style.backgroundImage = `url('${currentImage}')`;
+
+        // Audio Context & Visualization
+        let audioCtx, analyser, dataArray;
+        const playBtn = document.getElementById('play-btn');
+        const playIcon = document.getElementById('play-icon');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const shuffleBtn = document.getElementById('shuffle-btn');
+        const repeatBtn = document.getElementById('repeat-btn');
+        const repeatIcon = document.getElementById('repeat-icon');
+        const titleDot = document.getElementById('title-dot');
+        
+        let isPlaying = sessionStorage.getItem('is_playing') === 'true'; 
+        let isShuffle = false;
+        
+        let repeatMode = 1; 
+        repeatBtn.classList.add('active');
+
+        const svgRepeatAll = `<polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path>`;
+        const svgRepeatOne = `<polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path><text x="12" y="16" class="repeat-one-text" text-anchor="middle" fill="currentColor" stroke="none">1</text>`;
+
+        const playSvg = '<svg viewBox="0 0 24 24" fill="currentColor" style="width:20px; height:20px; margin-left: 1px;"><path d="M8 5v14l11-7z"/></svg>';
+        const pauseSvg = '<svg viewBox="0 0 24 24" fill="currentColor" style="width:20px; height:20px; margin-left: 0px;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+
+        function initAudio() {
+            if(audioCtx) return;
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+                analyser = audioCtx.createAnalyser();
+                const source = audioCtx.createMediaElementSource(bgm);
+                source.connect(analyser);
+                analyser.connect(audioCtx.destination);
+                analyser.fftSize = 256;
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+            } catch(e) {}
+        }
+
+        const updatePlayState = () => {
+            if (isPlaying) {
+                playIcon.innerHTML = pauseSvg; titleDot.classList.add('playing');
+                if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+                bgm.play().catch(e => console.log('Playback init required', e));
+            } else {
+                playIcon.innerHTML = playSvg; titleDot.classList.remove('playing');
+                bgm.pause();
+            }
+            sessionStorage.setItem('is_playing', isPlaying);
+        };
+
+        playBtn.addEventListener('click', () => { initAudio(); isPlaying = !isPlaying; updatePlayState(); });
+        shuffleBtn.addEventListener('click', () => { isShuffle = !isShuffle; shuffleBtn.classList.toggle('active', isShuffle); });
+        
+        repeatBtn.addEventListener('click', () => { 
+            repeatMode = (repeatMode + 1) % 3;
+            if (repeatMode === 0) {
+                repeatBtn.classList.remove('active');
+                repeatIcon.innerHTML = svgRepeatAll;
+            } else if (repeatMode === 1) {
+                repeatBtn.classList.add('active');
+                repeatIcon.innerHTML = svgRepeatAll;
+            } else {
+                repeatBtn.classList.add('active');
+                repeatIcon.innerHTML = svgRepeatOne;
+            }
+        });
+
+        const triggerVibration = () => {
+            const bg = document.getElementById('main-bg');
+            bg.classList.remove('vibrate-active');
+            void bg.offsetWidth; 
+            bg.classList.add('vibrate-active');
+        };
+
+        const changeTrack = (direction) => {
+            if (isShuffle) {
+                let nextIdx = currentTrackIdx;
+                if (currentPlaylist.length > 1) {
+                    while(nextIdx === currentTrackIdx) nextIdx = Math.floor(Math.random() * currentPlaylist.length);
+                }
+                currentTrackIdx = nextIdx;
+            } else {
+                currentTrackIdx = (currentTrackIdx + direction + currentPlaylist.length) % currentPlaylist.length;
+            }
+            bgm.src = currentPlaylist[currentTrackIdx];
+            sessionStorage.setItem('current_track_idx', currentTrackIdx);
+            bgm.currentTime = 0;
+            if (isPlaying) bgm.play().catch(e => {});
+        };
+
+        prevBtn.addEventListener('click', () => { initAudio(); triggerVibration(); changeTrack(-1); });
+        nextBtn.addEventListener('click', () => { initAudio(); triggerVibration(); changeTrack(1); });
+
+        bgm.addEventListener('ended', () => { 
+            if (repeatMode === 2) {
+                bgm.currentTime = 0;
+                bgm.play().catch(e=>{});
+            } else if (repeatMode === 1) {
+                changeTrack(1);
+            } else {
+                isPlaying = false;
+                updatePlayState();
+            }
+        });
+
+        window.addEventListener('beforeunload', () => {
+            sessionStorage.setItem('bgm_time', bgm.currentTime);
+        });
+
+        // 3D Environment Initialization
         let scene, camera, renderer, particles0, particles1;
         const threeContainer = document.getElementById('three-container');
-
+        
         function createBinaryTexture(text) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 64; canvas.height = 64;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'; // 白パーティクル
-            ctx.font = 'bold 44px "Roboto Mono", monospace';
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText(text, 32, 32);
-            return new THREE.CanvasTexture(canvas);
+            const canvas = document.createElement('canvas'); canvas.width = 64; canvas.height = 64;
+            const ctx = canvas.getContext('2d'); ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.font = 'bold 44px "Roboto Mono", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(text, 32, 32); return new THREE.CanvasTexture(canvas);
         }
 
         function initThree() {
-            scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2(0x000000, 0.0015);
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 1, 2000);
-            camera.position.z = 900;
+            scene = new THREE.Scene(); scene.fog = new THREE.FogExp2(0x000000, 0.0015);
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 1, 2000); camera.position.z = 900;
             
-            const tex0 = createBinaryTexture('0'); const tex1 = createBinaryTexture('1');
-            const particleCount = 750;
+            const isHiphop = currentImage === 'image_hiphop.png';
+            const tex0 = createBinaryTexture(isHiphop ? '$' : '0'); const tex1 = createBinaryTexture(isHiphop ? '$' : '1');
+            const particleCount = 1200;
 
             const createGroup = (tex) => {
                 const geo = new THREE.BufferGeometry(); const pos = new Float32Array(particleCount * 3);
                 for(let i=0; i<particleCount*3; i++) pos[i] = (Math.random()-0.5) * 2500;
                 geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-                return new THREE.Points(geo, new THREE.PointsMaterial({
-                    size: 18, map: tex, transparent: true, opacity: 0.5, 
-                    blending: THREE.AdditiveBlending, depthWrite: false
-                }));
+                return new THREE.Points(geo, new THREE.PointsMaterial({ size: 24, map: tex, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false }));
             };
 
             particles0 = createGroup(tex0); particles1 = createGroup(tex1);
@@ -238,183 +523,204 @@
 
         function animateThree() {
             requestAnimationFrame(animateThree);
+            let audioScale = 1.0; let targetX = 0, targetY = 0;
+            if (analyser && isPlaying && !bgm.paused) {
+                analyser.getByteFrequencyData(dataArray);
+                let sum = 0; for(let i = 0; i < 15; i++) sum += dataArray[i]; 
+                let intensity = (sum / 15) / 255; 
+                audioScale = 1.0 + (intensity * 0.1); 
+                if (intensity > 0.6) { targetX = (Math.random() - 0.5) * intensity * 6; targetY = (Math.random() - 0.5) * intensity * 6; }
+            }
+            scene.position.x += (targetX - scene.position.x) * 0.2; scene.position.y += (targetY - scene.position.y) * 0.2;
             if(particles0 && particles1){ 
-                particles0.rotation.y -= 0.0008; particles0.rotation.x += 0.0004;
-                particles1.rotation.y -= 0.001; particles1.rotation.x += 0.0005;
+                particles0.rotation.y -= 0.0008; particles0.rotation.x += 0.0004; particles1.rotation.y -= 0.001; particles1.rotation.x += 0.0005;
+                particles0.scale.set(audioScale, audioScale, audioScale); particles1.scale.set(audioScale * 1.02, audioScale * 1.02, audioScale * 1.02);
             }
             renderer.render(scene, camera);
         }
-
-        window.addEventListener('resize', () => {
-            if(camera && renderer) {
-                camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            }
-        });
+        window.addEventListener('resize', () => { if(camera && renderer) { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }});
         initThree(); animateThree();
 
-        // === 2. オープニング演出（タイムライン完全版） ===
-        const input = document.getElementById('pass-input');
-        const submitBtn = document.getElementById('auth-btn');
-        const introSequence = document.getElementById('intro-sequence');
-        const preGlitchImage = document.getElementById('pre-glitch-image');
-        const codeBg = document.getElementById('code-bg');
-        const targetWord = document.getElementById('target-word');
-        const tChars = document.querySelectorAll('.t-char');
-        const errorTxt = document.getElementById('error-txt');
+        // UI Interactions
+        const menuBtn = document.getElementById('menu-btn'); 
+        const menuList = document.getElementById('menu-list'); 
+        let menuOpen = sessionStorage.getItem('menu_open') === 'true';
         
-        let typeInterval, terminalInterval, scrambleInterval;
-        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+        if (menuOpen) {
+            menuList.classList.add('active'); 
+            menuBtn.innerText = '[ - CLOSE ]';
+        }
 
-        tChars.forEach(el => {
-            el.style.transform = `translate(${(Math.random()-0.5)*window.innerWidth*1.5}px, ${(Math.random()-0.5)*window.innerHeight*1.5}px)`;
+        menuBtn.addEventListener('click', () => { 
+            menuOpen = !menuOpen; 
+            sessionStorage.setItem('menu_open', menuOpen);
+            if(menuOpen) { 
+                menuList.classList.add('active'); 
+                menuBtn.innerText = '[ - CLOSE ]'; 
+            } else { 
+                menuList.classList.remove('active'); 
+                menuBtn.innerText = '[ + MENU ]'; 
+            }
         });
 
-        if (sessionStorage.getItem('is_auth_main') === 'true') {
-            document.body.classList.remove('locked');
-            document.getElementById('auth-overlay').style.display = 'none';
-            introSequence.style.display = 'none';
-            activateSystem();
-        } else {
-            setTimeout(() => input.focus(), 100);
+        document.getElementById('reboot-btn').addEventListener('click', function() {
+            if (window.trackSystemEvent) window.trackSystemEvent('reboot_clicked');
+
+            if (navigator.vibrate) navigator.vibrate(40);
+            this.classList.add('activating');
+            document.getElementById('main-bg').classList.add('fatal-error');
+            setTimeout(() => {
+                if (navigator.vibrate) navigator.vibrate([200, 50, 300]); 
+                document.getElementById('flash-overlay').classList.add('active'); 
+            }, 800); 
+            setTimeout(() => {
+                sessionStorage.setItem('is_auth_main', 'true'); 
+                sessionStorage.setItem('is_reboot_action', 'true'); 
+                sessionStorage.setItem('is_playing', 'false');
+                window.location.reload();
+            }, 1500); 
+        });
+
+        function activateSystem() { 
+            document.body.classList.add('system-active'); document.querySelector('.scroll-container').classList.add('system-active'); 
+            threeContainer.classList.add('system-active'); document.getElementById('main-bg').style.opacity = '0.6'; 
+            document.getElementById('audio-player').classList.add('system-active');
+            if (isPlaying) updatePlayState();
         }
 
-        function activateSystem() {
-            document.body.classList.add('system-active');
-            document.querySelector('.container').classList.add('system-active');
-            threeContainer.classList.add('system-active'); 
-            document.getElementById('bg1').style.opacity = '1';
-        }
+        const introSequence = document.getElementById('intro-sequence'); const codeBg = document.getElementById('code-bg'); const targetWord = document.getElementById('target-word'); const tChars = document.querySelectorAll('.t-char'); const preGlitchImage = document.getElementById('pre-glitch-image'); const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+        let scrambleInterval;
+        tChars.forEach(el => { el.style.transform = `translate(${(Math.random()-0.5)*window.innerWidth*1.5}px, ${(Math.random()-0.5)*window.innerHeight*1.5}px)`; });
 
-        const attemptLogin = () => {
-            if (input.value === '0711') { 
-                sessionStorage.setItem('is_auth_main', 'true');
-                document.getElementById('auth-label').classList.add('fade-out');
-                input.classList.add('fade-out'); submitBtn.classList.add('fade-out');
-                errorTxt.style.color = '#fff'; errorTxt.classList.add('access-granted');
+        // Glitch Sequence Controller
+        function playAnimationSequence(skipTyping = false) {
+            document.body.classList.add('locked'); 
+            introSequence.style.opacity = '1'; 
+            introSequence.style.display = 'flex';
+            
+            const charNeeded = Math.floor((window.innerWidth * window.innerHeight) / 30);
+            let bgText = ''; 
+            for(let i=0; i<charNeeded; i++) bgText += chars.charAt(Math.floor(Math.random()*chars.length)); 
+            codeBg.innerText = bgText;
+
+            codeBg.style.transition = 'opacity 2.0s ease, transform 2.0s cubic-bezier(0.2, 0.8, 0.2, 1), filter 2.0s ease';
+            codeBg.style.opacity = '0';
+            codeBg.style.transform = 'scale(0.9)';
+            codeBg.style.filter = 'blur(10px)';
+
+            setTimeout(() => {
+                codeBg.style.opacity = '1';
+                codeBg.style.transform = 'scale(1)';
+                codeBg.style.filter = 'blur(0px)';
+            }, 100);
+
+            setTimeout(() => {
+                codeBg.style.transition = 'none';
+                targetWord.style.opacity = '1'; 
+                let startTime = Date.now(); 
+                const parseDuration = 7000; 
                 
-                // [0s] 焦らしタイピング開始
-                let dotCount = 0;
-                typeInterval = setInterval(() => { dotCount = (dotCount + 1) % 4; errorTxt.innerText = 'DECRYPTING' + '.'.repeat(dotCount); }, 500);
+                scrambleInterval = setInterval(() => {
+                    let progress = (Date.now() - startTime) / parseDuration; if (progress > 1) progress = 1;
+                    
+                    let bgTextScramble = ''; 
+                    for(let i=0; i<charNeeded; i++) bgTextScramble += chars.charAt(Math.floor(Math.random()*chars.length)); 
+                    codeBg.innerText = bgTextScramble;
+                    
+                    if (Math.random() > (0.6 + progress * 0.4)) { codeBg.style.color = '#fff'; codeBg.style.transform = `translate(${(Math.random()-0.5)*15}px, ${(Math.random()-0.5)*15}px)`; } else { codeBg.style.color = '#111'; codeBg.style.transform = 'translate(0, 0)'; }
+                    if (Math.random() < (0.1 + progress * 0.8)) { preGlitchImage.style.opacity = 0.2 + (progress * 0.5); if (Math.random() > progress) { preGlitchImage.style.transform = `translate(${(Math.random()-0.5)*50*(1-progress)}px, ${(Math.random()-0.5)*50*(1-progress)}px)`; preGlitchImage.style.mixBlendMode = 'exclusion'; preGlitchImage.style.filter = Math.random() > 0.5 ? 'invert(1) contrast(3)' : 'hue-rotate(90deg) grayscale(1)'; } else { preGlitchImage.style.transform = 'translate(0, 0)'; preGlitchImage.style.mixBlendMode = 'normal'; preGlitchImage.style.filter = 'none'; } } else { preGlitchImage.style.opacity = '0'; }
+                    tChars.forEach(el => { if(!el.classList.contains('locked')) el.innerText = chars.charAt(Math.floor(Math.random()*chars.length)); });
+                }, 40);
+            }, 1500); 
+            
+            setTimeout(() => { tChars.forEach(el => { el.innerText = el.getAttribute('data-char'); el.classList.add('locked'); el.style.transform = 'translate(0, 0)'; }); }, 8500);
+            setTimeout(() => { clearInterval(scrambleInterval); codeBg.style.opacity = '0'; preGlitchImage.style.opacity = '0.3'; preGlitchImage.style.transform = 'translate(0, 0)'; preGlitchImage.style.mixBlendMode = 'normal'; preGlitchImage.style.filter = 'none'; }, 11500);
+            setTimeout(() => { targetWord.classList.add('merged'); }, 13000);
+            setTimeout(() => { introSequence.style.opacity = '0'; document.body.classList.remove('locked'); window.scrollTo(0, 0); activateSystem(); setTimeout(() => { introSequence.style.display = 'none'; }, 1000); }, 14500);
+        }
 
-                // [4.0s] 承認テキストに変更
-                setTimeout(() => { clearInterval(typeInterval); errorTxt.innerText = 'ACCESS GRANTED'; }, 4000);
+        // ▼ ハードコーディングされた最強パスワード ▼
+        const SYSTEM_PASSWORD = '1989'; 
 
-                // ★[6.0s] ブラックアウトへ移行 (承認テキストを2秒間しっかり見せる)
-                setTimeout(() => { document.getElementById('auth-overlay').style.opacity = '0'; introSequence.classList.add('active'); codeBg.style.opacity = '0'; }, 6000);
+        const input = document.getElementById('pass-input'); 
+        const submitBtn = document.getElementById('auth-btn'); 
+        const errorTxt = document.getElementById('error-txt'); 
+        let typeInterval;
 
-                // [8.0s] 高密度ターミナル入力開始 (ブラックアウトから2秒後)
-                setTimeout(() => {
-                    codeBg.style.opacity = '1'; codeBg.innerText = '';
-                    terminalInterval = setInterval(() => {
-                        let chunk = ''; let addCount = Math.floor(Math.random() * 12) + 8;
-                        for(let i=0; i<addCount; i++) chunk += chars.charAt(Math.floor(Math.random()*chars.length));
-                        codeBg.innerText += chunk;
-                    }, 40); 
-                }, 8000);
+        if (sessionStorage.getItem('is_auth_main') === 'true') { 
+            document.getElementById('auth-overlay').style.display = 'none'; 
+            if (isReboot) { 
+                playAnimationSequence(true); 
+            } else { 
+                introSequence.style.display = 'none'; 
+                document.body.classList.remove('locked'); 
+                activateSystem(); 
+            } 
+        } else { 
+            setTimeout(() => input.focus(), 100); 
+        }
+        
+        const attemptLogin = () => {
+            if (input.value === '0000') {
+                sessionStorage.setItem('is_auth_main', 'true');
+                if (window.trackSystemEvent) window.trackSystemEvent('page_view_main');
+                document.getElementById('auth-overlay').style.display = 'none';
+                introSequence.style.display = 'none';
+                document.body.classList.remove('locked');
+                activateSystem();
+            } else if (input.value === SYSTEM_PASSWORD) { // ▼ 変数でチェック ▼
+                sessionStorage.setItem('is_auth_main', 'true'); 
+                if (window.trackSystemEvent) window.trackSystemEvent('page_view_main');
+                
+                errorTxt.style.transition = 'none';
+                errorTxt.style.opacity = '1';
+                errorTxt.style.transform = 'translateY(0)';
+                errorTxt.style.color = '#fff';
+                errorTxt.style.textShadow = 'none';
+                errorTxt.style.letterSpacing = '0.2em';
 
-                // [16.5s] 限界突破 → バグ・グリッチ開始 (ターミナル入力は8.5秒間)
-                setTimeout(() => {
-                    clearInterval(terminalInterval);
-                    targetWord.style.opacity = '1';
-                    let startTime = Date.now();
-                    const parseDuration = 7000; 
+                errorTxt.innerText = 'DECRYPTING'; 
+                let dotCount = 0; 
+                typeInterval = setInterval(() => { 
+                    dotCount = (dotCount + 1) % 4; 
+                    errorTxt.innerText = 'DECRYPTING' + '.'.repeat(dotCount); 
+                }, 400); 
+                
+                setTimeout(() => { 
+                    clearInterval(typeInterval); 
+                    
+                    errorTxt.style.transition = 'opacity 1.0s ease, color 1.0s ease, text-shadow 1.0s ease';
+                    errorTxt.style.opacity = '0'; 
+                    
+                    setTimeout(() => {
+                        errorTxt.innerText = 'ACCESS GRANTED'; 
+                        errorTxt.style.color = '#34c759'; 
+                        errorTxt.style.textShadow = '0 0 15px rgba(52, 199, 89, 0.8)';
+                        errorTxt.style.letterSpacing = '0.3em';
+                        errorTxt.style.opacity = '1'; 
+                    }, 1000); 
+                }, 3000); 
+                
+                setTimeout(() => { 
+                    document.getElementById('auth-overlay').style.opacity = '0'; 
+                    setTimeout(() => { document.getElementById('auth-overlay').style.display = 'none'; }, 1500); 
+                }, 6000);
 
-                    scrambleInterval = setInterval(() => {
-                        let progress = (Date.now() - startTime) / parseDuration; 
-                        if (progress > 1) progress = 1;
-
-                        let bgText = ''; 
-                        for(let i=0; i<2500; i++) bgText += chars.charAt(Math.floor(Math.random()*chars.length));
-                        codeBg.innerText = bgText;
-                        
-                        if (Math.random() > (0.6 + progress * 0.4)) {
-                            codeBg.style.color = '#fff';
-                            codeBg.style.transform = `translate(${(Math.random()-0.5)*15}px, ${(Math.random()-0.5)*15}px)`;
-                        } else {
-                            codeBg.style.color = '#111'; 
-                            codeBg.style.transform = 'translate(0, 0)';
-                        }
-
-                        let showImageChance = 0.1 + (progress * 0.8); 
-                        if (Math.random() < showImageChance) {
-                            preGlitchImage.style.opacity = 0.2 + (progress * 0.5); 
-                            if (Math.random() > progress) {
-                                preGlitchImage.style.transform = `translate(${(Math.random()-0.5)*50*(1-progress)}px, ${(Math.random()-0.5)*50*(1-progress)}px)`;
-                                preGlitchImage.style.mixBlendMode = 'exclusion';
-                                preGlitchImage.style.filter = Math.random() > 0.5 ? 'invert(1) contrast(3)' : 'hue-rotate(90deg) grayscale(1)';
-                            } else {
-                                preGlitchImage.style.transform = 'translate(0, 0)';
-                                preGlitchImage.style.mixBlendMode = 'normal';
-                                preGlitchImage.style.filter = 'none';
-                            }
-                        } else { preGlitchImage.style.opacity = '0'; }
-                        
-                        tChars.forEach(el => { 
-                            if(!el.classList.contains('locked')) el.innerText = chars.charAt(Math.floor(Math.random()*chars.length));
-                        });
-                    }, 40);
-                }, 16500);
-
-                // [23.5s] NOBUYUKI 純白収束
-                setTimeout(() => {
-                    tChars.forEach(el => {
-                        el.innerText = el.getAttribute('data-char');
-                        el.classList.add('locked');
-                        el.style.transform = 'translate(0, 0)';
-                    });
-                }, 23500);
-
-                // [26.5s] 背景ノイズ完全消滅（NOBUYUKI固定から3秒間延長）
-                setTimeout(() => {
-                    clearInterval(scrambleInterval);
-                    codeBg.style.opacity = '0';
-                    preGlitchImage.style.opacity = '0.3'; 
-                    preGlitchImage.style.transform = 'translate(0, 0)';
-                    preGlitchImage.style.mixBlendMode = 'normal';
-                    preGlitchImage.style.filter = 'none';
-                }, 26500);
-
-                // [28.0s] 合体と白飛び消滅
-                setTimeout(() => { targetWord.classList.add('merged'); }, 28000);
-
-                // [29.5s] メイン画面浮上
-                setTimeout(() => {
-                    introSequence.style.opacity = '0';
-                    document.body.classList.remove('locked');
-                    window.scrollTo(0, 0); 
-                    activateSystem();
-                    updateBg();
-                    setTimeout(() => { document.getElementById('auth-overlay').style.display = 'none'; introSequence.style.display = 'none'; }, 1000);
-                }, 29500);
-
-            } else {
-                errorTxt.style.opacity = '1'; input.value = '';
-                setTimeout(() => { errorTxt.style.opacity = '0'; }, 2000);
+                setTimeout(() => { playAnimationSequence(false); }, 7000); 
+                
+            } else { 
+                errorTxt.style.transition = 'none';
+                errorTxt.innerText = 'INVALID CODE';
+                errorTxt.style.color = '#ff3b30';
+                errorTxt.style.textShadow = 'none';
+                errorTxt.style.opacity = '1'; 
+                input.value = ''; 
+                setTimeout(() => { errorTxt.style.opacity = '0'; }, 2000); 
             }
         };
-
-        submitBtn.addEventListener('click', attemptLogin);
-        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
-
-        // === 3. スクロール処理 ===
-        const updateBg = () => {
-            const trigger = window.innerHeight * 0.6;
-            const s1 = document.getElementById('sec-1').getBoundingClientRect().top;
-            const s2 = document.getElementById('sec-2').getBoundingClientRect().top;
-            const s3 = document.getElementById('sec-3').getBoundingClientRect().top;
-            const s4 = document.getElementById('sec-4').getBoundingClientRect().top;
-
-            document.getElementById('bg1').style.opacity = s1 > trigger ? '1' : '0';
-            document.getElementById('bg2').style.opacity = (s1 <= trigger && s2 > trigger) ? '1' : '0';
-            document.getElementById('bg3').style.opacity = (s2 <= trigger && s3 > trigger) ? '1' : '0';
-            document.getElementById('bg4').style.opacity = (s3 <= trigger && s4 > trigger) ? '1' : '0';
-            document.getElementById('bg5').style.opacity = s4 <= trigger ? '1' : '0';
-        };
         
-        window.addEventListener('scroll', updateBg); window.onload = updateBg;
-        const observer = new IntersectionObserver((entries) => { entries.forEachそ(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); }); }, { rootMargin: '0px 0px -15% 0px' }); 
-        document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+        submitBtn.addEventListener('click', attemptLogin); 
+        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
     </script>
 </body>
 </html>
