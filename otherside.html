@@ -215,7 +215,7 @@
                 <br><br><br><br>
                 NOBUYUKIQUEST<br><br><br>
                 すべての まものを とうばつした！<br><br><br>
-                DIRECTOR / Satoshi<br><br>
+                DIRECTOR / SATOSHI<br><br>
                 PROGRAM / AI<br><br><br><br>
                 THANK YOU FOR PLAYING<br><br><br><br><br>
                 <span style="font-size:16px;">＞ タップで タイトルへ ＜</span>
@@ -280,7 +280,7 @@
             loadConfig(); 
         } catch(e) {}
 
-        // 画面初期表示時のスクロール位置リセット処理
+        // スクロール位置のリセット（画面が開いた時に上にいっちゃう対策）
         window.addEventListener('DOMContentLoaded', () => {
             window.scrollTo(0, 0); 
             
@@ -462,13 +462,14 @@
         let waitFrames = 0, waitCallback = null, shake = 0, flash = 0; 
         
         let attackPower = 1; 
-        let powerUpTimer = 0;
-        let invincibleTimer = 0; 
-        let cutinTimer = 0; 
-        let zakoTimer = 0;       
-        let checkpointScore = 0; // ボス到達時のスコアを保持する変数
+let powerUpTimer = 0;
+let invincibleTimer = 0; 
+let cutinTimer = 0; 
+let zakoTimer = 0;       
+let checkpointScore = 0; // 追加: ボス到達時のスコアを保持する変数
 
-        const imgWalk = [document.getElementById('walk1'), document.getElementById('walk2')];
+const imgWalk = [document.getElementById('walk1'), document.getElementById('walk2')];
+
         const imgSword = [document.getElementById('sword1'), document.getElementById('sword2'), document.getElementById('sword3')];
         const imgMonsters = [document.getElementById('monster1'), document.getElementById('monster2'), document.getElementById('monster3')];
 
@@ -698,19 +699,21 @@
         }
 
         function resetGame(retryBoss = false) {
-            window.scrollTo(0, 0); 
-            stopBgm(); titleBgmAudio.pause(); musicBtn.innerText = "おんがく OFF";
-            
-            if(!retryBoss){ 
-                currentLevel = 1; score = 0; zakoKills = 0; updateStat('plays'); 
-                checkpointScore = 0; 
-            } else {
-                score = Math.max(0, checkpointScore - 500); 
-            }
-            
-            lives = 3; enemies = []; swordWaves = []; projectiles = []; boss = null; 
-            attackFrame = -1; waitFrames = 0; playerTintTimer = 0; diedAtBoss = false;
-            shake = 0; flash = 0; currentCooldownMax = baseCooldown;
+    window.scrollTo(0, 0); 
+    stopBgm(); titleBgmAudio.pause(); musicBtn.innerText = "おんがく OFF";
+    
+    if(!retryBoss){ 
+        currentLevel = 1; score = 0; zakoKills = 0; updateStat('plays'); 
+        checkpointScore = 0; // 追加: 完全初期化
+    } else {
+        // 変更: 現在のスコアではなく、記憶したチェックポイントから500を引く
+        score = Math.max(0, checkpointScore - 500); 
+    }
+    
+    lives=3; enemies=[]; swordWaves=[]; projectiles=[]; boss=null; 
+
+            attackFrame=-1; waitFrames=0; playerTintTimer=0; diedAtBoss=false;
+            shake=0; flash=0; currentCooldownMax = baseCooldown;
             attackPower = 1; powerUpTimer = 0; cutinTimer = 0; invincibleTimer = 0;
             zakoTimer = 60;
             
@@ -726,28 +729,19 @@
             startBgm();
             
             if (localDeathCount > 0 && localDeathCount % 10 === 0 && retryBoss) {
-                phase = 'wait_boss'; 
                 showMsg("れいんぼー は ちゃんす", false, "#ffd700");
-                waitFrames = 60; 
-                waitCallback = spawnBoss;
             } else if(retryBoss) {
-                phase = 'wait_boss'; 
-                showMsg("ボスとの さいせん だ！(スコア没収＆-500)"); 
-                waitFrames = 60; 
-                waitCallback = spawnBoss;
+                phase='wait_boss'; 
+                showMsg("ボスとの さいせん だ！(スコア-800)"); waitFrames = 60; waitCallback = spawnBoss;
             } else {
-                phase = 'zako'; 
-                showMsg("ぼうけん が はじまった！");
+                phase='zako'; showMsg("ぼうけん が はじまった！");
             }
         }
 
         function spawnBoss(){
             playSound('boss_appear');
-            boss = { x:GW+200, y:290, hp:bossHP[currentLevel-1], maxHp:bossHP[currentLevel-1], w:180, h:180, timer:-90, targetX:GW-150, shake:0, attackCount:0, restTimer:0, attackCooldown: 60, cutinDone: false };
-            phase = 'boss'; 
-            showMsg(currentLevel>=3?"さいしゅう ボス が あらわれた！！":"きょうりょくな ボス が あらわれた！");
-            
-            checkpointScore = score;
+            boss = { x:GW+200, y:290, hp:bossHP[currentLevel-1], maxHp:bossHP[currentLevel-1], w:180, h:180, timer:-90, targetX:GW-120, shake:0, attackCount:0, restTimer:0, attackCooldown: 60, cutinDone: false };
+            phase = 'boss'; showMsg(currentLevel>=3?"さいしゅう ボス が あらわれた！！":"きょうりょくな ボス が あらわれた！");
         }
 
         function showCutin() {
@@ -917,6 +911,7 @@
                     else if (p.x < -100 || p.x > GW + 200) projectiles.splice(i, 1);
                 }
 
+                // 修正：バグ（残像・道崩れ）の原因だった早期returnを廃止し、ifブロックで囲む
                 if (gameState === 'PLAYING') { 
 
                     if(phase === 'zako') {
@@ -991,7 +986,7 @@
 
                         if (attackFrame >= 0) { attackFrame++; if (attackFrame >= 12) attackFrame = -1; }
                     }
-                }
+                } // end of if(gameState === 'PLAYING')
             } 
             
             if (boss && (phase === 'boss' || phase === 'boss_dead')) {
@@ -1054,13 +1049,13 @@
                 ctx.restore();
             }
 
-            // 描画状態を確実に復元する
+            // ★ここで確実にrestoreされる（残像や道崩れのバグが消滅する）
             ctx.restore();
             
-            // レインボーのフラッシュ範囲を限定
+            // 修正：レインボーのフラッシュ範囲を限定して見やすくした
             if (flash > 0) { 
                 ctx.save();
-                const r = 200;
+                const r = 200; // 半径を縮小
                 const grad = ctx.createRadialGradient(PLAYER_X + CHAR_SIZE/2, GH - CHAR_SIZE/2, 10, PLAYER_X + CHAR_SIZE/2, GH - CHAR_SIZE/2, r);
                 grad.addColorStop(0, `rgba(255, 255, 255, ${flash*0.5})`);
                 grad.addColorStop(1, `rgba(255, 255, 255, 0)`);
