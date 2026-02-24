@@ -35,7 +35,7 @@
         .leaderboard-list { list-style: none; padding: 0; margin: 0; text-align: left; font-size: 14px; max-height: 80px; overflow-y: auto; }
         .leaderboard-list::-webkit-scrollbar { width: 4px; }
         .leaderboard-list::-webkit-scrollbar-thumb { background: #666; border-radius: 2px; }
-        .leaderboard-list li { display: flex; justify-content: space-between; border-bottom: 1px dashed #333; padding: 4px 5px; }
+        .leaderboard-list li { display: flex; justify-content: space-between; align-items: center; gap: 10px; border-bottom: 1px dashed #333; padding: 4px 5px; }
         .rank-1 { color: #ffd700; font-weight: bold; } .rank-2 { color: #c0c0c0; font-weight: bold; } .rank-3 { color: #cd7f32; font-weight: bold; }
 
         .start-prompt { 
@@ -92,44 +92,75 @@
         @keyframes scrollUp { 0% { transform: translateY(100dvh); } 100% { transform: translateY(-100dvh); } }
 
         .assets { display: none; }
+
+        /* 追加：さりげない戻るボタン */
+        #back-to-main { position: absolute; top: 15px; left: 15px; z-index: 1000; color: rgba(255, 255, 255, 0.3); text-decoration: none; font-size: 24px; font-weight: bold; font-family: sans-serif; transition: color 0.3s; pointer-events: auto; padding: 10px; }
+        #back-to-main:hover { color: rgba(255, 255, 255, 0.9); }
+
+        /* 追加：タップで進むストーリー演出用 */
+        #story-intro { position: absolute; inset: 0; background: #1a1a1a; z-index: 80; display: flex; justify-content: center; align-items: center; text-align: center; line-height: 2.2; font-size: 16px; transition: opacity 1s ease; cursor: pointer; }
+        #story-text { opacity: 0; transition: opacity 2.5s ease; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        .tap-hint { display: block; margin-top: 30px; font-size: 12px; color: #888; animation: blinker 1.5s linear infinite; }
+        #title-svg { opacity: 0; transition: opacity 2.5s ease; }
+        #title-ui-wrap { opacity: 0; transition: opacity 1.5s ease; width: 100%; display: flex; flex-direction: column; align-items: center; flex: 1; }
+
+        /* 追加：ランキング見切れ修正用 */
+        .leaderboard-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+        .leaderboard-score { color: #00f3ff; flex-shrink: 0; }
     </style>
 </head>
 <body>
 
     <div id="game-container">
         
+        <a href="index.html" id="back-to-main" title="メインに戻る">←</a>
+
         <video id="title-bgm-video" src="game.MOV" playsinline loop style="display:none;"></video>
 
         <div id="title-screen">
-            <svg width="800" height="150" viewBox="0 0 900 200" style="max-width: 90vw; margin-bottom: 2vh;">
+            
+            <div id="story-intro">
+                <div id="story-text">
+                    西暦20XX年、インフラから見放された街。<br>
+                    突如現れた異次元のバグ「魔獣」。<br><br>
+                    彼は遊戯台の覚醒条件を解析し、<br>
+                    己の肉体へと強制インストールした。<br><br>
+                    すべては、あの日の郷愁を守るために――<br>
+                    <span class="tap-hint blink">＞ タップして進む ＜</span>
+                </div>
+            </div>
+
+            <svg id="title-svg" width="800" height="150" viewBox="0 0 900 200" style="max-width: 90vw; margin-bottom: 2vh;">
                 <path id="title-curve" d="M 50,150 Q 450,-20 850,150" fill="transparent" />
                 <text font-family="'DotGothic16', sans-serif" font-size="90" fill="#fff" font-weight="bold" filter="drop-shadow(5px 5px 0 #444)">
                     <textPath href="#title-curve" startOffset="50%" text-anchor="middle">NOBUYUKIQUEST</textPath>
                 </text>
             </svg>
             
-            <div class="stats-container">
-                <div class="stats-box">
-                    <div style="color:#ffd700; margin-bottom:10px;">【 せかいデータ 】</div>
-                    死亡数: <span class="stat-val" id="global-deaths">-</span> 回<br>
-                    クリア率: <span class="stat-rate" id="global-clear-rate">-.-</span> %
+            <div id="title-ui-wrap">
+                <div class="stats-container">
+                    <div class="stats-box">
+                        <div style="color:#ffd700; margin-bottom:10px;">【 せかいデータ 】</div>
+                        死亡数: <span class="stat-val" id="global-deaths">-</span> 回<br>
+                        クリア率: <span class="stat-rate" id="global-clear-rate">-.-</span> %
+                    </div>
+                    
+                    <div class="stats-box">
+                        <div style="color:#ffd700; margin-bottom:5px;">【 えいゆうの きろく 】</div>
+                        <ul class="leaderboard-list" id="leaderboard-list">
+                            <li>よみこみちゅう...</li>
+                        </ul>
+                    </div>
                 </div>
-                
-                <div class="stats-box">
-                    <div style="color:#ffd700; margin-bottom:5px;">【 えいゆうの きろく 】</div>
-                    <ul class="leaderboard-list" id="leaderboard-list">
-                        <li>よみこみちゅう...</li>
-                    </ul>
-                </div>
-            </div>
 
-            <div class="start-prompt blink" id="start-btn">＞ ぼうけん に でる ＜</div>
-            
-            <div class="bottom-menu">
-                <div class="sys-btn-title" id="open-user-setting">せってい</div>
-                <div class="sys-btn-title" id="music-btn">おんがく OFF</div>
+                <div class="start-prompt blink" id="start-btn">＞ ぼうけん に でる ＜</div>
+                
+                <div class="bottom-menu">
+                    <div class="sys-btn-title" id="open-user-setting">せってい</div>
+                    <div class="sys-btn-title" id="music-btn">おんがく OFF</div>
+                </div>
+                <div class="sys-btn-title" id="open-sys" style="color:#888; margin-bottom:10px;">システム設定</div>
             </div>
-            <div class="sys-btn-title" id="open-sys" style="color:#888; margin-bottom:10px;">システム設定</div>
         </div>
 
         <div id="user-setting-screen">
@@ -250,7 +281,44 @@
             loadGlobalStats(); 
             loadLeaderboard(); 
             loadConfig(); 
-        } catch(e) { console.log("Firebase Error", e); }
+        } catch(e) {}
+
+        // 追加：タップで進むストーリー演出のロジック
+        window.addEventListener('DOMContentLoaded', () => {
+            const introDiv = document.getElementById('story-intro');
+            const storyText = document.getElementById('story-text');
+            const titleSvg = document.getElementById('title-svg');
+            const titleUiWrap = document.getElementById('title-ui-wrap');
+
+            if(sessionStorage.getItem('game_intro_done') === 'true') {
+                introDiv.style.display = 'none';
+                titleSvg.style.opacity = '1';
+                titleUiWrap.style.opacity = '1';
+            } else {
+                setTimeout(() => storyText.style.opacity = '1', 500); 
+
+                const advanceIntro = (e) => {
+                    e.preventDefault();
+                    introDiv.removeEventListener('click', advanceIntro);
+                    introDiv.removeEventListener('touchstart', advanceIntro);
+                    
+                    storyText.style.opacity = '0'; 
+                    
+                    setTimeout(() => {
+                        introDiv.style.display = 'none'; 
+                        titleSvg.style.opacity = '1';    
+                        
+                        setTimeout(() => {
+                            titleUiWrap.style.opacity = '1'; 
+                            sessionStorage.setItem('game_intro_done', 'true'); 
+                        }, 1000);
+                    }, 1000); 
+                };
+
+                introDiv.addEventListener('click', advanceIntro);
+                introDiv.addEventListener('touchstart', advanceIntro, {passive: false});
+            }
+        });
 
         let bossHP = [30, 50, 100];
         let boss3Zako = 15; 
@@ -375,7 +443,8 @@
                     const li = document.createElement('li');
                     let rankClass = rank <= 3 ? `rank-${rank}` : '';
                     let safeName = data.name.replace(/</g, "&lt;").replace(/>/g, "&gt;").substring(0, 8);
-                    li.innerHTML = `<span class="${rankClass}">#${rank} ${safeName}</span> <span style="color:#00f3ff;">${data.score}pt</span>`;
+                    // 修正：スコアが見切れないようにHTML構造を変更
+                    li.innerHTML = `<span class="${rankClass} leaderboard-name">#${rank} ${safeName}</span> <span class="leaderboard-score">${data.score}pt</span>`;
                     list.appendChild(li);
                     rank++;
                 });
@@ -404,7 +473,7 @@
         const imgSword = [document.getElementById('sword1'), document.getElementById('sword2'), document.getElementById('sword3')];
         const imgMonsters = [document.getElementById('monster1'), document.getElementById('monster2'), document.getElementById('monster3')];
 
-        let audioCtx, audioInitialized = false, bgmInterval, endingBgmInterval;
+        let audioCtx, audioInitialized = false, bgmInterval;
         const titleBgmAudio = new Audio('game.MOV');
         titleBgmAudio.loop = true;
         
@@ -464,7 +533,6 @@
                     osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now + i*0.08); osc.stop(now + i*0.08 + 0.3);
                 });
             }
-            // 🌟 レベルアップ音の実装
             if(type === 'levelup'){
                 const notes = [
                     {f: 392.00, t: 0, d: 0.1},    
@@ -585,42 +653,8 @@
             }, 180); 
         }
 
-        // 🌟 初代ドラクエ風 3和音エンディングBGM
-        function playEndingBgm() {
-            if(endingBgmInterval) clearInterval(endingBgmInterval);
-            if(!isBgmOn || !audioCtx || audioCtx.state !== 'running') return;
-            
-            const melody = [523.25, 587.33, 659.25, 783.99,  523.25, 659.25, 783.99, 1046.50];
-            const accomp = [261.63, 329.63, 392.00, 523.25,  261.63, 329.63, 392.00, 523.25];
-            const bass   = [130.81, 130.81, 130.81, 130.81,  130.81, 130.81, 130.81, 130.81];
-            
-            let step = 0;
-            endingBgmInterval = setInterval(() => {
-                const now = audioCtx.currentTime;
-                const v = masterVolume;
-                
-                const mOsc = audioCtx.createOscillator(); const mG = audioCtx.createGain();
-                mOsc.type = 'square'; mOsc.frequency.value = melody[step % melody.length];
-                mG.gain.setValueAtTime(0, now); mG.gain.linearRampToValueAtTime(0.08 * v, now + 0.02); mG.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-                mOsc.connect(mG); mG.connect(audioCtx.destination); mOsc.start(now); mOsc.stop(now + 0.3);
-
-                const aOsc = audioCtx.createOscillator(); const aG = audioCtx.createGain();
-                aOsc.type = 'square'; aOsc.frequency.value = accomp[(step + 2) % accomp.length];
-                aG.gain.setValueAtTime(0, now); aG.gain.linearRampToValueAtTime(0.06 * v, now + 0.02); aG.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-                aOsc.connect(aG); aG.connect(audioCtx.destination); aOsc.start(now); aOsc.stop(now + 0.3);
-
-                const bOsc = audioCtx.createOscillator(); const bG = audioCtx.createGain();
-                bOsc.type = 'triangle'; bOsc.frequency.value = bass[Math.floor(step / 4) % bass.length]; 
-                bG.gain.setValueAtTime(0, now); bG.gain.linearRampToValueAtTime(0.12 * v, now + 0.02); bG.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-                bOsc.connect(bG); bG.connect(audioCtx.destination); bOsc.start(now); bOsc.stop(now + 0.3);
-                
-                step++;
-            }, 250); 
-        }
-
         function stopBgm(){ 
             if(bgmInterval) clearInterval(bgmInterval); bgmInterval=null; 
-            if(endingBgmInterval) clearInterval(endingBgmInterval); endingBgmInterval=null;
         }
 
         function showMsg(t, blinkCursor = false, color = '#fff') { 
@@ -670,7 +704,7 @@
             if(!retryBoss){ 
                 currentLevel=1; score=0; zakoKills=0; updateStat('plays'); 
             } else {
-                score = Math.max(0, score - 800); // 🌟 リトライ時800マイナス（最低0）
+                score = Math.max(0, score - 800); 
             }
             
             lives=3; enemies=[]; swordWaves=[]; projectiles=[]; boss=null; 
@@ -681,15 +715,16 @@
             
             document.getElementById('ui').style.display='block'; updateUI(); 
             
+            updatePadLayout();
             if (controlPattern === 2) {
-                document.getElementById('virtual-pad').style.display = 'block';
+                vPad.style.display = 'block';
             } else {
-                document.getElementById('virtual-pad').style.display = 'none';
+                vPad.style.display = 'none';
             }
 
             startBgm();
             
-            if (localDeathCount >= 10 && retryBoss) {
+            if (localDeathCount > 0 && localDeathCount % 10 === 0 && retryBoss) {
                 showMsg("れいんぼー は ちゃんす", false, "#ffd700");
             } else if(retryBoss) {
                 phase='wait_boss'; 
@@ -768,7 +803,6 @@
             if (cutinTimer > 0) {
                 cutinTimer--;
             } else {
-                // =============== 時間進行 ===============
                 if (attackCooldown > 0) attackCooldown--;
                 if (powerUpTimer > 0) {
                     powerUpTimer--;
@@ -780,7 +814,6 @@
                     playerTint = `hsla(${frameCount * 30 % 360}, 100%, 70%, 0.6)`; playerTintTimer = 2; 
                 }
 
-                // --- BOSS UPDATE ---
                 if (boss && (phase === 'boss' || phase === 'boss_dead')) {
                     if (phase === 'boss') boss.timer++; 
                     if (boss.timer > 0 && phase === 'boss') {
@@ -834,7 +867,6 @@
                     }
                 }
 
-                // --- PROJECTILES UPDATE ---
                 for (let i = projectiles.length - 1; i >= 0; i--) {
                     let p = projectiles[i]; p.x -= p.speed; 
                     if (!p.isParried && p.y !== p.targetY && p.x < GW / 2 + 100) { p.y += (p.targetY > p.y) ? 12 : -12; if (Math.abs(p.y - p.targetY) < 12) p.y = p.targetY; }
@@ -843,7 +875,7 @@
                         if (p.color === 'rainbow') {
                             projectiles.splice(i, 1); 
                             playSound('heal'); flash = 0.5;
-                            score += 200; // 🌟 レインボーで200点アップ
+                            score += 200; 
                             let r = Math.floor(Math.random() * 3);
                             if (r === 0) {
                                 attackPower = 1.5; powerUpTimer = 300; 
@@ -858,7 +890,7 @@
                             updateUI(); 
                         } else {
                             projectiles.splice(i, 1); damagePlayer(); 
-                            if(gameState !== 'PLAYING') break; // 🌟 相打ち防止（死亡したら抜ける）
+                            if(gameState !== 'PLAYING') break; 
                         }
                     }
                     else if (p.isParried && boss && phase === 'boss' && p.x > boss.x - boss.w/2) { 
@@ -869,14 +901,13 @@
                             if(sysCutinEnabled) { cutinTimer = 72; showCutin(); }
                         }
 
-                        if (boss.hp <= 0 && gameState === 'PLAYING') { win(); break; } // 🌟 相打ち防止
+                        if (boss.hp <= 0 && gameState === 'PLAYING') { win(); break; } 
                     }
                     else if (p.x < -100 || p.x > GW + 200) projectiles.splice(i, 1);
                 }
 
-                if (gameState !== 'PLAYING') return; // 以降の処理をスキップ
+                if (gameState !== 'PLAYING') return; 
 
-                // --- ENEMIES UPDATE ---
                 if(phase === 'zako') {
                     zakoTimer--;
                     if (zakoTimer <= 0) {
@@ -904,7 +935,6 @@
                 }
                 if (gameState !== 'PLAYING') return;
 
-                // --- SWORD WAVES UPDATE ---
                 for (let i = swordWaves.length - 1; i >= 0; i--) {
                     let sw = swordWaves[i]; sw.x += 10; 
                     
@@ -949,20 +979,19 @@
                 }
 
                 if (attackFrame >= 0) { attackFrame++; if (attackFrame >= 12) attackFrame = -1; }
-            } // ======== 更新処理ここまで ========
-
-            // =============== 描画処理 ===============
+            } 
             
             if (boss && (phase === 'boss' || phase === 'boss_dead')) {
                 let bx = boss.x + (Math.random() - 0.5) * boss.shake; let by = boss.y + (Math.random() - 0.5) * boss.shake;
                 const bossImg = imgMonsters[Math.min(currentLevel - 1, 2)];
                 
-                if (bossImg && bossImg.complete && bossImg.naturalWidth > 0) { 
-                    ctx.drawImage(bossImg, bx - boss.w/2, by - boss.h/2, boss.w, boss.h); 
-                } else { 
-                    ctx.fillStyle = '#222'; ctx.fillRect(bx - boss.w/2, by - boss.h/2, boss.w, boss.h); 
+                ctx.save();
+                if(currentLevel === 3 && (boss.hp / boss.maxHp) < sysMadHpRatio) {
+                    ctx.filter = 'invert(0.3) sepia(1) hue-rotate(300deg) saturate(5) brightness(0.8)';
                 }
-                
+                if (bossImg && bossImg.complete && bossImg.naturalWidth > 0) { ctx.drawImage(bossImg, bx - boss.w/2, by - boss.h/2, boss.w, boss.h); } else { ctx.fillStyle = '#222'; ctx.fillRect(bx - boss.w/2, by - boss.h/2, boss.w, boss.h); }
+                ctx.restore();
+
                 if(phase === 'boss') {
                     ctx.fillStyle = '#111'; ctx.fillRect(GW/2 - 150, 15, 300, 10); ctx.fillStyle = '#ff3b30'; ctx.fillRect(GW/2 - 150, 15, 300 * (boss.hp/boss.maxHp), 10);
                     ctx.fillStyle = '#fff'; ctx.font = '16px DotGothic16'; ctx.textAlign = 'center'; ctx.fillText('BOSS', GW/2, 10); ctx.textAlign = 'left';
@@ -1068,14 +1097,20 @@
                     gameState = 'ENDING'; stopBgm(); updateStat('clears'); showMsg("すべての まものを とうばつした！");
                     document.getElementById('virtual-pad').style.display = 'none'; 
                     
-                    playSound('levelup'); // 🌟 レベルアップ音
+                    playSound('levelup'); 
                     
                     setTimeout(async () => {
                         let playerName = prompt("クリアおめでとうございます！\nえいゆうのきろく に 名前をのこそう！(8文字まで)", "ゆうしゃ");
                         
-                        // プロンプト後に確実におんがく再開
                         if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-                        playEndingBgm(); // 🌟 エンディングBGM開始
+                        
+                        // エンディングで動画の代わりにタイトルBGM（game.MOV）の「音声のみ」を再生
+                        if (isBgmOn) {
+                            titleBgmAudio.volume = masterVolume;
+                            titleBgmAudio.currentTime = 0;
+                            titleBgmAudio.play().catch(e => console.log(e));
+                            musicBtn.innerText = "おんがく ON";
+                        }
                         
                         if (playerName) {
                             try {
@@ -1084,9 +1119,9 @@
                             } catch(e) {}
                         }
                         document.getElementById('ending-screen').style.display = 'flex'; 
-                        document.getElementById('ending-video').volume = masterVolume;
-                        document.getElementById('ending-video').play().catch(e => console.log(e)); 
-                    }, 2500); // 🌟 レベルアップ音が鳴り終わってからプロンプト
+                        // 追加：game2.MOVの映像（ミュート）を再生
+                        document.getElementById('ending-video').play().catch(e => console.log(e));
+                    }, 2500); 
 
                 } else {
                     phase = 'transition'; document.getElementById('transition-screen').style.display = 'flex'; document.getElementById('transition-screen').innerText = `STAGE ${currentLevel + 1}`;
@@ -1171,10 +1206,12 @@
 
         document.getElementById('ending-screen').onclick = () => {
             document.getElementById('ending-screen').style.display = 'none';
-            document.getElementById('ending-video').pause();
-            if(endingBgmInterval) clearInterval(endingBgmInterval);
+            
+            // エンディングで再生していたBGMと映像を止める
+            titleBgmAudio.pause();
+            document.getElementById('ending-video').pause(); // 追加
+            
             gameState = 'TITLE'; document.getElementById('ui').style.display = 'none'; document.getElementById('title-screen').style.display = 'flex'; showMsg("・・・・・・。"); 
-            playTitleBgm();
         };
 
         const executeAttack = (isUpper) => {
@@ -1203,7 +1240,6 @@
         btnA.addEventListener('mousedown', tapA); btnA.addEventListener('touchstart', tapA, {passive: false});
         btnB.addEventListener('mousedown', tapB); btnB.addEventListener('touchstart', tapB, {passive: false});
 
-        // 初回ロード時にパッドレイアウトを計算しておく
         updatePadLayout();
 
         canvas.width = GW; canvas.height = GH; 
