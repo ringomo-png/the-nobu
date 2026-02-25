@@ -855,7 +855,7 @@
                 waitCallback = spawnBoss;
             } else if(retryBoss) {
                 phase = 'wait_boss'; 
-                showMsg("ボスとの さいせん だ！(スコア没収＆-500)"); 
+                showMsg("ボスとの さいせん だ！"); 
                 waitFrames = 60; 
                 waitCallback = spawnBoss;
             } else {
@@ -866,7 +866,7 @@
 
         function spawnBoss(){
             playSound('boss_appear');
-            boss = { x:GW+200, y:290, hp:bossHP[currentLevel-1], maxHp:bossHP[currentLevel-1], w:180, h:180, timer:-90, targetX:GW-150, shake:0, attackCount:0, restTimer:0, attackCooldown: 60, cutinDone: false };
+            boss = { x:GW+200, y:290, hp:bossHP[currentLevel-1], maxHp:bossHP[currentLevel-1], w:180, h:180, timer:-90, targetX:GW-130, shake:0, attackCount:0, restTimer:0, attackCooldown: 60, cutinDone: false };
             phase = 'boss'; 
             showMsg(currentLevel>=3?"さいしゅう ボス が あらわれた！！":"きょうりょくな ボス が あらわれた！");
             
@@ -1367,4 +1367,5 @@
     </script>
 </body>
 </html>
+
 
