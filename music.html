@@ -162,8 +162,10 @@
 
         // Record play count to Firestore
         async function recordPlayCount(trackTitle) {
+            if (!db || !trackTitle) return;
             try {
-                const trackRef = doc(db, "music_plays", trackTitle);
+                const safeTitle = trackTitle.replace(/[\/\.]/g, '_');
+                const trackRef = doc(db, "music_plays", safeTitle);
                 await setDoc(trackRef, {
                     playCount: increment(1),
                     lastPlayed: serverTimestamp()
@@ -173,9 +175,6 @@
                 console.error("[Error] Failed to record play count:", error);
             }
         }
-
-        // Initialize Player Logic
-        //if (sessionStorage.getItem('has_rebooted_ever') !== 'true') { window.location.href = 'index.html'; }
 
         const whiteFiles = ['main1.sound.MOV', 'main2.sound.MOV', 'main3.sound.MOV', 'about.sound.MOV', 'more.music.MOV', 'photo.music.MOV'];
         const whiteTitles = ['System Overwrite', 'Local Infrastructure', 'Blank State', 'History Log', 'Deep Belonging', 'Visual Archive'];
@@ -188,6 +187,10 @@
         let currentPlaylist = whiteFiles;
         let currentTitles = whiteTitles;
         let trackIdx = 0;
+        
+        // ▼ アルバムをまたいでも重複判定ができるように、タイトル名で記憶させる変数 ▼
+        let lastRecordedTrackTitle = ""; 
+        
         let isPlaying = false;
         let isShuffle = false;
         let repeatMode = 1; 
@@ -251,6 +254,12 @@
                 bgm.play().catch(e => console.log(e)); 
                 miniWave.classList.remove('paused');
                 miniWave.classList.add('playing');
+                
+                // ▼ ここにカウント処理を統合！再生ボタンからでもしっかりカウントされるわ ▼
+                if (lastRecordedTrackTitle !== currentTitles[trackIdx]) {
+                    lastRecordedTrackTitle = currentTitles[trackIdx];
+                    recordPlayCount(currentTitles[trackIdx]);
+                }
             } else { 
                 playIcon.innerHTML = playSvg; 
                 bgm.pause(); 
@@ -282,8 +291,10 @@
             bgm.src = currentPlaylist[trackIdx];
             nowPlayingText.innerText = currentTitles[trackIdx];
             isPlaying = true;
-            updatePlayState();
-            recordPlayCount(currentTitles[trackIdx]);
+            
+            // ▼ ここは updatePlayState() に任せることで重複カウントを防止！ ▼
+            updatePlayState(); 
+            
             updateMediaSession();
         }
 
@@ -308,7 +319,12 @@
             bgm.currentTime = 0;
             if (isPlaying) {
                 bgm.play().catch(e => {});
-                recordPlayCount(currentTitles[trackIdx]);
+                
+                // ▼ スキップした時もカウントを送信（重複防止付き） ▼
+                if (lastRecordedTrackTitle !== currentTitles[trackIdx]) {
+                    lastRecordedTrackTitle = currentTitles[trackIdx];
+                    recordPlayCount(currentTitles[trackIdx]);
+                }
             }
             updateHighlight();
             updateMediaSession();
