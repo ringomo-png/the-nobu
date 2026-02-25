@@ -278,7 +278,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, increment } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDrDTNLFOC93bBsjzcBrdLt4miPgrat2zY",
@@ -302,13 +302,16 @@
             }
         };
 
-        // ▼ music.htmlと同じデータベースに再生数を送る関数を追加 ▼
+        // 再生数をFirestoreに記録する関数
         window.recordPlayCount = async function(songTitle) {
             if (!db || !songTitle) return;
             try {
                 const safeTitle = songTitle.replace(/[\/\.]/g, '_');
-                const docRef = doc(db, "music_plays", safeTitle); // music.htmlと統一
-                await setDoc(docRef, { playCount: increment(1) }, { merge: true });
+                const docRef = doc(db, "music_plays", safeTitle); 
+                await setDoc(docRef, { 
+                    playCount: increment(1),
+                    lastPlayed: serverTimestamp()
+                }, { merge: true });
                 console.log(`[System] 再生数を記録しました: ${songTitle}`);
             } catch (e) {
                 console.error("[System] 再生数の記録に失敗しました", e);
@@ -357,7 +360,6 @@
             }
         });
 
-        // ▼ タイトル用の配列を追加 ▼
         const topAudioFiles = ['main1.sound.MOV', 'main2.sound.MOV', 'main3.sound.MOV'];
         const topAudioTitles = ['System Overwrite', 'Local Infrastructure', 'Blank State']; 
 
@@ -381,9 +383,11 @@
         }
 
         let currentPlaylist = currentImage === 'image_top.png' ? topAudioFiles : hiphopAudioFiles;
-        let currentTitleList = currentImage === 'image_top.png' ? topAudioTitles : hiphopAudioTitles; // ▼ タイトルリストも切り替え ▼
+        let currentTitleList = currentImage === 'image_top.png' ? topAudioTitles : hiphopAudioTitles;
         let currentTrackIdx = parseInt(sessionStorage.getItem('current_track_idx') || '0', 10);
         if (currentTrackIdx >= currentPlaylist.length) currentTrackIdx = 0; 
+        
+        let lastRecordedTrackIdx = -1; 
 
         const bgm = document.getElementById('bgm');
         bgm.src = currentPlaylist[currentTrackIdx];
@@ -439,9 +443,17 @@
                 if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
                 bgm.play().catch(e => console.log('Playback init required', e));
                 
-                // ▼ 曲が再生されたらFirestoreへカウントを送信 ▼
-                if (typeof window.recordPlayCount === 'function') {
-                    window.recordPlayCount(currentTitleList[currentTrackIdx]);
+                // 曲が再生されたらFirestoreへカウントを送信（モジュール準備待機＆重複防止）
+                if (lastRecordedTrackIdx !== currentTrackIdx) {
+                    lastRecordedTrackIdx = currentTrackIdx;
+                    const tryCount = () => {
+                        if (typeof window.recordPlayCount === 'function') {
+                            window.recordPlayCount(currentTitleList[currentTrackIdx]);
+                        } else {
+                            setTimeout(tryCount, 100); 
+                        }
+                    };
+                    tryCount();
                 }
             } else {
                 playIcon.innerHTML = playSvg; titleDot.classList.remove('playing');
@@ -489,9 +501,18 @@
             bgm.currentTime = 0;
             if (isPlaying) {
                 bgm.play().catch(e => {});
-                // ▼ スキップ等で曲が切り替わった時もカウントを送信 ▼
-                if (typeof window.recordPlayCount === 'function') {
-                    window.recordPlayCount(currentTitleList[currentTrackIdx]);
+                
+                // スキップ等で曲が切り替わった時もカウントを送信（重複防止）
+                if (lastRecordedTrackIdx !== currentTrackIdx) {
+                    lastRecordedTrackIdx = currentTrackIdx;
+                    const tryCount = () => {
+                        if (typeof window.recordPlayCount === 'function') {
+                            window.recordPlayCount(currentTitleList[currentTrackIdx]);
+                        } else {
+                            setTimeout(tryCount, 100); 
+                        }
+                    };
+                    tryCount();
                 }
             }
         };
