@@ -654,12 +654,17 @@
         tChars.forEach(el => { el.style.transform = `translate(${(Math.random()-0.5)*window.innerWidth*1.5}px, ${(Math.random()-0.5)*window.innerHeight*1.5}px)`; });
 
         // Glitch Sequence Controller
+
         function playAnimationSequence(skipTyping = false) {
+            // ★ ストッパー1：すでにスキップされていたら、最初から何もしない！
+            if (typeof isSkipped !== 'undefined' && isSkipped) return;
+
             document.body.classList.add('locked'); 
             introSequence.style.opacity = '1'; 
             introSequence.style.display = 'flex';
             
-            const charNeeded = Math.floor((window.innerWidth * window.innerHeight) / 30);
+            // ★ さっきの軽量化ハック：文字数を極限まで減らしてスマホを軽くする！
+            const charNeeded = Math.min(Math.floor((window.innerWidth * window.innerHeight) / 100), 4000);
             let bgText = ''; 
             for(let i=0; i<charNeeded; i++) bgText += chars.charAt(Math.floor(Math.random()*chars.length)); 
             codeBg.innerText = bgText;
@@ -670,18 +675,28 @@
             codeBg.style.filter = 'blur(10px)';
 
             setTimeout(() => {
+                if (typeof isSkipped !== 'undefined' && isSkipped) return;
                 codeBg.style.opacity = '1';
                 codeBg.style.transform = 'scale(1)';
                 codeBg.style.filter = 'blur(0px)';
             }, 100);
 
             setTimeout(() => {
+                // ★ ストッパー2：1.5秒待機中にスキップされたら、ここで処理を捨てる！
+                if (typeof isSkipped !== 'undefined' && isSkipped) return;
+
                 codeBg.style.transition = 'none';
                 targetWord.style.opacity = '1'; 
                 let startTime = Date.now(); 
                 const parseDuration = 7000; 
                 
                 scrambleInterval = setInterval(() => {
+                    // ★ ストッパー3：ループ中にスキップされたら、即座に自爆してループを破壊！
+                    if (typeof isSkipped !== 'undefined' && isSkipped) {
+                        clearInterval(scrambleInterval);
+                        return;
+                    }
+
                     let progress = (Date.now() - startTime) / parseDuration; if (progress > 1) progress = 1;
                     
                     let bgTextScramble = ''; 
@@ -694,22 +709,58 @@
                 }, 40);
             }, 1500); 
             
-            setTimeout(() => { tChars.forEach(el => { el.innerText = el.getAttribute('data-char'); el.classList.add('locked'); el.style.transform = 'translate(0, 0)'; }); }, 8500);
-            setTimeout(() => { clearInterval(scrambleInterval); codeBg.style.opacity = '0'; preGlitchImage.style.opacity = '0.3'; preGlitchImage.style.transform = 'translate(0, 0)'; preGlitchImage.style.mixBlendMode = 'normal'; preGlitchImage.style.filter = 'none'; }, 11500);
-            setTimeout(() => { targetWord.classList.add('merged'); }, 13000);
-            setTimeout(() => { introSequence.style.opacity = '0'; document.body.classList.remove('locked'); window.scrollTo(0, 0); activateSystem(); setTimeout(() => { introSequence.style.display = 'none'; }, 1000); }, 14500);
+            // ★ 後半の演出予約も、スキップされたら全部無効化（return）する防波堤を追加！
+            setTimeout(() => { if(typeof isSkipped !== 'undefined' && isSkipped) return; tChars.forEach(el => { el.innerText = el.getAttribute('data-char'); el.classList.add('locked'); el.style.transform = 'translate(0, 0)'; }); }, 8500);
+            setTimeout(() => { if(typeof isSkipped !== 'undefined' && isSkipped) return; clearInterval(scrambleInterval); codeBg.style.opacity = '0'; preGlitchImage.style.opacity = '0.3'; preGlitchImage.style.transform = 'translate(0, 0)'; preGlitchImage.style.mixBlendMode = 'normal'; preGlitchImage.style.filter = 'none'; }, 11500);
+            setTimeout(() => { if(typeof isSkipped !== 'undefined' && isSkipped) return; targetWord.classList.add('merged'); }, 13000);
+            setTimeout(() => { if(typeof isSkipped !== 'undefined' && isSkipped) return; introSequence.style.opacity = '0'; document.body.classList.remove('locked'); window.scrollTo(0, 0); activateSystem(); setTimeout(() => { introSequence.style.display = 'none'; }, 1000); }, 14500);
         }
 
-        const SYSTEM_PASSWORD = '1989'; 
+                const SYSTEM_PASSWORD = '1989'; 
 
         const input = document.getElementById('pass-input'); 
         const submitBtn = document.getElementById('auth-btn'); 
         const errorTxt = document.getElementById('error-txt'); 
         let typeInterval;
 
+        // ★★★ ハッカー特製：演出スキップ機能 ★★★
+        let isSkipped = false;
+        const skipIntro = () => {
+            if (isSkipped) return;
+            isSkipped = true;
+            
+            // 裏で動いている「DECRYPTING...」やグリッチの文字化けループを強制停止！
+            clearInterval(typeInterval);
+            if (typeof scrambleInterval !== 'undefined') clearInterval(scrambleInterval);
+            
+            // 邪魔な画面（パスワード画面＆グリッチ画面）を一瞬で透明にして消し去る
+            document.getElementById('auth-overlay').style.opacity = '0';
+            document.getElementById('intro-sequence').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('auth-overlay').style.display = 'none';
+                document.getElementById('intro-sequence').style.display = 'none';
+            }, 300);
+            
+            // スクロールロックを解除して、即座にシステム（本編）を起動！
+            document.body.classList.remove('locked');
+            window.scrollTo(0, 0);
+            activateSystem();
+            
+            // 誤爆防止のため、スキップ用のタップ判定を解除
+            document.removeEventListener('click', skipIntro);
+            document.removeEventListener('touchstart', skipIntro);
+        };
+        // ★★★ ここまで ★★★
+
+
         if (sessionStorage.getItem('is_auth_main') === 'true') { 
             document.getElementById('auth-overlay').style.display = 'none'; 
             if (isReboot) { 
+                // リブート時もスキップ可能に（0.5秒後から画面タップ受付開始）
+                setTimeout(() => {
+                    document.addEventListener('click', skipIntro);
+                    document.addEventListener('touchstart', skipIntro, {passive: false});
+                }, 500);
                 playAnimationSequence(true); 
             } else { 
                 introSequence.style.display = 'none'; 
@@ -732,6 +783,8 @@
                 sessionStorage.setItem('is_auth_main', 'true'); 
                 if (window.trackSystemEvent) window.trackSystemEvent('page_view_main');
                 
+                // ※ここにあった「0.5秒後にスキップ解禁」のコードは削除したわ！
+
                 errorTxt.style.transition = 'none';
                 errorTxt.style.opacity = '1';
                 errorTxt.style.transform = 'translateY(0)';
@@ -747,26 +800,41 @@
                 }, 400); 
                 
                 setTimeout(() => { 
+                    if (isSkipped) return; 
                     clearInterval(typeInterval); 
                     
                     errorTxt.style.transition = 'opacity 1.0s ease, color 1.0s ease, text-shadow 1.0s ease';
                     errorTxt.style.opacity = '0'; 
                     
                     setTimeout(() => {
+                        if (isSkipped) return;
                         errorTxt.innerText = 'ACCESS GRANTED'; 
                         errorTxt.style.color = '#34c759'; 
                         errorTxt.style.textShadow = '0 0 15px rgba(52, 199, 89, 0.8)';
                         errorTxt.style.letterSpacing = '0.3em';
                         errorTxt.style.opacity = '1'; 
+
+                        // ★★★ ここだ！！ ★★★
+                        // 「ACCESS GRANTED」がバシッと表示されたら、スキップ（画面タップ）を解禁する！
+                        setTimeout(() => {
+                            document.addEventListener('click', skipIntro);
+                            document.addEventListener('touchstart', skipIntro, {passive: false});
+                        }, 100);
+                        // ★★★★★★★★★★★★★
+
                     }, 1000); 
                 }, 3000); 
                 
                 setTimeout(() => { 
+                    if (isSkipped) return;
                     document.getElementById('auth-overlay').style.opacity = '0'; 
                     setTimeout(() => { document.getElementById('auth-overlay').style.display = 'none'; }, 1500); 
                 }, 6000);
 
-                setTimeout(() => { playAnimationSequence(false); }, 7000); 
+                setTimeout(() => { 
+                    if (isSkipped) return;
+                    playAnimationSequence(false); 
+                }, 7000); 
                 
             } else { 
                 errorTxt.style.transition = 'none';
@@ -778,9 +846,11 @@
                 setTimeout(() => { errorTxt.style.opacity = '0'; }, 2000); 
             }
         };
+
         
         submitBtn.addEventListener('click', attemptLogin); 
         input.addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
+
     </script>
 </body>
 </html>
