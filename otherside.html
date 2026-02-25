@@ -1111,19 +1111,35 @@
                             }
                             if(hitSomething){ swordWaves.splice(i, 1); continue; }
 
-                            for(let j = projectiles.length - 1; j >= 0; j--) {
+                                    for(let j = projectiles.length - 1; j >= 0; j--) {
                                 let p = projectiles[j];
-                                if (!p.isParried && Math.abs(sw.x - p.x) < parryWindow && Math.abs(sw.y - p.y) < 30) { 
+                                
+                                // ★ プロの技！「この1フレームの間に剣と弾がすれ違ったか？」を計算
+                                let isCrossed = (sw.x >= p.x && (sw.x - 10) <= (p.x + p.speed));
+                                // 通常の判定枠、または「すれ違い」が発生していればヒット！
+                                let isHitX = Math.abs(sw.x - p.x) < parryWindow || isCrossed;
+
+                                if (!p.isParried && isHitX && Math.abs(sw.y - p.y) < 30) { 
                                     hitSomething = true;
-                                    if (p.x < PLAYER_X + 220) { p.isParried = true; p.speed = -40; playSound('parry'); score += 100; updateUI(); shake = 10; flash = 0.3; } 
-                                    else { projectiles.splice(j, 1); playSound('hit'); score += 10; updateUI(); shake = 5; }
+                                    // プレイヤーの近くで当てれば「パリィ」、遠くなら「ただ消すだけ」
+                                    if (p.x < PLAYER_X + 140) { 
+                                        p.isParried = true; p.speed = -40; playSound('parry'); score += 50; updateUI(); shake = 10; flash = 0.3; 
+                                    } else { 
+                                        projectiles.splice(j, 1); playSound('hit'); score += 10; updateUI(); shake = 5; 
+                                    }
                                     break;
                                 } 
                             }
-                            if(hitSomething){ swordWaves.splice(i, 1); continue; }
 
-                            if (boss && phase === 'boss' && Math.abs(sw.x - boss.x) < boss.w/2) { 
-                                boss.hp -= (1 * attackPower); boss.shake = 10; swordWaves.splice(i, 1); shake = 10; playSound('hit'); 
+if(hitSomething){ swordWaves.splice(i, 1); continue; }
+
+                                                        // ★ 追加：boss.x <= boss.targetX で、ボスが定位置に着くまで一切のダメージを無効化！
+                            if (boss && phase === 'boss' && boss.x <= boss.targetX && Math.abs(sw.x - boss.x) < boss.w/2) { 
+                                
+                                // ★ 修正：通常攻撃の火力を「1」から「2」（または好きな数字）に引き上げ！
+                                boss.hp -= (5 * attackPower); 
+                                
+                                boss.shake = 10; swordWaves.splice(i, 1); shake = 10; playSound('hit'); 
                                 
                                 if (currentLevel === 3 && boss.hp > 0 && (boss.hp / boss.maxHp) <= 0.1 && !boss.cutinDone) {
                                     boss.cutinDone = true; 
@@ -1132,6 +1148,7 @@
 
                                 if (boss.hp <= 0 && gameState === 'PLAYING') { win(); break; } 
                             }
+
                             else if (sw.x > GW + 100) swordWaves.splice(i, 1);
                         }
 
