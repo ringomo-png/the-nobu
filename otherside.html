@@ -576,6 +576,7 @@
             tapBtn.style.opacity = '1';
             
             // タップ時のイベントを登録
+                        // タップ時のイベントを登録
             const tapHandler = () => {
                 tapBtn.removeEventListener('click', tapHandler);
                 tapBtn.removeEventListener('touchstart', tapHandler);
@@ -591,23 +592,31 @@
                 
                 setTimeout(() => { vid.style.opacity = '0.4'; }, 100);
                 
+                // 追加・変更: タイトルへ戻る処理を関数化し、動画終了時(ended)に発火させる
+                const returnTitle = () => {
+                    vid.removeEventListener('ended', returnTitle);
+                    screen.removeEventListener('click', returnTitle);
+                    screen.removeEventListener('touchstart', returnTitle);
+                    
+                    screen.style.display = 'none';
+                    titleBgmAudio.pause();
+                    vid.pause();
+                    gameState = 'TITLE'; 
+                    document.getElementById('ui').style.display = 'none'; 
+                    document.getElementById('title-screen').style.display = 'flex'; 
+                    showMsg("・・・・・・。"); 
+                };
+
+                // 追加: 動画が最後まで再生されたら自動でタイトルに戻る
+                vid.addEventListener('ended', returnTitle);
+                
+                // 変更: 誤タップ防止で2秒待機後、画面タップでもスキップ（タイトルへ戻る）できるようにする
                 setTimeout(() => {
-                    const returnTitle = () => {
-                        screen.removeEventListener('click', returnTitle);
-                        screen.removeEventListener('touchstart', returnTitle);
-                        
-                        screen.style.display = 'none';
-                        titleBgmAudio.pause();
-                        vid.pause();
-                        gameState = 'TITLE'; 
-                        document.getElementById('ui').style.display = 'none'; 
-                        document.getElementById('title-screen').style.display = 'flex'; 
-                        showMsg("・・・・・・。"); 
-                    };
                     screen.addEventListener('click', returnTitle);
                     screen.addEventListener('touchstart', returnTitle, {passive: false});
                 }, 2000); 
             };
+
             
             tapBtn.addEventListener('click', tapHandler);
             tapBtn.addEventListener('touchstart', tapHandler, {passive: false});
@@ -1358,4 +1367,3 @@
     </script>
 </body>
 </html>
-
