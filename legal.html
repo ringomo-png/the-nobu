@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Roboto+Mono:wght@300;700&display=swap" rel="stylesheet">
     
     <style>
-        :root { --bg-color: #050505; --text-main: #a0a0a0; --accent-green: #34c759; --accent-red: #ff3b30; }
+        :root { --bg-color: #050505; --text-main: #a0a0a0; --accent-green: #34c759; }
         
         body {
             margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-main);
@@ -40,12 +40,6 @@
         p, li { font-size: 14px; letter-spacing: 0.05em; margin-bottom: 10px; }
         ul { padding-left: 20px; }
 
-        .warning-box {
-            background: rgba(255, 59, 48, 0.1); border: 1px solid var(--accent-red);
-            padding: 15px; border-radius: 4px; margin-top: 30px;
-        }
-        .warning-box p { color: var(--accent-red); margin: 0; font-weight: bold; }
-
         .back-btn {
             display: inline-block; margin-bottom: 30px; font-family: 'Roboto Mono', monospace;
             font-size: 12px; color: var(--text-main); text-decoration: none;
@@ -76,7 +70,7 @@
             <li><strong>免責事項：</strong> 本システムは現状有姿で無料で提供されます。本システムの利用、またはバグ・不具合によって生じた端末の故障、データの消失、その他のいかなる損害についても、制作チーム「bori's」は一切の責任を負いません。</li>
             <li><strong>禁止事項：</strong> 意図的なサーバーへの攻撃、リーダーボード（えいゆうのきろく）における不正なスコア送信、不快・公序良俗に反する名前の登録を禁じます。</li>
             <li><strong>データの管理権限：</strong> 運営は、不適切と判断したリーダーボードの登録名やスコアを、予告なくデータベースから物理削除（パージ）する権利を有します。</li>
-            <li><strong>著作権：</strong> 本システム内の楽曲、画像、コード、デザイン等の著作権は「bori's」および各制作者に帰属します。無断転載や改変を禁じます。</li>
+            <li><strong>著作権とAI生成物：</strong> 本システム内の楽曲、画像、コード、デザイン等の著作権は「bori's」および各制作者に帰属します。無断転載や改変を禁じます。なお、本システム内で使用されている背景画像および一部のアセットは、AI技術を用いて生成されたものです。</li>
         </ul>
 
         <h2>プライバシーポリシー (PRIVACY POLICY)</h2>
@@ -87,10 +81,6 @@
             <li><strong>外部サービスの利用：</strong> 本システムはバックエンドに「Google Firebase」を利用しています。アクセスログ等の匿名のトラフィックデータはGoogleのサーバーに送信・記録されます。詳細についてはGoogleのプライバシーポリシーをご確認ください。</li>
             <li><strong>個人情報の保護：</strong> 本システムでは、氏名や住所、連絡先などの「特定の個人を識別できる情報」は一切要求・収集しません。リーダーボードには本名を入力しないよう推奨します。</li>
         </ul>
-
-        <div class="warning-box">
-            <p>＞ WARNING ＜<br>規約に違反する異常なリクエストを検知した場合、システムは自動的にお客様のアクセスを遮断する可能性があります。</p>
-        </div>
 
         <div class="footer">
             © THE NOBLE / bori's. ALL RIGHTS RESERVED.
