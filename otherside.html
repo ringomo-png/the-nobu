@@ -231,7 +231,7 @@
             
             <div id="ending-the-end">
                 <div id="end-final-text" class="end-seq-text" style="font-size: 60px; font-family: 'DotGothic16', sans-serif; text-shadow: 4px 4px 0 #000; letter-spacing: 5px;">THE END</div>
-                <div id="ending-tap" class="end-seq-text blink">＞ TAP ＜</div>
+                <div id="ending-tap" class="end-seq-text">＞ TAP ＜</div>
             </div>
         </div>
 
@@ -540,30 +540,30 @@
             document.querySelectorAll('.end-seq-text').forEach(el => el.style.opacity = '0');
             
             // 冒険の結末テキスト表示
-            await waitMs(1000);
+            await waitMs(600);
             document.getElementById('end-msg-1').style.opacity = '1';
-            await waitMs(2500);
+            await waitMs(2000);
             document.getElementById('end-msg-2').style.opacity = '1';
             await waitMs(2500);
             document.getElementById('end-msg-3').style.opacity = '1';
             
-            await waitMs(3500);
+            await waitMs(3000);
             term.style.display = 'none';
             
             // クレジット表示
             creds.style.display = 'flex';
             await waitMs(500);
             document.getElementById('end-cred-1').style.opacity = '1';
-            await waitMs(1200);
+            await waitMs(2200);
             document.getElementById('end-cred-2').style.opacity = '1';
-            await waitMs(1200);
+            await waitMs(2500);
             document.getElementById('end-cred-3').style.opacity = '1';
-            await waitMs(1200);
+            await waitMs(2500);
             document.getElementById('end-cred-4').style.opacity = '1';
-            await waitMs(1200);
+            await waitMs(2500);
             document.getElementById('end-cred-5').style.opacity = '1';
             
-            await waitMs(4500);
+            await waitMs(4000);
             creds.style.display = 'none';
             
             // THE END 表示
@@ -571,9 +571,11 @@
             await waitMs(1000);
             document.getElementById('end-final-text').style.opacity = '1';
             
-            // フェイクの TAP ボタン表示
-            await waitMs(3000);
+                        // フェイクの TAP ボタン表示
+            await waitMs(3000); // 
             tapBtn.style.opacity = '1';
+            tapBtn.classList.add('blink'); // 
+
             
             // タップ時のイベントを登録
                         // タップ時のイベントを登録
@@ -855,7 +857,7 @@
                 waitCallback = spawnBoss;
             } else if(retryBoss) {
                 phase = 'wait_boss'; 
-                showMsg("ボスとの さいせん だ！"); 
+                showMsg("ボスとの さいせん だ！(スコア没収＆-500)"); 
                 waitFrames = 60; 
                 waitCallback = spawnBoss;
             } else {
@@ -1364,8 +1366,28 @@
         canvas.width = GW; canvas.height = GH; 
         document.getElementById('title-screen').style.display = 'flex';
         animate();
+    // デバッグ用：強制エンディング関数（THE NOBLE専用カスタム版）
+    window.forceEnding = function() {
+        console.log("[SYSTEM] Override: Jump to Ending");
+
+        // 1. ゲーム状態を正しく「ENDING（大文字）」にする
+        gameState = 'ENDING';
+
+        // 2. 鳴っているBGMを完全に止める
+        stopBgm();
+        titleBgmAudio.pause();
+
+        // 3. 邪魔なUIや画面を強制的に隠す
+        document.getElementById('ui').style.display = 'none';
+        document.getElementById('virtual-pad').style.display = 'none';
+        document.getElementById('title-screen').style.display = 'none';
+        document.getElementById('gameover-screen').style.display = 'none';
+
+        // 4. スコア登録などをすっ飛ばして、直接エンディングの演出関数を起動！
+        playEndingSequence();
+    };
+
+
     </script>
 </body>
 </html>
-
-
