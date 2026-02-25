@@ -222,8 +222,21 @@
             return min + ":" + (sec < 10 ? "0" + sec : sec);
         }
 
-        bgm.addEventListener('timeupdate', () => { timeDisplay.innerText = formatTime(bgm.currentTime) + " / " + formatTime(bgm.duration); });
-        bgm.addEventListener('loadedmetadata', () => { timeDisplay.innerText = formatTime(bgm.currentTime) + " / " + formatTime(bgm.duration); });
+        // ★ プロの最適化：1秒間に何十回も書き換えないように「前の秒数」を記憶させる！
+        let lastDisplayedSec = -1;
+
+        bgm.addEventListener('timeupdate', () => { 
+            let currentSec = Math.floor(bgm.currentTime);
+            // ★ 秒数が変わった（1秒進んだ）時だけ、画面の文字を書き換える！
+            if (currentSec !== lastDisplayedSec) {
+                lastDisplayedSec = currentSec;
+                timeDisplay.innerText = formatTime(currentSec) + " / " + formatTime(bgm.duration); 
+            }
+        });
+        
+        bgm.addEventListener('loadedmetadata', () => { 
+            timeDisplay.innerText = formatTime(bgm.currentTime) + " / " + formatTime(bgm.duration); 
+        });
 
         // Update Media Session (Lock Screen UI)
         function updateMediaSession() {
@@ -317,6 +330,9 @@
             bgm.src = currentPlaylist[trackIdx];
             nowPlayingText.innerText = currentTitles[trackIdx];
             bgm.currentTime = 0;
+            // リセット用
+            lastDisplayedSec = -1;
+            
             if (isPlaying) {
                 bgm.play().catch(e => {});
                 
@@ -333,9 +349,10 @@
         prevBtn.addEventListener('click', () => changeTrack(-1));
         nextBtn.addEventListener('click', () => changeTrack(1));
 
-                bgm.addEventListener('ended', () => { 
+        bgm.addEventListener('ended', () => { 
             if (repeatMode === 2) { 
                 bgm.currentTime = 0; 
+                lastDisplayedSec = -1;
                 bgm.play().catch(e=>{}); 
                 // ▼ 追加：1曲リピートで最後まで聴き終わってループした瞬間にカウント！ ▼
                 recordPlayCount(currentTitles[trackIdx]);
@@ -343,7 +360,6 @@
             else if (repeatMode === 1) { changeTrack(1); } 
             else { isPlaying = false; updatePlayState(); }
         });
-
 
         // PC Slider Navigation
         window.moveSlider = function(dir) {
