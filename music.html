@@ -333,11 +333,17 @@
         prevBtn.addEventListener('click', () => changeTrack(-1));
         nextBtn.addEventListener('click', () => changeTrack(1));
 
-        bgm.addEventListener('ended', () => { 
-            if (repeatMode === 2) { bgm.currentTime = 0; bgm.play().catch(e=>{}); } 
+                bgm.addEventListener('ended', () => { 
+            if (repeatMode === 2) { 
+                bgm.currentTime = 0; 
+                bgm.play().catch(e=>{}); 
+                // ▼ 追加：1曲リピートで最後まで聴き終わってループした瞬間にカウント！ ▼
+                recordPlayCount(currentTitles[trackIdx]);
+            } 
             else if (repeatMode === 1) { changeTrack(1); } 
             else { isPlaying = false; updatePlayState(); }
         });
+
 
         // PC Slider Navigation
         window.moveSlider = function(dir) {
