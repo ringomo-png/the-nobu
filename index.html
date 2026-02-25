@@ -273,7 +273,12 @@
             </button>
         </div>
 
-        <footer class="site-footer">© THE NOBLE. ALL RIGHTS RESERVED.</footer>
+<footer class="site-footer">
+    <a href="legal.html" style="color: #666; text-decoration: none; transition: color 0.3s; letter-spacing: 0.3em;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#666'">[ SYSTEM_LEGAL_LOG ]</a><br><br>
+    © THE NOBLE / bori's. ALL RIGHTS RESERVED.
+</footer>
+
+
     </div>
 
     <script type="module">
@@ -411,8 +416,10 @@
         const repeatIcon = document.getElementById('repeat-icon');
         const titleDot = document.getElementById('title-dot');
         
-        let isPlaying = sessionStorage.getItem('is_playing') === 'true'; 
+                // 変更: ページ読み込み時は必ず停止状態からスタートさせる
+        let isPlaying = false; sessionStorage.setItem('is_playing', 'false'); 
         let isShuffle = false;
+
         
         let repeatMode = 1; 
         repeatBtn.classList.add('active');
@@ -520,10 +527,14 @@
         prevBtn.addEventListener('click', () => { initAudio(); triggerVibration(); changeTrack(-1); });
         nextBtn.addEventListener('click', () => { initAudio(); triggerVibration(); changeTrack(1); });
 
-        bgm.addEventListener('ended', () => { 
+                bgm.addEventListener('ended', () => { 
             if (repeatMode === 2) {
                 bgm.currentTime = 0;
                 bgm.play().catch(e=>{});
+                // ▼ 追加：1曲リピートで最後まで聴き終わってループした瞬間にカウント！ ▼
+                if (typeof window.recordPlayCount === 'function') {
+                    window.recordPlayCount(currentTitleList[currentTrackIdx]);
+                }
             } else if (repeatMode === 1) {
                 changeTrack(1);
             } else {
