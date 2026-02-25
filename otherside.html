@@ -218,7 +218,7 @@
             <div id="ending-terminal">
                 <div id="end-msg-1" class="end-seq-text">システムの初期化に成功……魔獣は駆逐された</div>
                 <div id="end-msg-2" class="end-seq-text">郷愁の街「よつかいどう」に、平和が訪れる</div>
-                <div id="end-msg-3" class="end-seq-text">だが、彼の冒険は、終わらない――</div>
+                <div id="end-msg-3" class="end-seq-text">だが、のぶゆきの冒険は、終わらない――</div>
             </div>
             
             <div id="ending-credits">
@@ -486,13 +486,26 @@
         const titleBgmAudio = new Audio('game.MOV');
         titleBgmAudio.loop = true;
         
-        function initAudio() {
-            if (!audioInitialized || audioCtx.state === 'suspended') {
+                function initAudio() {
+            if (!audioInitialized) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                if (audioCtx.state === 'suspended') audioCtx.resume();
                 audioInitialized = true;
             }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            // ★スマホの音出し制限を強制突破する「無音再生ハック」
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                gain.gain.value = 0; // ボリューム0（無音）
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(0);
+                osc.stop(audioCtx.currentTime + 0.01);
+            } catch(e) {}
         }
+
 
         const musicBtn = document.getElementById('music-btn');
         musicBtn.onclick = (e) => {
@@ -821,10 +834,16 @@
             btnB.style.fontSize = Math.floor(btnSize * 0.5) + 'px';
         }
 
-        function resetGame(retryBoss = false) {
+                function resetGame(retryBoss = false) {
             window.scrollTo(0, 0); 
-            stopBgm(); titleBgmAudio.pause(); musicBtn.innerText = "おんがく OFF";
             
+            // 1. タイトル用のAI音楽はここで完全に止める
+            titleBgmAudio.pause(); 
+            musicBtn.innerText = "おんがく OFF";
+            
+            // 2. ピコピコBGMを一旦リセット
+            stopBgm(); 
+
             if(!retryBoss){ 
                 currentLevel = 1; score = 0; zakoKills = 0; updateStat('plays'); 
                 checkpointScore = 0; 
@@ -848,6 +867,7 @@
                 vPad.style.display = 'none';
             }
 
+            // 3. ここで本編の「ピコピコBGM」を再生開始！
             startBgm();
             
             if (localDeathCount > 0 && localDeathCount % 10 === 0 && retryBoss) {
@@ -865,6 +885,7 @@
                 showMsg("ぼうけん が はじまった！");
             }
         }
+
 
         function spawnBoss(){
             playSound('boss_appear');
