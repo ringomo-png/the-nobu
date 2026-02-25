@@ -889,7 +889,7 @@
 
         function spawnBoss(){
             playSound('boss_appear');
-            boss = { x:GW+200, y:290, hp:bossHP[currentLevel-1], maxHp:bossHP[currentLevel-1], w:180, h:180, timer:-90, targetX:GW-120, shake:0, attackCount:0, restTimer:0, attackCooldown: 60, cutinDone: false };
+            boss = { x:GW+200, y:290, hp:bossHP[currentLevel-1], maxHp:bossHP[currentLevel-1], w:180, h:180, timer:-90, targetX:GW-130, shake:0, attackCount:0, restTimer:0, attackCooldown: 60, cutinDone: false };
             phase = 'boss'; 
             showMsg(currentLevel>=3?"さいしゅう ボス が あらわれた！！":"きょうりょくな ボス が あらわれた！");
             
@@ -1287,12 +1287,24 @@
             };
         }
 
-        const startHandler = (e) => {
-            e.preventDefault(); initAudio(); 
-            gameState = 'PLAYING'; document.getElementById('title-screen').style.display = 'none'; resetGame();
+                const startHandler = (e) => {
+            e.preventDefault(); 
+            
+            // ここで強制的にスピーカーを叩く
+            initAudio(); 
+            if(audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            
+            gameState = 'PLAYING'; 
+            document.getElementById('title-screen').style.display = 'none'; 
+            resetGame();
         };
-        document.getElementById('start-btn').addEventListener('mousedown', startHandler);
-        document.getElementById('start-btn').addEventListener('touchstart', startHandler, {passive: false});
+        
+        // ★ スマホが確実に認識する「click」と「touchend（指が離れた瞬間）」に変更
+        document.getElementById('start-btn').addEventListener('click', startHandler);
+        document.getElementById('start-btn').addEventListener('touchend', startHandler, {passive: false});
+
 
         document.getElementById('open-user-setting').onclick = () => {
             initAudio(); 
