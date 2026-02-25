@@ -302,6 +302,19 @@
             }
         };
 
+        // ▼ music.htmlと同じデータベースに再生数を送る関数を追加 ▼
+        window.recordPlayCount = async function(songTitle) {
+            if (!db || !songTitle) return;
+            try {
+                const safeTitle = songTitle.replace(/[\/\.]/g, '_');
+                const docRef = doc(db, "music_plays", safeTitle); // music.htmlと統一
+                await setDoc(docRef, { playCount: increment(1) }, { merge: true });
+                console.log(`[System] 再生数を記録しました: ${songTitle}`);
+            } catch (e) {
+                console.error("[System] 再生数の記録に失敗しました", e);
+            }
+        };
+
         // Navigation Tracking
         document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', (e) => {
@@ -344,8 +357,12 @@
             }
         });
 
+        // ▼ タイトル用の配列を追加 ▼
         const topAudioFiles = ['main1.sound.MOV', 'main2.sound.MOV', 'main3.sound.MOV'];
+        const topAudioTitles = ['System Overwrite', 'Local Infrastructure', 'Blank State']; 
+
         const hiphopAudioFiles = ['hiphop1.sound.MOV', 'hiphop2.sound.MOV', 'hiphop3.sound.MOV', 'hiphop4.sound.MOV', 'hiphop5.sound.MOV'];
+        const hiphopAudioTitles = ['Midnight Sabotage', 'Identity Masking', 'Anatomic Defense', 'Velocity Override', 'Fatal Exception']; 
         
         let currentImage = sessionStorage.getItem('current_image');
         if (currentImage !== 'image_top.png' && currentImage !== 'image_hiphop.png') {
@@ -364,6 +381,7 @@
         }
 
         let currentPlaylist = currentImage === 'image_top.png' ? topAudioFiles : hiphopAudioFiles;
+        let currentTitleList = currentImage === 'image_top.png' ? topAudioTitles : hiphopAudioTitles; // ▼ タイトルリストも切り替え ▼
         let currentTrackIdx = parseInt(sessionStorage.getItem('current_track_idx') || '0', 10);
         if (currentTrackIdx >= currentPlaylist.length) currentTrackIdx = 0; 
 
@@ -420,6 +438,11 @@
                 playIcon.innerHTML = pauseSvg; titleDot.classList.add('playing');
                 if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
                 bgm.play().catch(e => console.log('Playback init required', e));
+                
+                // ▼ 曲が再生されたらFirestoreへカウントを送信 ▼
+                if (typeof window.recordPlayCount === 'function') {
+                    window.recordPlayCount(currentTitleList[currentTrackIdx]);
+                }
             } else {
                 playIcon.innerHTML = playSvg; titleDot.classList.remove('playing');
                 bgm.pause();
@@ -464,7 +487,13 @@
             bgm.src = currentPlaylist[currentTrackIdx];
             sessionStorage.setItem('current_track_idx', currentTrackIdx);
             bgm.currentTime = 0;
-            if (isPlaying) bgm.play().catch(e => {});
+            if (isPlaying) {
+                bgm.play().catch(e => {});
+                // ▼ スキップ等で曲が切り替わった時もカウントを送信 ▼
+                if (typeof window.recordPlayCount === 'function') {
+                    window.recordPlayCount(currentTitleList[currentTrackIdx]);
+                }
+            }
         };
 
         prevBtn.addEventListener('click', () => { initAudio(); triggerVibration(); changeTrack(-1); });
@@ -639,7 +668,6 @@
             setTimeout(() => { introSequence.style.opacity = '0'; document.body.classList.remove('locked'); window.scrollTo(0, 0); activateSystem(); setTimeout(() => { introSequence.style.display = 'none'; }, 1000); }, 14500);
         }
 
-        // ▼ ハードコーディングされた最強パスワード ▼
         const SYSTEM_PASSWORD = '1989'; 
 
         const input = document.getElementById('pass-input'); 
@@ -668,7 +696,7 @@
                 introSequence.style.display = 'none';
                 document.body.classList.remove('locked');
                 activateSystem();
-            } else if (input.value === SYSTEM_PASSWORD) { // ▼ 変数でチェック ▼
+            } else if (input.value === SYSTEM_PASSWORD) {
                 sessionStorage.setItem('is_auth_main', 'true'); 
                 if (window.trackSystemEvent) window.trackSystemEvent('page_view_main');
                 
