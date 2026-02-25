@@ -1115,7 +1115,7 @@
                                 let p = projectiles[j];
                                 if (!p.isParried && Math.abs(sw.x - p.x) < parryWindow && Math.abs(sw.y - p.y) < 30) { 
                                     hitSomething = true;
-                                    if (p.x < PLAYER_X + 220) { p.isParried = true; p.speed = -40; playSound('parry'); score += 50; updateUI(); shake = 10; flash = 0.3; } 
+                                    if (p.x < PLAYER_X + 220) { p.isParried = true; p.speed = -40; playSound('parry'); score += 100; updateUI(); shake = 10; flash = 0.3; } 
                                     else { projectiles.splice(j, 1); playSound('hit'); score += 10; updateUI(); shake = 5; }
                                     break;
                                 } 
@@ -1245,7 +1245,7 @@
 
         function win() {
             if (gameState !== 'PLAYING') return;
-            boss = null; score += 500 * currentLevel; 
+            boss = null; score += 600 * currentLevel; 
             if (lives < 3) lives++; 
             updateUI(); flash = 0.8; playSound('boss_dead'); showMsg("ボス を たおした！ いのち が かいふくした！");
             phase = 'boss_dead'; 
