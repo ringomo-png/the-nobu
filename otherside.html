@@ -1015,11 +1015,39 @@
                                 else nextRate = Math.max(nextRate, baseCooldown + 15);
                                 boss.attackCooldown = nextRate;
 
+
                                 boss.attackCount++; 
-                                if (boss.attackCount >= (currentLevel === 3 ? 6 + Math.random()*4 : 4 + Math.random()*2)) { 
-                                    boss.restTimer = 100; boss.attackCount = 0; 
+                                
+                                // ★ ハッカー特製：予測不能のランダムコンボシステム！
+                                let shouldRest = false;
+                                
+                                if (currentLevel === 3) {
+                                    // まだ「今回の目標回数」が決まっていなければ、3〜7の間でサイコロを振って決める！
+                                    if (!boss.targetAttackCount) {
+                                        boss.targetAttackCount = Math.floor(Math.random() * 5) + 3; // 3, 4, 5, 6, 7 のどれか
+                                    }
+                                    
+                                    // 攻撃回数が、裏で決めた目標回数に達したら休む！
+                                    if (boss.attackCount >= boss.targetAttackCount) {
+                                        shouldRest = true;
+                                    }
+                                } else {
+                                    // ステージ1・2：今まで通り（だいたい5〜6回で休む）
+                                    if (boss.attackCount >= (4 + Math.random()*2)) {
+                                        shouldRest = true;
+                                    }
                                 }
-                            }
+
+                                // 休むフラグが立ったら、タイマーをセットしてリセット！
+                                if (shouldRest) { 
+                                    boss.restTimer = 100; 
+                                    boss.attackCount = 0; 
+                                    boss.targetAttackCount = null; // ★ ここがキモ！休む時に目標を消して、次はまた新しくサイコロを振らせる！
+                                }
+
+
+                                                                
+                           }
                         }
                     }
                 }
@@ -1448,6 +1476,27 @@ if(hitSomething){ swordWaves.splice(i, 1); continue; }
         // 4. スコア登録などをすっ飛ばして、直接エンディングの演出関数を起動！
         playEndingSequence();
     };
+
+
+        // ★ ハッカー特製：爆音（音割れ）防止システム！
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                // タブが隠れた（裏に行った）瞬間：BGMのタイマーを破壊して音を止める！
+                stopBgm();
+                if (audioCtx && audioCtx.state === 'running') {
+                    audioCtx.suspend(); // 音声エンジンごと一時停止
+                }
+            } else {
+                // タブに戻ってきた瞬間：音声エンジンを叩き起こして、BGMを再起動！
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                // ゲームプレイ中ならBGMを再開
+                if (gameState === 'PLAYING') {
+                    startBgm();
+                }
+            }
+        });
 
 
     </script>
