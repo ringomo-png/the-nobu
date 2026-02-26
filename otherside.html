@@ -1276,27 +1276,33 @@ if(hitSomething){ swordWaves.splice(i, 1); continue; }
                     
                     playSound('levelup'); 
                     
-                    setTimeout(async () => {
+                                        setTimeout(async () => {
                         let playerName = prompt("クリアおめでとうございます！\nえいゆうのきろく に 名前をのこそう！(8文字まで)", "ゆうしゃ");
                         
                         if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
                         
-                        if (playerName) {
-                            try {
-                                        // ★ Date.now() の代わりに、Firebase公式の serverTimestamp() を使う！
-        await addDoc(collection(db, "leaderboard"), {
-            name: playerName,
-            score: finalScore,
-            timestamp: serverTimestamp() // 👈 これで管理画面が劇的に見やすくなる！
-        });
-
-                                loadLeaderboard(); 
-                            } catch(e) {}
+                        // ★ 名無し（キャンセル）検知システム！
+                        if (!playerName || playerName.trim() === "") {
+                            playerName = "のぶゆき"; // キャンセルされたら強制的にのぶゆき
+                        } else {
+                            playerName = playerName.substring(0, 8); // 普通に入力されたら8文字でカット
                         }
+                        
+                        // ★ if (playerName) の条件を外して、全員必ず保存するように変更
+                        try {
+                            await addDoc(collection(db, "leaderboard"), {
+                                name: playerName,
+                                score: score, // ★エラー修正：finalScoreじゃなくて「score」が正解
+                                timestamp: serverTimestamp() 
+                            });
+
+                            loadLeaderboard(); 
+                        } catch(e) { console.error(e); } // エラーが起きたら裏側で教えてくれるようにした
                         
                         playEndingSequence();
                         
                     }, 2500); 
+
 
                 } else {
                     phase = 'transition'; document.getElementById('transition-screen').style.display = 'flex'; document.getElementById('transition-screen').innerText = `STAGE ${currentLevel + 1}`;
