@@ -272,8 +272,10 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, increment, collection, addDoc, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+                import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        // ★ 最後に「, serverTimestamp」を追加
+        import { getFirestore, doc, getDoc, setDoc, increment, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
 
         const firebaseConfig = {
             apiKey: "AIzaSyDrDTNLFOC93bBsjzcBrdLt4miPgrat2zY",
