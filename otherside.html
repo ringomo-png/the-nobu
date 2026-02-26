@@ -532,7 +532,7 @@
         // 非同期処理による待機関数
         const waitMs = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-        // エンディングのシーケンス制御
+                // エンディングのシーケンス制御
         async function playEndingSequence() {
             initAudio();
 
@@ -557,48 +557,81 @@
             vid.style.opacity = '0';
             
             document.querySelectorAll('.end-seq-text').forEach(el => el.style.opacity = '0');
-            
-            // 冒険の結末テキスト表示
-            await waitMs(600);
+
+            // ★ ハッカー特製：エンディング完全スキップ機能！
+            let isSkipped = false;
+            let tapHandler; // 後で使うために宣言
+
+            const returnTitle = (e) => {
+                if (isSkipped) return;
+                isSkipped = true;
+                
+                // すべてのイベントを解除して綺麗にする
+                screen.removeEventListener('click', returnTitle);
+                screen.removeEventListener('touchstart', returnTitle);
+                tapBtn.removeEventListener('click', tapHandler);
+                tapBtn.removeEventListener('touchstart', tapHandler);
+                vid.removeEventListener('ended', returnTitle);
+                
+                // 音と動画を強制ストップ
+                titleBgmAudio.pause();
+                vid.pause();
+                
+                // タイトル画面へ強制ワープ！
+                screen.style.display = 'none';
+                gameState = 'TITLE'; 
+                document.getElementById('ui').style.display = 'none'; 
+                document.getElementById('title-screen').style.display = 'flex'; 
+                showMsg("・・・・・・。"); 
+            };
+
+            // 誤爆防止！ スタート直後の1秒間だけはスキップ不可にして、その後画面全体をタップ可能にする
+            setTimeout(() => {
+                if (!isSkipped) {
+                    screen.addEventListener('click', returnTitle);
+                    screen.addEventListener('touchstart', returnTitle, {passive: false});
+                }
+            }, 1000);
+
+            // ★ 以降の待機処理は、スキップされたら「return」して処理を捨てる！
+            await waitMs(600); if(isSkipped) return;
             document.getElementById('end-msg-1').style.opacity = '1';
-            await waitMs(2000);
+            await waitMs(2000); if(isSkipped) return;
             document.getElementById('end-msg-2').style.opacity = '1';
-            await waitMs(2500);
+            await waitMs(2500); if(isSkipped) return;
             document.getElementById('end-msg-3').style.opacity = '1';
             
-            await waitMs(3000);
+            await waitMs(3000); if(isSkipped) return;
             term.style.display = 'none';
             
-            // クレジット表示
             creds.style.display = 'flex';
-            await waitMs(500);
+            await waitMs(500); if(isSkipped) return;
             document.getElementById('end-cred-1').style.opacity = '1';
-            await waitMs(2200);
+            await waitMs(2200); if(isSkipped) return;
             document.getElementById('end-cred-2').style.opacity = '1';
-            await waitMs(2500);
+            await waitMs(2500); if(isSkipped) return;
             document.getElementById('end-cred-3').style.opacity = '1';
-            await waitMs(2500);
+            await waitMs(2500); if(isSkipped) return;
             document.getElementById('end-cred-4').style.opacity = '1';
-            await waitMs(2500);
+            await waitMs(2500); if(isSkipped) return;
             document.getElementById('end-cred-5').style.opacity = '1';
             
-            await waitMs(4000);
+            await waitMs(4000); if(isSkipped) return;
             creds.style.display = 'none';
             
-            // THE END 表示
             theEnd.style.display = 'flex';
-            await waitMs(1000);
+            await waitMs(1000); if(isSkipped) return;
             document.getElementById('end-final-text').style.opacity = '1';
             
-                        // フェイクの TAP ボタン表示
-            await waitMs(3000); // 
+            await waitMs(3000); if(isSkipped) return;
             tapBtn.style.opacity = '1';
-            tapBtn.classList.add('blink'); // 
+            tapBtn.classList.add('blink'); 
 
-            
-            // タップ時のイベントを登録
-                        // タップ時のイベントを登録
-            const tapHandler = () => {
+            // THE END が出たあとの「TAP」ボタンを押した時の動画再生ルート
+            tapHandler = (e) => {
+                // 画面全体のスキップ処理が同時に発動しないようにブロック！
+                if (e) e.stopPropagation(); 
+                
                 tapBtn.removeEventListener('click', tapHandler);
                 tapBtn.removeEventListener('touchstart', tapHandler);
                 
@@ -613,32 +646,10 @@
                 
                 setTimeout(() => { vid.style.opacity = '0.4'; }, 100);
                 
-                // 追加・変更: タイトルへ戻る処理を関数化し、動画終了時(ended)に発火させる
-                const returnTitle = () => {
-                    vid.removeEventListener('ended', returnTitle);
-                    screen.removeEventListener('click', returnTitle);
-                    screen.removeEventListener('touchstart', returnTitle);
-                    
-                    screen.style.display = 'none';
-                    titleBgmAudio.pause();
-                    vid.pause();
-                    gameState = 'TITLE'; 
-                    document.getElementById('ui').style.display = 'none'; 
-                    document.getElementById('title-screen').style.display = 'flex'; 
-                    showMsg("・・・・・・。"); 
-                };
-
-                // 追加: 動画が最後まで再生されたら自動でタイトルに戻る
+                // 動画が最後まで終わったらタイトルへ
                 vid.addEventListener('ended', returnTitle);
-                
-                // 変更: 誤タップ防止で2秒待機後、画面タップでもスキップ（タイトルへ戻る）できるようにする
-                setTimeout(() => {
-                    screen.addEventListener('click', returnTitle);
-                    screen.addEventListener('touchstart', returnTitle, {passive: false});
-                }, 2000); 
             };
 
-            
             tapBtn.addEventListener('click', tapHandler);
             tapBtn.addEventListener('touchstart', tapHandler, {passive: false});
         }
@@ -1383,32 +1394,39 @@ if(hitSomething){ swordWaves.splice(i, 1); continue; }
                     playSound('levelup'); 
 
                     
-                                        setTimeout(async () => {
+                                                                                setTimeout(async () => {
                         let playerName = prompt("クリアおめでとうございます！\nえいゆうのきろく に 名前をのこそう！(8文字まで)", "ゆうしゃ");
                         
                         if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
                         
-                        // ★ 名無し（キャンセル）検知システム！
-                        if (!playerName || playerName.trim() === "") {
-                            playerName = "のぶゆき"; // キャンセルされたら強制的にのぶゆき
+                        // ★ 鉄壁のキャンセル＆名無し検知システム！
+                        if (playerName === null) {
+                            playerName = "のぶゆき"; // キャンセルボタンを押した時
                         } else {
-                            playerName = playerName.substring(0, 8); // 普通に入力されたら8文字でカット
+                            // 全角スペースも半角にしてから、空白を取り除く！
+                            let cleanName = playerName.replace(/　/g, " ").trim();
+                            if (cleanName === "") {
+                                playerName = "のぶゆき"; // 空っぽ（または空白のみ）でOKを押した時
+                            } else {
+                                playerName = cleanName.substring(0, 8); // 普通に入力された時
+                            }
                         }
                         
-                        // ★ if (playerName) の条件を外して、全員必ず保存するように変更
                         try {
                             await addDoc(collection(db, "leaderboard"), {
                                 name: playerName,
-                                score: score, // ★エラー修正：finalScoreじゃなくて「score」が正解
+                                score: score,
+                                damage: totalDamageTaken, // ★ 復活！ 虹色称号（ノーダメ）の証拠データ！
                                 timestamp: serverTimestamp() 
                             });
 
                             loadLeaderboard(); 
-                        } catch(e) { console.error(e); } // エラーが起きたら裏側で教えてくれるようにした
+                        } catch(e) { console.error(e); }
                         
                         playEndingSequence();
                         
                     }, 2500); 
+
 
 
                 } else {
