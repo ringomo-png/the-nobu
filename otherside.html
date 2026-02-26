@@ -467,7 +467,11 @@
         const GW = 1000, GH = 400; const PLAYER_X = 50; const CHAR_SIZE = 180;
         const UPPER_Y = 280, LOWER_Y = 340; 
 
-        let gameState = 'TITLE', currentLevel = 1, score = 0, frameCount = 0, lives = 3;
+                        let gameState = 'TITLE', currentLevel = 1, score = 0, frameCount = 0, lives = 3;
+        let totalDamageTaken = 0; // ★ ノーダメクリア判定用のカウンター
+        let cancelScoreCount = 0; // ★ 追加：弾消しで稼いだ点数を記録するカウンター
+
+
         let phase = 'zako', zakoKills = 0, enemies = [], swordWaves = [], projectiles = [], boss = null;
         let attackFrame = -1, attackCooldown = 0, currentCooldownMax = baseCooldown, playerTint = '', playerTintTimer = 0;
         let diedAtBoss = false;
@@ -715,23 +719,34 @@
                 noise.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(audioCtx.destination);
                 noise.start(now);
             }
-            if(type === 'player_dead'){
+                        if(type === 'player_dead'){
+                // 【ハッカー特製】ドゥーーーン…という絶望的な音（ベースの急降下）
                 const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, now); osc.frequency.exponentialRampToValueAtTime(10, now + 1.0);
-                gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(1.0 * v, now + 0.05); gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
-                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 1.0);
+                osc.type = 'sawtooth'; 
+                osc.frequency.setValueAtTime(150, now); 
+                osc.frequency.exponentialRampToValueAtTime(10, now + 1.2); 
                 
-                const bufferSize = audioCtx.sampleRate * 0.5;
+                // エラー回避のため、linearRampで安全にフェードアウト！
+                gain.gain.setValueAtTime(0, now); 
+                gain.gain.linearRampToValueAtTime(1.0 * v, now + 0.05); 
+                gain.gain.linearRampToValueAtTime(0, now + 1.2); 
+                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 1.2);
+                
+                // ザザーッというノイズ（Math.floorで小数を切り捨ててエラーを完全防御！）
+                const bufferSize = Math.floor(audioCtx.sampleRate * 0.5); 
                 const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
                 const data = buffer.getChannelData(0);
                 for (let i = 0; i < bufferSize; i++) { data[i] = Math.random() * 2 - 1; }
                 const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
-                const noiseFilter = audioCtx.createBiquadFilter(); noiseFilter.type = 'lowpass'; noiseFilter.frequency.value = 800;
+                const noiseFilter = audioCtx.createBiquadFilter(); noiseFilter.type = 'lowpass'; noiseFilter.frequency.value = 600;
                 const noiseGain = audioCtx.createGain();
-                noiseGain.gain.setValueAtTime(0, now); noiseGain.gain.linearRampToValueAtTime(1.0 * v, now + 0.05); noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                noiseGain.gain.setValueAtTime(0, now); 
+                noiseGain.gain.linearRampToValueAtTime(0.8 * v, now + 0.05); 
+                noiseGain.gain.linearRampToValueAtTime(0, now + 0.5); 
                 noise.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(audioCtx.destination);
                 noise.start(now);
             }
+
             if(type === 'boss_dead'){
                 const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                 osc.type = 'square'; osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(10, now + 2.0);
@@ -744,16 +759,27 @@
                 gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.5 * v, now + 0.02); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
                 osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.5);
             }
-            if(type === 'gameover'){
-                const startTime = now + 1.0; 
-                const notes = [196.00, 185.00, 174.61, 130.81];
-                notes.forEach((freq, i) => {
+                        if(type === 'gameover'){
+                const startTime = now + 1.2; // 死の音のあとに鳴らす
+                // 【ハッカー特製】絶望のレクイエム（哀愁漂う下降アルペジオ）
+                const notes = [
+                    {f: 261.63, t: 0, d: 0.2},    // C4
+                    {f: 246.94, t: 0.2, d: 0.2},  // B3
+                    {f: 233.08, t: 0.4, d: 0.2},  // Bb3
+                    {f: 220.00, t: 0.6, d: 0.8}   // A3 (最後は長く伸ばす…)
+                ];
+                notes.forEach(n => {
                     const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-                    osc.type = 'triangle'; osc.frequency.value = freq;
-                    gain.gain.setValueAtTime(0, startTime + i*0.4); gain.gain.linearRampToValueAtTime(0.7 * v, startTime + i*0.4 + 0.05); gain.gain.exponentialRampToValueAtTime(0.01, startTime + i*0.4 + 1.0);
-                    osc.connect(gain); gain.connect(audioCtx.destination); osc.start(startTime + i*0.4); osc.stop(startTime + i*0.4 + 1.0);
+                    osc.type = 'square'; // レトロなピコピコ感
+                    osc.frequency.value = n.f;
+                    gain.gain.setValueAtTime(0, startTime + n.t); 
+                    gain.gain.linearRampToValueAtTime(0.6 * v, startTime + n.t + 0.05); 
+                    gain.gain.linearRampToValueAtTime(0, startTime + n.t + n.d); // 安全に消す
+                    osc.connect(gain); gain.connect(audioCtx.destination); 
+                    osc.start(startTime + n.t); osc.stop(startTime + n.t + n.d);
                 });
             }
+
         }
         
         function startBgm(){ 
@@ -846,10 +872,15 @@
             // 2. ピコピコBGMを一旦リセット
             stopBgm(); 
 
-            if(!retryBoss){ 
+            // resetGame関数の中
+                        if(!retryBoss){ 
                 currentLevel = 1; score = 0; zakoKills = 0; updateStat('plays'); 
                 checkpointScore = 0; 
+                totalDamageTaken = 0; // ★ 最初から遊ぶ時はダメージ記録をリセット！
+                cancelScoreCount = 0; // ★ 追加：弾消しスコアの上限もリセット！
             } else {
+
+
                 score = Math.max(0, checkpointScore - 500); 
                 updateStat('plays');
             }
@@ -889,10 +920,14 @@
         }
 
 
-        function spawnBoss(){
+                function spawnBoss(){
             playSound('boss_appear');
-            boss = { x:GW+200, y:290, hp:bossHP[currentLevel-1], maxHp:bossHP[currentLevel-1], w:180, h:180, timer:-90, targetX:GW-130, shake:0, attackCount:0, restTimer:0, attackCooldown: 60, cutinDone: false };
+            boss = { 
+                x:GW+200, y:290, hp:bossHP[currentLevel-1], maxHp:bossHP[currentLevel-1], w:180, h:180, timer:-90, targetX:GW-130, shake:0, attackCount:0, restTimer:0, attackCooldown: 60, cutinDone: false,
+                totalShotCount: 0, hasShotRainbow: false, rainbowTarget: Math.floor(Math.random() * 5) + 3 // ★ 追加：3〜7発目で確定レインボーを撃つ裏設定！
+            };
             phase = 'boss'; 
+
             showMsg(currentLevel>=3?"さいしゅう ボス が あらわれた！！":"きょうりょくな ボス が あらわれた！");
             
             checkpointScore = score;
@@ -984,15 +1019,20 @@
                         } else {
                             if (boss.attackCooldown > 0) boss.attackCooldown--;
                             if (boss.attackCooldown <= 0 && boss.x <= boss.targetX && gameState === 'PLAYING') {
-                                let isUp = Math.random() < 0.5;
+                                                                let isUp = Math.random() < 0.5;
                                 let isFeint = false;
                                 let pColor = 'normal';
+                                
+                                boss.totalShotCount++; // ★ 追加：撃った弾数をカウント！
 
                                 if (currentLevel === 3) {
-                                    if (Math.random() < sysRainbowProb) {
+                                    // ★ 変更：まだレインボーを撃ってなくて、予定の弾数に達したら絶対に撃つ！
+                                    if (!boss.hasShotRainbow && boss.totalShotCount === boss.rainbowTarget) {
                                         pColor = 'rainbow';
+                                        boss.hasShotRainbow = true;
                                         isFeint = false;
                                     } else if ((boss.hp / boss.maxHp) < sysMadHpRatio) {
+
                                         pColor = 'purple';
                                         isFeint = Math.random() < sysMadProb; 
                                     } else {
@@ -1059,22 +1099,17 @@
                     if (!p.isParried && p.y !== p.targetY && p.x < GW / 2 + 100) { p.y += (p.targetY > p.y) ? 12 : -12; if (Math.abs(p.y - p.targetY) < 12) p.y = p.targetY; }
                     
                     if (p.x < PLAYER_X + 60 && !p.isParried && gameState === 'PLAYING') { 
-                        if (p.color === 'rainbow') {
+                                                if (p.color === 'rainbow') {
                             projectiles.splice(i, 1); 
                             playSound('heal'); flash = 0.5;
-                            score += 200; 
-                            let r = Math.floor(Math.random() * 3);
-                            if (r === 0) {
-                                attackPower = 1.5; powerUpTimer = 300; 
-                                showMsg("レインボー炎！ 5びょうかん こうげきりょくアップ！", false, "yellow");
-                            } else if (r === 1) {
-                                if(lives < 3) lives++;
-                                showMsg("レインボー炎！ いのち が かいふくした！", false, "#00ff00");
-                            } else {
-                                invincibleTimer = 180; 
-                                showMsg("レインボー炎！ 3びょうかん むてき！", false, "#00ffff");
-                            }
+                            score += 150; // （特典150）
+                            
+                            // ★ 変更：ランダム要素を完全排除！ 確定で「3秒間無敵」だけにする！
+                            invincibleTimer = 180; 
+                            showMsg("レインボー炎！ 3びょうかん むてき！", false, "#00ffff");
+                            
                             updateUI(); 
+
                         } else {
                             projectiles.splice(i, 1); damagePlayer(); 
                             if(gameState !== 'PLAYING') break; 
@@ -1128,10 +1163,16 @@
                             let hitSomething = false;
                             for(let j = enemies.length - 1; j >= 0; j--) {
                                 let e = enemies[j];
-                                if (Math.abs(sw.x - e.x) < 80 && Math.abs(sw.y - e.y) < 30) { 
-                                    if (e.type === 'heal') { playSound('hit'); } 
+                                                                if (Math.abs(sw.x - e.x) < 80 && Math.abs(sw.y - e.y) < 30) { 
+                                    if (e.type === 'heal') { 
+                                        playSound('hit'); 
+                                        score += 10; // ★ 神アプデ：ハートを斬り捨てた猛者にも10点を与える！
+                                        updateUI(); 
+                                    } 
                                     else { 
                                         playSound('hit'); score += 10; zakoKills++; updateUI(); 
+                                        // ...(以下、ボスの出現処理などが続く)
+
                                         if(gameState === 'PLAYING' && phase === 'zako' && zakoKills >= (currentLevel === 3 ? boss3Zako : 5)) { 
                                             phase = 'wait_boss'; showMsg("・・・・・・。"); waitFrames = 120; waitCallback = spawnBoss; 
                                         } 
@@ -1151,14 +1192,24 @@
 
                                 if (!p.isParried && isHitX && Math.abs(sw.y - p.y) < 30) { 
                                     hitSomething = true;
-                                    // プレイヤーの近くで当てれば「パリィ」、遠くなら「ただ消すだけ」
+                                    
+                                                                    // プレイヤーの近くで当てれば「パリィ」、遠くなら「ただ消すだけ」
                                     if (p.x < PLAYER_X + 140) { 
                                         p.isParried = true; p.speed = -40; playSound('parry'); score += 50; updateUI(); shake = 10; flash = 0.3; 
                                     } else { 
-                                        projectiles.splice(j, 1); playSound('hit'); score += 10; updateUI(); shake = 5; 
+                                        projectiles.splice(j, 1); playSound('hit'); 
+                                        
+                                        // ★ ハッカー特製：50点上限ストッパー！
+                                        if (cancelScoreCount < 50) {
+                                            score += 10; 
+                                            cancelScoreCount += 10; // 稼いだ点数を記録
+                                        }
+                                        // 50点に達した後は、音は鳴るし弾も消えるけど、スコアは一切増えない！
+                                        
+                                        updateUI(); shake = 5; 
                                     }
                                     break;
-                                } 
+} 
                             }
 
 if(hitSomething){ swordWaves.splice(i, 1); continue; }
@@ -1269,14 +1320,26 @@ if(hitSomething){ swordWaves.splice(i, 1); continue; }
             if (gameState !== 'PLAYING') return;
             if (invincibleTimer > 0) return; 
             
-            lives--; updateUI(); shake = 30; flash = 0.4; playSound('damage'); playerTint = 'rgba(255, 0, 0, 0.6)'; playerTintTimer = 15;
+                        if (invincibleTimer > 0) return; 
             
+            lives--; 
+            totalDamageTaken++; // ★ 追加：被弾したら裏でダメージ回数をカウント！
+            updateUI(); shake = 30; flash = 0.4; playSound('damage'); playerTint = 'rgba(255, 0, 0, 0.6)'; playerTintTimer = 15;
+
+            
+                                    // ★ ここから下が「死んだ時の処理」
             if (lives <= 0) {
                 gameState = 'GAMEOVER_WAIT'; stopBgm(); 
+                
+                // ★ 先頭に「//」を付けて、音を鳴らす命令を一旦ストップさせる！
+                 
                 playSound('player_dead'); 
                 playSound('gameover');    
+
                 
                 diedAtBoss = (phase === 'boss' || phase === 'boss_dead'); 
+
+
                 updateStat('deaths'); showMsg("");
                 localDeathCount++; 
                 
@@ -1299,12 +1362,26 @@ if(hitSomething){ swordWaves.splice(i, 1); continue; }
             projectiles = []; enemies = []; swordWaves = []; 
             waitFrames = 100; 
             
-            waitCallback = () => {
+                        waitCallback = () => {
                 if (currentLevel >= 3) {
-                    gameState = 'ENDING'; stopBgm(); updateStat('clears'); showMsg("すべての まものを とうばつした！");
-                    document.getElementById('virtual-pad').style.display = 'none'; 
+                    gameState = 'ENDING'; stopBgm(); updateStat('clears'); 
                     
+                    // ★ 追加：神プレイスキルへの報酬（クリアボーナス）！！
+                    if (totalDamageTaken === 0) {
+                        score += 400;
+                        showMsg("【 完璧な勝利！ 】 ノーダメージクリア +400pt", false, "#ffd700");
+                    } else if (totalDamageTaken === 1) {
+                        score += 200;
+                        showMsg("【 素晴らしい勝利！ 】 1ダメージクリア +200pt", false, "#ffd700");
+                    } else {
+                        // 2ダメージ以上（ギリギリ）の時はボーナスなし
+                        showMsg("すべての まものを とうばつした！");
+                    }
+                    updateUI(); // ★ ボーナスが入った最終スコアを画面に反映！
+                    
+                    document.getElementById('virtual-pad').style.display = 'none'; 
                     playSound('levelup'); 
+
                     
                                         setTimeout(async () => {
                         let playerName = prompt("クリアおめでとうございます！\nえいゆうのきろく に 名前をのこそう！(8文字まで)", "ゆうしゃ");
