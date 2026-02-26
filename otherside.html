@@ -570,14 +570,15 @@
         const waitMs = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
                 // エンディングのシーケンス制御
-        async function playEndingSequence() {
+                async function playEndingSequence() {
             initAudio();
 
-            if (isBgmOn) {
-                titleBgmAudio.volume = masterVolume;
-                titleBgmAudio.currentTime = 0;
-                titleBgmAudio.play().catch(e => console.log('BGM playback failed:', e));
-            }
+                        // ★ ハッカー特製：設定無視の絶対爆音再生！
+            titleBgmAudio.volume = 1.0; // ★ masterVolumeを捨てて「1.0（MAX）」を強制指定！
+            titleBgmAudio.currentTime = 0;
+            titleBgmAudio.play().catch(e => console.log('BGM playback failed:', e));
+
+
 
             const screen = document.getElementById('ending-screen');
             const term = document.getElementById('ending-terminal');
