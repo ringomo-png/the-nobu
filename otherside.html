@@ -1283,7 +1283,13 @@ if(hitSomething){ swordWaves.splice(i, 1); continue; }
                         
                         if (playerName) {
                             try {
-                                await addDoc(collection(db, "leaderboard"), { name: playerName || "ななし", score: score, timestamp: Date.now() });
+                                        // ★ Date.now() の代わりに、Firebase公式の serverTimestamp() を使う！
+        await addDoc(collection(db, "leaderboard"), {
+            name: playerName,
+            score: finalScore,
+            timestamp: serverTimestamp() // 👈 これで管理画面が劇的に見やすくなる！
+        });
+
                                 loadLeaderboard(); 
                             } catch(e) {}
                         }
