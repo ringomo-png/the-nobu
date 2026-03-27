@@ -77,11 +77,12 @@
         .scroll-container.system-active { opacity: 1; transform: translateY(0); }
 
         .top-header { position: absolute; top: 40px; left: 40px; }
-        .hero-title {
+                .hero-title {
             font-size: clamp(65px, 14vw, 120px); font-weight: 900; letter-spacing: 0.02em; 
-            line-height: 0.85; color: var(--noble-white); margin: 0;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            line-height: 0.85; color: rgba(255, 255, 255, 0.1); margin: 0; /* ←色をrgbaにして半透明に */
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.1); /* ←文字が透ける分、影も少し弱めに調整 */
         }
+
         .title-dot {
             color: #ff3b30; text-shadow: 0 0 10px rgba(255, 59, 48, 0.8);
             transition: color 0.5s ease, text-shadow 0.5s ease;
@@ -171,17 +172,22 @@
             font-size: 10px; color: #444; letter-spacing: 0.2em; font-family: 'Roboto Mono';
         }
 
-        /* Authentication Overlay */
+        /* Authentication Overlay - Updated to Tap to Start */
         #auth-overlay {
             position: fixed; inset: 0; background: #000; z-index: 9999;
             display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease;
+            cursor: pointer; /* マウスカーソルをポインターに */
         }
         #auth-overlay.hidden { opacity: 0; visibility: hidden; }
-        
-        .auth-input { background: transparent; border: none; border-bottom: 1px solid #333; color: #fff; font-family: 'Roboto Mono'; text-align: center; outline: none; letter-spacing: 0.2em; transition: opacity 0.5s ease; }
-        #pass-input { font-size: 24px; width: 240px; margin-bottom: 30px; }
-        .auth-submit { background: transparent; border: 1px solid #444; color: #fff; font-family: 'Roboto Mono'; font-size: 10px; padding: 10px 30px; letter-spacing: 0.3em; cursor: pointer; transition: opacity 0.5s ease; }
-        .error-msg { color: #fff; font-size: 11px; font-family: 'Roboto Mono'; margin-top: 25px; opacity: 0; letter-spacing: 0.2em; }
+
+        /* タップしてスタート用の点滅アニメーション */
+        @keyframes pulseText {
+            0%, 100% { opacity: 1; text-shadow: 0 0 10px rgba(255, 255, 255, 0.8); }
+            50% { opacity: 0.3; text-shadow: none; }
+        }
+        .pulse-text {
+            animation: pulseText 2s infinite ease-in-out;
+        }
 
         /* Glitch Intro Sequence */
         #intro-sequence { position: fixed; inset: 0; background: #000; z-index: 9998; display: flex; justify-content: center; align-items: center; overflow: hidden; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
@@ -202,10 +208,7 @@
 
     <div id="auth-overlay">
         <div id="login-ui" style="display: flex; flex-direction: column; align-items: center; z-index: 20;">
-            <span id="auth-label" style="font-family:'Roboto Mono'; font-size:10px; color:#555; letter-spacing:0.3em; margin-bottom:30px; text-transform:uppercase; transition: opacity 0.5s ease;">System Authentication</span>
-            <input type="password" id="pass-input" class="auth-input" placeholder="····" autocomplete="off">
-            <button class="auth-submit" id="auth-btn">ENTER</button>
-            <div id="error-txt" class="error-msg">INVALID CODE</div>
+            <span id="auth-label" class="pulse-text" style="font-family:'Roboto Mono'; font-size:14px; color:#fff; letter-spacing:0.3em; text-transform:uppercase; transition: all 0.5s ease;">TAP</span>
         </div>
     </div>
 
@@ -234,6 +237,7 @@
                 <a href="gallery.html" class="nav-link">GALLERY</a>
                 <a href="music.html" class="nav-link" id="nav-music">MUSIC</a>
                 <a href="otherside.html" class="nav-link">GAME</a>
+                <a href="https://ringomo-png.github.io/nobukue/" class="nav-link">GAME2</a>
             </div>
         </div>
 
@@ -307,7 +311,6 @@
             }
         };
 
-        // 再生数をFirestoreに記録する関数
         window.recordPlayCount = async function(songTitle) {
             if (!db || !songTitle) return;
             try {
@@ -323,10 +326,15 @@
             }
         };
 
-        // Navigation Tracking
         document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', (e) => {
                 if (link.classList.contains('locked-link')) return;
+                
+                // 外部リンク（GAME2など）の場合は通常遷移させる
+                if (link.getAttribute('href').startsWith('http')) {
+                    return; 
+                }
+
                 e.preventDefault();
                 const targetUrl = link.getAttribute('href');
                 const menuName = link.innerText.trim();
@@ -335,7 +343,6 @@
             });
         });
 
-        // BGM Playback Tracking
         const bgm = document.getElementById('bgm');
         if (bgm) {
             bgm.addEventListener('play', () => {
@@ -343,7 +350,6 @@
             }, { once: true });
         }
 
-        // Session Page View Tracking
         window.addEventListener('DOMContentLoaded', () => {
             if (sessionStorage.getItem('is_auth_main') === 'true' && !sessionStorage.getItem('tracked_main')) {
                 window.trackSystemEvent('page_view_main');
@@ -416,10 +422,8 @@
         const repeatIcon = document.getElementById('repeat-icon');
         const titleDot = document.getElementById('title-dot');
         
-                // 変更: ページ読み込み時は必ず停止状態からスタートさせる
         let isPlaying = false; sessionStorage.setItem('is_playing', 'false'); 
         let isShuffle = false;
-
         
         let repeatMode = 1; 
         repeatBtn.classList.add('active');
@@ -450,7 +454,6 @@
                 if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
                 bgm.play().catch(e => console.log('Playback init required', e));
                 
-                // 曲が再生されたらFirestoreへカウントを送信（モジュール準備待機＆重複防止）
                 if (lastRecordedTrackIdx !== currentTrackIdx) {
                     lastRecordedTrackIdx = currentTrackIdx;
                     const tryCount = () => {
@@ -509,7 +512,6 @@
             if (isPlaying) {
                 bgm.play().catch(e => {});
                 
-                // スキップ等で曲が切り替わった時もカウントを送信（重複防止）
                 if (lastRecordedTrackIdx !== currentTrackIdx) {
                     lastRecordedTrackIdx = currentTrackIdx;
                     const tryCount = () => {
@@ -527,11 +529,10 @@
         prevBtn.addEventListener('click', () => { initAudio(); triggerVibration(); changeTrack(-1); });
         nextBtn.addEventListener('click', () => { initAudio(); triggerVibration(); changeTrack(1); });
 
-                bgm.addEventListener('ended', () => { 
+        bgm.addEventListener('ended', () => { 
             if (repeatMode === 2) {
                 bgm.currentTime = 0;
                 bgm.play().catch(e=>{});
-                // ▼ 追加：1曲リピートで最後まで聴き終わってループした瞬間にカウント！ ▼
                 if (typeof window.recordPlayCount === 'function') {
                     window.recordPlayCount(currentTitleList[currentTrackIdx]);
                 }
@@ -654,16 +655,13 @@
         tChars.forEach(el => { el.style.transform = `translate(${(Math.random()-0.5)*window.innerWidth*1.5}px, ${(Math.random()-0.5)*window.innerHeight*1.5}px)`; });
 
         // Glitch Sequence Controller
-
         function playAnimationSequence(skipTyping = false) {
-            // ★ ストッパー1：すでにスキップされていたら、最初から何もしない！
             if (typeof isSkipped !== 'undefined' && isSkipped) return;
 
             document.body.classList.add('locked'); 
             introSequence.style.opacity = '1'; 
             introSequence.style.display = 'flex';
             
-            // ★ さっきの軽量化ハック：文字数を極限まで減らしてスマホを軽くする！
             const charNeeded = Math.min(Math.floor((window.innerWidth * window.innerHeight) / 100), 4000);
             let bgText = ''; 
             for(let i=0; i<charNeeded; i++) bgText += chars.charAt(Math.floor(Math.random()*chars.length)); 
@@ -682,7 +680,6 @@
             }, 100);
 
             setTimeout(() => {
-                // ★ ストッパー2：1.5秒待機中にスキップされたら、ここで処理を捨てる！
                 if (typeof isSkipped !== 'undefined' && isSkipped) return;
 
                 codeBg.style.transition = 'none';
@@ -691,7 +688,6 @@
                 const parseDuration = 7000; 
                 
                 scrambleInterval = setInterval(() => {
-                    // ★ ストッパー3：ループ中にスキップされたら、即座に自爆してループを破壊！
                     if (typeof isSkipped !== 'undefined' && isSkipped) {
                         clearInterval(scrambleInterval);
                         return;
@@ -709,31 +705,19 @@
                 }, 40);
             }, 1500); 
             
-            // ★ 後半の演出予約も、スキップされたら全部無効化（return）する防波堤を追加！
             setTimeout(() => { if(typeof isSkipped !== 'undefined' && isSkipped) return; tChars.forEach(el => { el.innerText = el.getAttribute('data-char'); el.classList.add('locked'); el.style.transform = 'translate(0, 0)'; }); }, 8500);
             setTimeout(() => { if(typeof isSkipped !== 'undefined' && isSkipped) return; clearInterval(scrambleInterval); codeBg.style.opacity = '0'; preGlitchImage.style.opacity = '0.3'; preGlitchImage.style.transform = 'translate(0, 0)'; preGlitchImage.style.mixBlendMode = 'normal'; preGlitchImage.style.filter = 'none'; }, 11500);
             setTimeout(() => { if(typeof isSkipped !== 'undefined' && isSkipped) return; targetWord.classList.add('merged'); }, 13000);
             setTimeout(() => { if(typeof isSkipped !== 'undefined' && isSkipped) return; introSequence.style.opacity = '0'; document.body.classList.remove('locked'); window.scrollTo(0, 0); activateSystem(); setTimeout(() => { introSequence.style.display = 'none'; }, 1000); }, 14500);
         }
 
-                const SYSTEM_PASSWORD = '1989'; 
-
-        const input = document.getElementById('pass-input'); 
-        const submitBtn = document.getElementById('auth-btn'); 
-        const errorTxt = document.getElementById('error-txt'); 
-        let typeInterval;
-
-        // ★★★ ハッカー特製：演出スキップ機能 ★★★
         let isSkipped = false;
         const skipIntro = () => {
             if (isSkipped) return;
             isSkipped = true;
             
-            // 裏で動いている「DECRYPTING...」やグリッチの文字化けループを強制停止！
-            clearInterval(typeInterval);
             if (typeof scrambleInterval !== 'undefined') clearInterval(scrambleInterval);
             
-            // 邪魔な画面（パスワード画面＆グリッチ画面）を一瞬で透明にして消し去る
             document.getElementById('auth-overlay').style.opacity = '0';
             document.getElementById('intro-sequence').style.opacity = '0';
             setTimeout(() => {
@@ -741,22 +725,46 @@
                 document.getElementById('intro-sequence').style.display = 'none';
             }, 300);
             
-            // スクロールロックを解除して、即座にシステム（本編）を起動！
             document.body.classList.remove('locked');
             window.scrollTo(0, 0);
             activateSystem();
             
-            // 誤爆防止のため、スキップ用のタップ判定を解除
             document.removeEventListener('click', skipIntro);
             document.removeEventListener('touchstart', skipIntro);
         };
-        // ★★★ ここまで ★★★
 
+        const authOverlayElement = document.getElementById('auth-overlay');
+        const authLabelElement = document.getElementById('auth-label');
+
+        const startSystem = () => {
+            sessionStorage.setItem('is_auth_main', 'true');
+            if (window.trackSystemEvent) window.trackSystemEvent('page_view_main');
+
+            // タップ時のフィードバック
+            authLabelElement.classList.remove('pulse-text');
+            authLabelElement.style.color = '#34c759';
+            authLabelElement.style.textShadow = '0 0 15px rgba(52, 199, 89, 0.8)';
+            authLabelElement.innerText = 'SYSTEM BOOTING...';
+
+            setTimeout(() => {
+                document.addEventListener('click', skipIntro);
+                document.addEventListener('touchstart', skipIntro, {passive: false});
+            }, 100);
+
+            setTimeout(() => {
+                authOverlayElement.style.opacity = '0';
+                setTimeout(() => { authOverlayElement.style.display = 'none'; }, 1500);
+            }, 1000);
+
+            setTimeout(() => {
+                if (isSkipped) return;
+                playAnimationSequence(false);
+            }, 2000);
+        };
 
         if (sessionStorage.getItem('is_auth_main') === 'true') { 
-            document.getElementById('auth-overlay').style.display = 'none'; 
+            authOverlayElement.style.display = 'none'; 
             if (isReboot) { 
-                // リブート時もスキップ可能に（0.5秒後から画面タップ受付開始）
                 setTimeout(() => {
                     document.addEventListener('click', skipIntro);
                     document.addEventListener('touchstart', skipIntro, {passive: false});
@@ -768,88 +776,9 @@
                 activateSystem(); 
             } 
         } else { 
-            setTimeout(() => input.focus(), 100); 
+            // 初回アクセス時：画面のどこかをタップしたらスタート
+            authOverlayElement.addEventListener('click', startSystem, { once: true });
         }
-        
-        const attemptLogin = () => {
-            if (input.value === '0000') {
-                sessionStorage.setItem('is_auth_main', 'true');
-                if (window.trackSystemEvent) window.trackSystemEvent('page_view_main');
-                document.getElementById('auth-overlay').style.display = 'none';
-                introSequence.style.display = 'none';
-                document.body.classList.remove('locked');
-                activateSystem();
-            } else if (input.value === SYSTEM_PASSWORD) {
-                sessionStorage.setItem('is_auth_main', 'true'); 
-                if (window.trackSystemEvent) window.trackSystemEvent('page_view_main');
-                
-                // ※ここにあった「0.5秒後にスキップ解禁」のコードは削除したわ！
-
-                errorTxt.style.transition = 'none';
-                errorTxt.style.opacity = '1';
-                errorTxt.style.transform = 'translateY(0)';
-                errorTxt.style.color = '#fff';
-                errorTxt.style.textShadow = 'none';
-                errorTxt.style.letterSpacing = '0.2em';
-
-                errorTxt.innerText = 'DECRYPTING'; 
-                let dotCount = 0; 
-                typeInterval = setInterval(() => { 
-                    dotCount = (dotCount + 1) % 4; 
-                    errorTxt.innerText = 'DECRYPTING' + '.'.repeat(dotCount); 
-                }, 400); 
-                
-                setTimeout(() => { 
-                    if (isSkipped) return; 
-                    clearInterval(typeInterval); 
-                    
-                    errorTxt.style.transition = 'opacity 1.0s ease, color 1.0s ease, text-shadow 1.0s ease';
-                    errorTxt.style.opacity = '0'; 
-                    
-                    setTimeout(() => {
-                        if (isSkipped) return;
-                        errorTxt.innerText = 'ACCESS GRANTED'; 
-                        errorTxt.style.color = '#34c759'; 
-                        errorTxt.style.textShadow = '0 0 15px rgba(52, 199, 89, 0.8)';
-                        errorTxt.style.letterSpacing = '0.3em';
-                        errorTxt.style.opacity = '1'; 
-
-                        // ★★★ ここだ！！ ★★★
-                        // 「ACCESS GRANTED」がバシッと表示されたら、スキップ（画面タップ）を解禁する！
-                        setTimeout(() => {
-                            document.addEventListener('click', skipIntro);
-                            document.addEventListener('touchstart', skipIntro, {passive: false});
-                        }, 100);
-                        // ★★★★★★★★★★★★★
-
-                    }, 1000); 
-                }, 3000); 
-                
-                setTimeout(() => { 
-                    if (isSkipped) return;
-                    document.getElementById('auth-overlay').style.opacity = '0'; 
-                    setTimeout(() => { document.getElementById('auth-overlay').style.display = 'none'; }, 1500); 
-                }, 6000);
-
-                setTimeout(() => { 
-                    if (isSkipped) return;
-                    playAnimationSequence(false); 
-                }, 7000); 
-                
-            } else { 
-                errorTxt.style.transition = 'none';
-                errorTxt.innerText = 'INVALID CODE';
-                errorTxt.style.color = '#ff3b30';
-                errorTxt.style.textShadow = 'none';
-                errorTxt.style.opacity = '1'; 
-                input.value = ''; 
-                setTimeout(() => { errorTxt.style.opacity = '0'; }, 2000); 
-            }
-        };
-
-        
-        submitBtn.addEventListener('click', attemptLogin); 
-        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
 
     </script>
 </body>
